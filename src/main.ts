@@ -1,25 +1,25 @@
 import './style.css';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from './config';
-import { goi, LoiApi } from './api';
+import { docCache, ghiCache, goi, LoiApi, xoaCache } from './api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth';
-import { h, xoaHet, thongBao } from './dom';
+import { h, khungCho, xoaHet, thongBao } from './dom';
 import { layManifest, veBaiHoc, veDanhSachBai, veDanhSachMon, laMoi } from './views/bai-hoc';
 import { veNhom } from './views/nhom';
 import { veQuanTri } from './views/quan-tri';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
 import { vePhongThi } from './views/phong-thi';
 import { veXepHang } from './views/xep-hang';
-import { veLuyenTap } from './views/luyen-tap';
+import { veTaoDe } from './views/tao-de';
 import { veXemLai } from './views/xem-lai';
-import { theCap } from './cap';
-import type { KetQuaXepHangCaNhan } from './types';
 import { veCauHoiCuaToi } from './views/cau-hoi-cua-toi';
+import { theCap } from './cap';
 import { dungDongHo, datGioMayChu, demNguoc, dinhDangNgay } from './gio';
-import type { TuanHienTai } from './types';
-import type { Me } from './types';
+import type { Me, TrangChuData } from './types';
 
 const goc = document.getElementById('app') as HTMLElement;
 let me: Me | null = null;
+let duLieuTrangChu: TrangChuData | null = null;
+let thoiDiemTaiTrangChu = 0;
 
 function laTrinhDuyetTrongUngDung(): boolean {
   return /(Zalo|FBAN|FBAV|FB_IAB|Messenger|Instagram)/i.test(navigator.userAgent);
@@ -67,6 +67,7 @@ function manHinhDangNhap(): void {
 async function doiLayPhien(): Promise<void> {
   manHinhDon(h('p', { class: 'phu' }, 'Đang đăng nhập...'));
   try {
+    xoaCache(); // tránh hiện nhầm dữ liệu của người dùng trước trên cùng một máy
     const r = await goi<{ phien: string }>('dangNhap');
     luuPhien(r.phien);
   } catch (e) {
@@ -83,18 +84,45 @@ function manHinhChuaDuyet(thongDiep: string): void {
   );
 }
 
+// Mở web nhanh: nếu đã có bản lưu của lần trước thì vẽ giao diện ngay, rồi hỏi máy chủ một yêu cầu duy nhất
+// (trangChu) để cập nhật. Quyền thật sự luôn do máy chủ kiểm tra ở mỗi yêu cầu.
 async function khoiDong(): Promise<void> {
-  manHinhDon(h('p', { class: 'phu' }, 'Đang kiểm tra tài khoản...'));
+  const cu = docCache<TrangChuData>('trangChu');
+  let daVe = false;
+  if (cu) {
+    me = cu.me;
+    duLieuTrangChu = cu;
+    veKhung();
+    void dinhTuyen();
+    daVe = true;
+  } else {
+    xoaHet(goc);
+    goc.append(h('main', { class: 'noi-dung' }, khungCho(3)));
+  }
   try {
-    me = await goi<Me>('me');
+    const moi = await goi<TrangChuData>('trangChu');
+    ghiCache('trangChu', {}, moi);
+    const doiVaiTro = !me || me.vaiTro !== moi.me.vaiTro;
+    me = moi.me;
+    duLieuTrangChu = moi;
+    thoiDiemTaiTrangChu = Date.now();
+    datGioMayChu(moi.tuan.now);
+    if (!daVe || doiVaiTro) {
+      veKhung();
+      void dinhTuyen();
+    } else if ((location.hash || '#/') === '#/' || location.hash === '') {
+      veTrangChu(vungNoiDung);
+    }
   } catch (e) {
     const loi = e as LoiApi;
     if (loi.ma === 'chua_duyet') return manHinhChuaDuyet(loi.message);
     if (loi.ma === 'token_expired' || loi.ma === 'unauthorized' || loi.ma === 'phien_het_han') return manHinhDangNhap();
+    if (daVe) {
+      thongBao('Chưa cập nhật được, đang hiện dữ liệu lần trước.', 'loi');
+      return;
+    }
     return manHinhChuaDuyet(loi.message);
   }
-  veKhung();
-  dinhTuyen();
 }
 
 // ---------- Khung chính và định tuyến ----------
@@ -144,7 +172,9 @@ async function dinhTuyen(): Promise<void> {
   try {
     switch (muc) {
       case '':
-        return await veTrangChu(vungNoiDung);
+        veTrangChu(vungNoiDung);
+        if (Date.now() - thoiDiemTaiTrangChu > 20000) void lamMoiTrangChu();
+        return;
       case 'bai-hoc':
         return a && b ? await veDanhSachBai(vungNoiDung, a, b) : await veDanhSachMon(vungNoiDung, hk);
       case 'doc':
@@ -159,8 +189,8 @@ async function dinhTuyen(): Promise<void> {
         return await veCauHoiCuaToi(vungNoiDung);
       case 'xep-hang':
         return await veXepHang(vungNoiDung, a === 'ca-nhan' ? 'ca-nhan' : 'nhom');
-      case 'luyen-tap':
-        return await veLuyenTap(vungNoiDung);
+      case 'tao-de':
+        return await veTaoDe(vungNoiDung);
       case 'quan-tri':
         if (me.vaiTro === 'member') return veSapCo('Quản trị', 'Bạn không có quyền vào trang này.');
         return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
@@ -180,11 +210,27 @@ function veSapCo(tieuDe: string, noiDung: string): void {
   vungNoiDung.append(h('h1', {}, tieuDe), h('div', { class: 'card' }, h('p', { class: 'phu' }, noiDung)));
 }
 
-async function veTrangChu(noi: HTMLElement): Promise<void> {
+// Làm mới dữ liệu trang chủ ở nền khi quay lại trang chủ sau một lúc.
+async function lamMoiTrangChu(): Promise<void> {
+  try {
+    const moi = await goi<TrangChuData>('trangChu');
+    ghiCache('trangChu', {}, moi);
+    me = moi.me;
+    duLieuTrangChu = moi;
+    thoiDiemTaiTrangChu = Date.now();
+    datGioMayChu(moi.tuan.now);
+    if ((location.hash || '#/') === '#/') veTrangChu(vungNoiDung);
+  } catch {
+    /* giữ dữ liệu cũ */
+  }
+}
+
+// Vẽ trang chủ ngay từ dữ liệu đã có, không cần chờ mạng (trừ danh sách bài học, tải riêng bên dưới).
+function veTrangChu(noi: HTMLElement): void {
+  dungDongHo();
   xoaHet(noi);
   const m = me!;
-  const theCapCuaToi = h('div', {});
-  const theSuKien = h('a', { class: 'card', href: '#/su-kien' }, h('div', { class: 'phu nho' }, 'Sự kiện tuần này'), h('div', { class: 'mon-ten' }, 'Đang tải...'));
+  const d = duLieuTrangChu;
   noi.append(
     h('h1', {}, `Chào ${m.hoTen || 'bạn'}`),
     ...(m.hocKy ? [h('p', { class: 'phu' }, m.hocKy.tenHocKy)] : []),
@@ -192,52 +238,47 @@ async function veTrangChu(noi: HTMLElement): Promise<void> {
       h('div', { class: 'phu nho' }, 'Nhóm của tôi'),
       h('div', { class: 'mon-ten' }, m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm'),
       h('div', { class: 'phu nho' }, m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký')),
-    theCapCuaToi,
-    h('a', { class: 'card', href: '#/luyen-tap' },
-      h('div', { class: 'mon-ten' }, 'Luyện tập ngoài sự kiện'),
-      h('div', { class: 'phu nho' }, 'Làm đề luyện tập để tích điểm cấp bậc, mỗi lượt +20 điểm, tối đa 120 điểm mỗi tuần.')),
-    theSuKien
+    ...(d ? [theCap(d.cap)] : []),
+    h('a', { class: 'card', href: '#/tao-de' },
+      h('div', { class: 'mon-ten' }, 'Tạo đề thi'),
+      h('div', { class: 'phu nho' }, 'Chọn môn, chọn chương, làm đề 30 câu. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.')),
+    d ? theSuKien(d) : h('div', { class: 'card' }, h('div', { class: 'mon-ten' }, 'Đang tải...'))
   );
-  void goi<KetQuaXepHangCaNhan>('xepHangCaNhan').then((r) => theCapCuaToi.replaceWith(theCap(r.toi.cap))).catch(() => undefined);
-  void capNhatTheSuKien(theSuKien);
-  const mf = await layManifest();
-  const hk = mf.hocKy.find((x) => x.ma === m.hocKy?.maHocKy) ?? mf.hocKy[0];
-  if (hk && hk.mon.length) {
+  const vungMon = h('div', {});
+  noi.append(vungMon);
+  void layManifest().then((mf) => {
+    const hk = mf.hocKy.find((x) => x.ma === m.hocKy?.maHocKy) ?? mf.hocKy[0];
+    if (!hk || !hk.mon.length) return;
     const luoi = h('div', { class: 'luoi' });
     hk.mon.forEach((mon) =>
       luoi.append(h('a', { class: 'card card-mon', href: `#/bai-hoc/${hk.ma}/${mon.ma}`, style: `--mau:${mon.mau || '#4cc9f0'}` },
         h('div', { class: 'mon-ten' }, mon.ten),
         mon.baiHoc.some((b) => laMoi(b.capNhat)) ? h('span', { class: 'nhan-moi' }, 'Mới cập nhật') : null)));
-    noi.append(h('h2', {}, 'Các môn'), luoi);
-  }
+    vungMon.append(h('h2', {}, 'Các môn'), luoi);
+  });
 }
 
-async function capNhatTheSuKien(the: HTMLElement): Promise<void> {
-  xoaHet(the);
-  try {
-    const tt = await goi<TuanHienTai>('tuanHienTai');
-    datGioMayChu(tt.now);
-    const t = tt.tuan;
-    the.append(h('div', { class: 'phu nho' }, 'Sự kiện tuần này'));
-    if (!t) {
-      the.append(h('div', { class: 'mon-ten' }, 'Chưa có lịch sự kiện'));
-      return;
-    }
-    const canNop = tt.soCauCanNop ?? 0;
-    const viec = tt.mien ? 'Bạn được miễn tuần này'
-      : t.trangThai === 'nop_cau_hoi' ? ((tt.soCauDaNop ?? 0) >= canNop ? 'Đã nộp đủ câu hỏi' : `Cần nộp câu hỏi (${tt.soCauDaNop ?? 0}/${canNop})`)
-      : t.trangThai === 'cho_mo_cua' ? 'Chờ mở phòng thi'
-      : t.trangThai === 'mo' ? 'Phòng thi đang mở'
-      : 'Tuần này đã đóng';
-    the.append(h('div', { class: 'mon-ten' }, `Tuần ${t.soTuan}: ${viec}`));
-    if (t.moc) {
-      const so = h('div', { class: 'dem-nguoc nho-dem' });
-      demNguoc(so, t.moc.luc);
-      the.append(h('div', { class: 'phu nho' }, `${t.moc.nhan} (${dinhDangNgay(t.moc.luc)}) còn:`), so);
-    }
-  } catch (e) {
-    the.append(h('div', { class: 'phu nho' }, 'Sự kiện tuần này'), h('div', { class: 'loi' }, (e as Error).message));
+function theSuKien(d: TrangChuData): HTMLElement {
+  const tt = d.tuan;
+  const the = h('a', { class: 'card', href: '#/su-kien' }, h('div', { class: 'phu nho' }, 'Sự kiện tuần này'));
+  const t = tt.tuan;
+  if (!t) {
+    the.append(h('div', { class: 'mon-ten' }, 'Chưa có lịch sự kiện'));
+    return the;
   }
+  const canNop = tt.soCauCanNop ?? 0;
+  const viec = tt.mien ? 'Bạn được miễn tuần này'
+    : t.trangThai === 'nop_cau_hoi' ? ((tt.soCauDaNop ?? 0) >= canNop ? 'Đã nộp đủ câu hỏi' : `Cần nộp câu hỏi (${tt.soCauDaNop ?? 0}/${canNop})`)
+    : t.trangThai === 'cho_mo_cua' ? 'Chờ mở phòng thi'
+    : t.trangThai === 'mo' ? 'Phòng thi đang mở'
+    : 'Tuần này đã đóng';
+  the.append(h('div', { class: 'mon-ten' }, `Tuần ${t.soTuan}: ${viec}`));
+  if (t.moc) {
+    const so = h('div', { class: 'dem-nguoc nho-dem' });
+    demNguoc(so, t.moc.luc);
+    the.append(h('div', { class: 'phu nho' }, `${t.moc.nhan} (${dinhDangNgay(t.moc.luc)}) còn:`), so);
+  }
+  return the;
 }
 
 async function thoat(): Promise<void> {
@@ -248,7 +289,9 @@ async function thoat(): Promise<void> {
     /* máy chủ không trả lời vẫn đăng xuất ở máy này */
   }
   dangXuat();
+  xoaCache();
   me = null;
+  duLieuTrangChu = null;
   location.hash = '#/';
   manHinhDangNhap();
 }
@@ -270,6 +313,7 @@ function veCaiDat(noi: HTMLElement): void {
 window.addEventListener('hashchange', () => void dinhTuyen());
 window.addEventListener('phien-het-han', () => {
   me = null;
+  duLieuTrangChu = null;
   manHinhDangNhap();
 });
 

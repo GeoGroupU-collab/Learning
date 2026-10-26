@@ -27,3 +27,10 @@ export function thongBao(noiDung: string, loai: 'ok' | 'loi' = 'ok'): void {
   document.body.append(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+// Khung chờ tĩnh (không chuyển động) hiện trong lúc tải, để trang không bị trống.
+export function khungCho(soThe = 3): HTMLElement {
+  const goc = h('div', { class: 'khung-cho', 'aria-busy': 'true', 'aria-label': 'Đang tải' });
+  for (let i = 0; i < soThe; i++) goc.append(h('div', { class: 'card the-cho' }, h('div', { class: 'dong-cho dai' }), h('div', { class: 'dong-cho' }), h('div', { class: 'dong-cho ngan' })));
+  return goc;
+}

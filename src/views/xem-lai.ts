@@ -2,7 +2,7 @@ import { goi } from '../api';
 import { h, xoaHet } from '../dom';
 import { dungDongHo } from '../gio';
 import { nutBaoSai } from '../cap';
-import { theXemLai } from './luyen-tap';
+import { theXemLai } from './tao-de';
 import type { CauKho, KetQuaXemLai } from '../types';
 
 function theCauKho(c: CauKho, i: number): HTMLElement {

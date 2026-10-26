@@ -11,6 +11,7 @@ class TrangTinh {
     this.ten = ten;
     this.id = id;
     this.dong = [];
+    this.soLanDoc = 0;
   }
   getName() { return this.ten; }
   setName(t) { this.ten = t; }
@@ -24,6 +25,7 @@ class TrangTinh {
     const sheet = this;
     return {
       getValues() {
+        sheet.soLanDoc++;
         const kq = [];
         for (let i = 0; i < nr; i++) {
           const row = sheet.dong[r - 1 + i] || [];
@@ -118,6 +120,13 @@ export function taoMoiTruong() {
     // Gọi doPost như trình duyệt: body JSON, trả về đối tượng đã parse.
     goi(body) {
       return JSON.parse(xuat.doPost({ postData: { contents: JSON.stringify(body) } }).s);
+    },
+    // Số lần đọc Sheet theo tab kể từ lần gọi datLaiDem().
+    demDoc() {
+      return Object.fromEntries(cacTrang.map((s) => [s.ten, s.soLanDoc]).filter(([, n]) => n > 0));
+    },
+    datLaiDem() {
+      cacTrang.forEach((s) => { s.soLanDoc = 0; });
     },
     docTab(ten) {
       const s = ss.getSheetByName(ten);

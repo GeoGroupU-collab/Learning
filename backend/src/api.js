@@ -2,6 +2,7 @@
 // Trình duyệt gửi POST với Content-Type text/plain để tránh preflight CORS.
 
 function doPost(e) {
+  datLaiBoNho_();
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var hd = HANH_DONG_[body.action];
@@ -34,14 +35,19 @@ var HANH_DONG_ = {
   dangNhap: { chay: hdDangNhap_ },
   dangXuat: { chay: hdDangXuat_ },
   me: { chay: hdMe_ },
+  trangChu: { chay: hdTrangChu_ },
   batDauThi: { chay: hdBatDauThi_ },
   'thi.luu': { choPhienThi: true, chay: hdThiLuu_ },
   'thi.nop': { choPhienThi: true, chay: hdThiNop_ },
   xepHang: { chay: hdXepHang_ },
   xepHangCaNhan: { chay: hdXepHangCaNhan_ },
-  'luyenTap.thongTin': { chay: hdLuyenTapThongTin_ },
-  'luyenTap.bat': { chay: hdLuyenTapBat_ },
-  'luyenTap.nop': { chay: hdLuyenTapNop_ },
+  'taoDe.thongTin': { chay: hdTaoDeThongTin_ },
+  'taoDe.bat': { chay: hdTaoDeBat_ },
+  'taoDe.nop': { chay: hdTaoDeNop_ },
+  'taoDe.huy': { chay: hdTaoDeHuy_ },
+  'admin.dsMon': { vaiTro: CHU_TRO_LY_, chay: hdDsMon_ },
+  'admin.luuChuong': { vaiTro: CHU_, chay: hdLuuChuong_ },
+  'admin.doiChuongCau': { vaiTro: CHU_, chay: hdDoiChuongCau_ },
   baoSai: { chay: hdBaoSai_ },
   xemLai: { chay: hdXemLai_ },
   cauKhoNhat: { chay: hdCauKhoNhat_ },
@@ -100,6 +106,11 @@ function chiTietNhom_(nhom) {
     })
     .filter(function (t) { return t.trangThai === 'active'; });
   return { maNhom: nhom.maNhom, tenNhom: nhom.tenNhom, linkZalo: nhom.linkZalo || '', thanhVien: thanhVien };
+}
+
+// Gom mọi thứ trang chủ cần vào một yêu cầu để mở web nhanh hơn: thông tin cá nhân, tuần hiện tại, cấp bậc.
+function hdTrangChu_(email, tv) {
+  return { me: hdMe_(email, tv), tuan: hdTuanHienTai_(email), cap: thongTinCapCuaToi_(email, layCauHinh_()) };
 }
 
 function hdMe_(email, tv) {

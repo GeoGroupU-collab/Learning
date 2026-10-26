@@ -61,43 +61,94 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-describe('luyện tập ngoài sự kiện', () => {
+describe('tạo đề tự luyện', () => {
   beforeEach(nopHetCauHoi);
-  const luyen = (email, soTraLoi = 10) => {
-    const bat = goiAs(email, 'luyenTap.bat', { maMon: MON[0] });
+  // Gán lại chương cho một phần ngân hàng để thử lọc theo chương.
+  const datChuong = (dieuKien, chuong) => {
+    const sheet = mt.ss.getSheetByName('CauHoi');
+    const tieuDe = sheet.dong[0];
+    sheet.dong.forEach((r, k) => {
+      if (k > 0 && dieuKien({ maMon: r[tieuDe.indexOf('maMon')], tacGia: r[tieuDe.indexOf('tacGia')] })) r[tieuDe.indexOf('maChuong')] = chuong;
+    });
+    mt.boNho.clear();
+  };
+  const lamDe = (email, body = { maMon: MON[0] }, soTraLoi = 30) => {
+    const bat = goiAs(email, 'taoDe.bat', body);
     expect(bat.ok, JSON.stringify(bat)).toBe(true);
     const traLoi = Object.fromEntries(bat.data.cauHoi.slice(0, soTraLoi).map((c) => [c.id, 'A']));
-    return goiAs(email, 'luyenTap.nop', { maLuot: bat.data.maLuot, traLoi });
+    return goiAs(email, 'taoDe.nop', { maLuot: bat.data.maLuot, traLoi });
   };
 
-  it('đề luyện tập: 10 câu một môn, không đáp án đúng, không có câu của mình', () => {
-    vi.setSystemTime(gio('2026-11-03T09:00:00'));
-    const bat = goiAs(NGUOI[0], 'luyenTap.bat', { maMon: MON[0] });
-    expect(bat.data.cauHoi).toHaveLength(10);
+  it('đề 30 câu một môn, không đáp án đúng, không có câu của mình', () => {
+    const bat = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0] });
+    expect(bat.data.cauHoi).toHaveLength(30);
     expect(JSON.stringify(bat.data)).not.toContain('"dung"');
+    new Set(bat.data.cauHoi.map((c) => c.id)).size === 30 || expect.fail('trùng câu');
     bat.data.cauHoi.forEach((c) => {
       expect(c.maMon).toBe(MON[0]);
       expect(c.noiDung).not.toContain(`Câu của ${NGUOI[0]}`);
     });
   });
 
-  it('mỗi lượt +20 điểm; đang mở thì gọi lại trả đúng lượt đó', () => {
-    const bat1 = goiAs(NGUOI[0], 'luyenTap.bat', { maMon: MON[0] });
-    const bat2 = goiAs(NGUOI[0], 'luyenTap.bat', { maMon: MON[1] });
+  it('chọn chương: chỉ lấy câu thuộc các chương đã chọn', () => {
+    datChuong((c) => c.tacGia === NGUOI[1] || c.tacGia === NGUOI[2] || c.tacGia === NGUOI[3] || c.tacGia === NGUOI[4], 'c2');
+    const bat = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0], chuong: ['c2'] });
+    expect(bat.ok, JSON.stringify(bat)).toBe(true);
+    const cau = Object.fromEntries(mt.docTab('CauHoi').map((c) => [c.id, c]));
+    expect(bat.data.cauHoi).toHaveLength(20); // 4 người × 5 câu của môn này ở chương c2
+    bat.data.cauHoi.forEach((c) => expect(cau[c.id].maChuong).toBe('c2'));
+  });
+
+  it('chọn nhiều chương thì gộp câu của các chương đó', () => {
+    datChuong((c) => c.tacGia === NGUOI[1] || c.tacGia === NGUOI[2], 'c2');
+    const bat = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0], chuong: ['c1', 'c2'] });
+    expect(bat.data.cauHoi).toHaveLength(30);
+  });
+
+  it('không chọn chương nào nghĩa là lấy tất cả chương', () => {
+    expect(goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0], chuong: [] }).data.cauHoi).toHaveLength(30);
+  });
+
+  it('chương quá ít câu thì không tạo được đề và báo rõ', () => {
+    datChuong((c) => c.tacGia === NGUOI[1], 'c3'); // chỉ 5 câu
+    const r = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0], chuong: ['c3'] });
+    expect(r).toMatchObject({ ok: false, error: 'khong_du_cau' });
+    expect(r.message).toContain('Chỉ có 5 câu');
+  });
+
+  it('thông tin tạo đề: lấy chương từ ngân hàng khi chủ chưa nhập danh sách, kèm số câu', () => {
+    datChuong((c) => c.tacGia === NGUOI[1], 'Chương hai');
+    const tt = goiAs(NGUOI[0], 'taoDe.thongTin').data;
+    const m = tt.mon.find((x) => x.ma === MON[0]);
+    expect(m.soCau).toBe(35);
+    expect(Object.fromEntries(m.chuong.map((c) => [c.ma, c.soCau]))).toEqual({ c1: 30, 'Chương hai': 5 });
+    expect(tt).toMatchObject({ soCauMoiDe: 30, diemMoiDe: 20, diemToiDaTuan: 120 });
+  });
+
+  it('mỗi đề làm xong +20 điểm; đang mở thì gọi lại trả đúng đề đó; nộp lại không cộng thêm', () => {
+    const bat1 = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0] });
+    const bat2 = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[1] });
     expect(bat2.data.maLuot).toBe(bat1.data.maLuot);
-    const nop = goiAs(NGUOI[0], 'luyenTap.nop', { maLuot: bat1.data.maLuot, traLoi: Object.fromEntries(bat1.data.cauHoi.map((c) => [c.id, 'A'])) });
+    const nop = goiAs(NGUOI[0], 'taoDe.nop', { maLuot: bat1.data.maLuot, traLoi: Object.fromEntries(bat1.data.cauHoi.map((c) => [c.id, 'A'])) });
     expect(nop.data.diemThuong).toBe(20);
     expect(nop.data.cap).toMatchObject({ tong: 20, level: 1 });
     expect(tongDiem(NGUOI[0])).toBe(20);
-    // nộp lại không cộng thêm
-    const lai = goiAs(NGUOI[0], 'luyenTap.nop', { maLuot: bat1.data.maLuot, traLoi: {} });
-    expect(lai.data.diemThuong).toBe(20);
+    expect(goiAs(NGUOI[0], 'taoDe.nop', { maLuot: bat1.data.maLuot, traLoi: {} }).data.diemThuong).toBe(20);
     expect(tongDiem(NGUOI[0])).toBe(20);
   });
 
+  it('hủy đề đang làm dở để tạo đề khác, hủy không được điểm', () => {
+    const bat1 = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[0] });
+    expect(goiAs(NGUOI[0], 'taoDe.huy').data.daHuy).toBe(true);
+    const bat2 = goiAs(NGUOI[0], 'taoDe.bat', { maMon: MON[1] });
+    expect(bat2.data.maLuot).not.toBe(bat1.data.maLuot);
+    expect(bat2.data.cauHoi.every((c) => c.maMon === MON[1])).toBe(true);
+    expect(tongDiem(NGUOI[0])).toBe(0);
+  });
+
   it('xem lại sau khi nộp có đáp án đúng và giải thích', () => {
-    const r = luyen(NGUOI[0]);
-    expect(r.data.cauHoi).toHaveLength(10);
+    const r = lamDe(NGUOI[0]);
+    expect(r.data.cauHoi).toHaveLength(30);
     r.data.cauHoi.forEach((c) => {
       expect('ABCD').toContain(c.dung);
       expect(c.giaiThich).toContain('Giải thích');
@@ -106,44 +157,78 @@ describe('luyện tập ngoài sự kiện', () => {
   });
 
   it('trần 120 điểm mỗi tuần, sang tuần mới được cộng lại', () => {
+    vi.setSystemTime(gio('2026-11-03T09:00:00'));
     const diem = [];
-    for (let i = 0; i < 7; i++) diem.push(luyen(NGUOI[1]).data.diemThuong);
+    for (let i = 0; i < 7; i++) diem.push(lamDe(NGUOI[1]).data.diemThuong);
     expect(diem).toEqual([20, 20, 20, 20, 20, 20, 0]);
     expect(tongDiem(NGUOI[1])).toBe(120);
-    vi.setSystemTime(gio('2026-11-09T08:00:00')); // Thứ Hai tuần sau
-    expect(luyen(NGUOI[1]).data.diemThuong).toBe(20);
+    vi.setSystemTime(gio('2026-11-09T08:00:00'));
+    expect(lamDe(NGUOI[1]).data.diemThuong).toBe(20);
     expect(tongDiem(NGUOI[1])).toBe(140);
   });
 
-  it('trần tuần tính theo Thứ Hai đến Chủ nhật giờ Việt Nam', () => {
-    vi.setSystemTime(gio('2026-11-08T23:00:00')); // Chủ nhật
-    for (let i = 0; i < 6; i++) luyen(NGUOI[2]);
+  it('tuần tính từ Thứ Hai đến Chủ nhật giờ Việt Nam', () => {
+    vi.setSystemTime(gio('2026-11-08T23:00:00'));
+    for (let i = 0; i < 6; i++) lamDe(NGUOI[2]);
     vi.setSystemTime(gio('2026-11-08T23:59:00'));
-    expect(luyen(NGUOI[2]).data.diemThuong).toBe(0);
+    expect(lamDe(NGUOI[2]).data.diemThuong).toBe(0);
   });
 
-  it('trả lời ít hơn một nửa thì không được cộng điểm', () => {
-    expect(luyen(NGUOI[3], 4).data.diemThuong).toBe(0);
+  it('trả lời ít hơn một nửa số câu thì không được cộng điểm', () => {
+    expect(lamDe(NGUOI[3], { maMon: MON[0] }, 10).data.diemThuong).toBe(0);
     expect(tongDiem(NGUOI[3])).toBe(0);
-    expect(luyen(NGUOI[3], 5).data.diemThuong).toBe(20);
+    expect(lamDe(NGUOI[3], { maMon: MON[0] }, 15).data.diemThuong).toBe(20);
   });
 
   it('chọn môn không có trong học kỳ bị từ chối', () => {
-    expect(goiAs(NGUOI[0], 'luyenTap.bat', { maMon: 'khong-co' }).error).toBe('mon_sai');
-  });
-
-  it('thông tin luyện tập hiện điểm tuần này và cấp', () => {
-    luyen(NGUOI[4]);
-    const tt = goiAs(NGUOI[4], 'luyenTap.thongTin').data;
-    expect(tt).toMatchObject({ diemTuanNay: 20, diemToiDaTuan: 120, diemMoiLuot: 20, soCauMoiLuot: 10 });
-    expect(tt.cap.level).toBe(1);
-    expect(tt.mon.length).toBeGreaterThan(0);
+    expect(goiAs(NGUOI[0], 'taoDe.bat', { maMon: 'khong-co' }).error).toBe('mon_sai');
   });
 
   it('đủ 500 điểm thì lên Võ Sư (level 6)', () => {
     mt.themDong('Diem', { thoiGian: new Date(), email: NGUOI[5], loai: 'thuong_nhom_nhat', soDiem: 500, khoa: 'x1' });
-    const c = goiAs(NGUOI[5], 'luyenTap.thongTin').data.cap;
-    expect(c).toMatchObject({ level: 6, tenCapLon: 'Võ Sư' });
+    expect(goiAs(NGUOI[5], 'taoDe.thongTin').data.cap).toMatchObject({ level: 6, tenCapLon: 'Võ Sư' });
+  });
+});
+
+describe('quản trị danh sách chương', () => {
+  beforeEach(nopHetCauHoi);
+
+  it('thành viên không sửa được chương', () => {
+    expect(goiAs(NGUOI[0], 'admin.luuChuong', { maMon: MON[0], chuong: ['A'] })).toMatchObject({ ok: false, error: 'cam' });
+  });
+
+  it('lưu danh sách chương: cấp mã c1, c2..., giữ mã khi giữ nguyên tên, bỏ trùng và dòng trống', () => {
+    const r = goiAs(CHU, 'admin.luuChuong', { maMon: MON[0], chuong: ['Mở đầu', ' Thống kê  ', '', 'mở đầu'] }).data;
+    expect(r.chuong).toEqual([{ ten: 'Mở đầu', ma: 'c1' }, { ten: 'Thống kê', ma: 'c2' }]);
+    const r2 = goiAs(CHU, 'admin.luuChuong', { maMon: MON[0], chuong: ['Thống kê', 'Học máy', 'Mở đầu'] }).data;
+    expect(r2.chuong).toEqual([{ ten: 'Thống kê', ma: 'c2' }, { ten: 'Học máy', ma: 'c3' }, { ten: 'Mở đầu', ma: 'c1' }]);
+  });
+
+  it('sau khi có danh sách chương, nộp câu hỏi bắt buộc chọn đúng chương', () => {
+    goiAs(CHU, 'admin.luuChuong', { maMon: MON[0], chuong: ['Mở đầu', 'Thống kê'] });
+    vi.setSystemTime(gio('2026-11-05T11:00:00'));
+    mt.themDong('ThanhVien', { email: 'moi@x.vn', hoTen: 'Mới', vaiTro: 'member', trangThai: 'active' });
+    const bo = taoBoCau('moi@x.vn');
+    const chuongMon0 = (v) => bo.filter((c) => c.maMon === MON[0]).forEach((c) => { c.maChuong = v; });
+    chuongMon0('');
+    expect(goiAs('moi@x.vn', 'nopCauHoi', { cauHoi: bo })).toMatchObject({ ok: false, error: 'cau_hoi_sai' }); // chưa chọn chương
+    chuongMon0('khong-co');
+    expect(goiAs('moi@x.vn', 'nopCauHoi', { cauHoi: bo }).error).toBe('cau_hoi_sai'); // chương không có trong danh sách
+    chuongMon0('c2');
+    expect(goiAs('moi@x.vn', 'nopCauHoi', { cauHoi: bo }).ok).toBe(true);
+  });
+
+  it('danh sách môn kèm các giá trị chương đang có trong ngân hàng', () => {
+    const r = goiAs(CHU, 'admin.dsMon').data.mon.find((m) => m.ma === MON[0]);
+    expect(r.soCau).toBe(40);
+    expect(r.giaTriTrongNganHang).toEqual([{ giaTri: 'c1', soCau: 40 }]);
+  });
+
+  it('đổi giá trị chương hàng loạt để gộp vào chương chuẩn', () => {
+    const r = goiAs(CHU, 'admin.doiChuongCau', { maMon: MON[0], tu: ' C1 ', den: 'c9' }).data;
+    expect(r.soCau).toBe(40);
+    expect(mt.docTab('CauHoi').filter((c) => c.maMon === MON[0]).every((c) => c.maChuong === 'c9')).toBe(true);
+    expect(mt.docTab('CauHoi').filter((c) => c.maMon !== MON[0]).every((c) => c.maChuong === 'c1')).toBe(true);
   });
 });
 
@@ -211,8 +296,8 @@ describe('thưởng nhóm, danh hiệu và xếp hạng cá nhân sau khi chốt
   it('luyện tập và thưởng nhóm cộng dồn vào cùng một tổng', () => {
     thiVaChot();
     vi.setSystemTime(gio('2026-11-10T09:00:00'));
-    const bat = goiAs(NGUOI[4], 'luyenTap.bat', { maMon: MON[0] });
-    goiAs(NGUOI[4], 'luyenTap.nop', { maLuot: bat.data.maLuot, traLoi: Object.fromEntries(bat.data.cauHoi.map((c) => [c.id, 'A'])) });
+    const bat = goiAs(NGUOI[4], 'taoDe.bat', { maMon: MON[0] });
+    goiAs(NGUOI[4], 'taoDe.nop', { maLuot: bat.data.maLuot, traLoi: Object.fromEntries(bat.data.cauHoi.map((c) => [c.id, 'A'])) });
     expect(goiAs(NGUOI[4], 'xepHangCaNhan').data.toi.cap.tong).toBe(70);
   });
 });
@@ -270,9 +355,9 @@ describe('báo sai', () => {
     expect(trangThaiCau(cauCuaNguoi0Gap)).toBe('suspended');
     // luyện tập mới không chứa câu tạm loại
     for (let k = 0; k < 6; k++) {
-      const bat = goiAs(NGUOI[5], 'luyenTap.bat', { maMon: MON[0] });
+      const bat = goiAs(NGUOI[5], 'taoDe.bat', { maMon: MON[0] });
       expect(bat.data.cauHoi.some((c) => c.id === cauCuaNguoi0Gap)).toBe(false);
-      goiAs(NGUOI[5], 'luyenTap.nop', { maLuot: bat.data.maLuot, traLoi: {} });
+      goiAs(NGUOI[5], 'taoDe.nop', { maLuot: bat.data.maLuot, traLoi: {} });
     }
   });
 

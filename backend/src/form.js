@@ -12,6 +12,7 @@ var MO_TA_FORM_ =
   'Mỗi người điền một lần.';
 
 function taoFormDangKy() {
+  datLaiBoNho_();
   var props = PropertiesService.getScriptProperties();
   var formId = props.getProperty('FORM_ID');
   if (formId) {

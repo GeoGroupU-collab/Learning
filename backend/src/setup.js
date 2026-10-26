@@ -2,6 +2,7 @@
 // chỉ tạo tab còn thiếu, thêm cột còn thiếu và thêm khóa cấu hình còn thiếu.
 
 function khoiTao() {
+  datLaiBoNho_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var baoCao = [];
 
@@ -13,6 +14,8 @@ function khoiTao() {
   baoCao.push(themHocKyVaMonMau_(ss));
   baoCao.push(themChuVaoThanhVien_(ss));
   xoaTrangTinhMacDinh_(ss);
+  datLaiBoNho_();
+  xoaCacheTab_();
 
   var noiDung = baoCao.join('\n');
   Logger.log(noiDung);

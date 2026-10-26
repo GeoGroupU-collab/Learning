@@ -159,3 +159,11 @@ summary { display: flex; align-items: center; justify-content: space-between; ga
 
 .form-sua { border-top: 1px solid var(--vien); margin-top: 10px; padding-top: 6px; }
 .tabs { flex-wrap: wrap; }
+
+/* Khung chờ tĩnh */
+.the-cho { pointer-events: none; }
+.dong-cho { height: 12px; border-radius: 6px; background: rgba(140, 150, 255, 0.14); margin: 10px 0; width: 70%; }
+.dong-cho.dai { width: 90%; height: 16px; }
+.dong-cho.ngan { width: 40%; }
+
+.gop-chuong { padding: 6px 0; border-top: 1px solid var(--vien); gap: 8px; flex-wrap: wrap; }

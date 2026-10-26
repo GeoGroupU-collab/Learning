@@ -1,5 +1,5 @@
-import { goi, LoiApi } from '../api';
-import { h, xoaHet, thongBao } from '../dom';
+import { docCache, ghiCache, goi, LoiApi } from '../api';
+import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
 import type { ChiTietNhom, KetQuaXepHang, Me, ThanhVienNhom } from '../types';
 
@@ -40,10 +40,12 @@ function veDiemNhom(vung: HTMLElement, xh: KetQuaXepHang | null): void {
 export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Nhóm'), h('p', { class: 'phu' }, 'Đang tải...'));
-  let nhom: ChiTietNhom | null;
+  goc.append(h('h1', {}, 'Nhóm'), khungCho(2));
+  let nhom: ChiTietNhom | null = docCache<ChiTietNhom>('nhomCuaToi');
+  const tuBanLuu = nhom !== null;
   try {
-    nhom = await goi<ChiTietNhom | null>('nhomCuaToi');
+    if (!nhom) nhom = await goi<ChiTietNhom | null>('nhomCuaToi');
+    if (nhom) ghiCache('nhomCuaToi', {}, nhom);
   } catch (e) {
     xoaHet(goc);
     goc.append(h('h1', {}, 'Nhóm'), h('p', { class: 'loi' }, (e as Error).message));
@@ -132,11 +134,19 @@ export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
 
   const taiDiem = async (): Promise<void> => {
     try {
-      veDiemNhom(vungDiem, await goi<KetQuaXepHang>('xepHang'));
+      const kq = await goi<KetQuaXepHang>('xepHang');
+      ghiCache('xepHang', {}, kq);
+      veDiemNhom(vungDiem, kq);
     } catch {
-      veDiemNhom(vungDiem, null);
+      if (!vungDiem.querySelector('.so-lieu')) veDiemNhom(vungDiem, null);
     }
   };
+  const diemCu = docCache<KetQuaXepHang>('xepHang');
+  if (diemCu) veDiemNhom(vungDiem, diemCu);
+  const lamMoiNgay = (): void => {
+    void goi<ChiTietNhom | null>('nhomCuaToi').then((nh) => { if (nh) { ghiCache('nhomCuaToi', {}, nh); veDs(nh); } }).catch(() => undefined);
+  };
+  if (tuBanLuu) lamMoiNgay();
   await taiDiem();
   // Làm mới gần thời gian thật, chỉ khi tab đang hiển thị.
   chayDinhKy(() => {

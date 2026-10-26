@@ -2,7 +2,7 @@
 
 function nguoiDaGapCau_(email, id) {
   var thay = false;
-  docBang_('LuotThi').concat(docBang_('LuyenTap')).forEach(function (r) {
+  docBang_('LuotThi').concat(docBang_('DeTuTao')).forEach(function (r) {
     if (thay || chuanHoaEmail(r.email) !== email) return;
     thay = jsonAnToan_(r.dsCau, { ds: [] }).ds.some(function (c) { return c.id === id; });
   });

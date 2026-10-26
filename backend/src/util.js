@@ -10,8 +10,56 @@ function loi_(ma, thongBao) {
   return e;
 }
 
+// Bộ nhớ theo từng yêu cầu: mỗi tab chỉ đọc từ Sheet một lần trong một lần chạy, các lần sau lấy từ bộ nhớ.
+// Mọi hàm ghi (themDong_, suaDong_, xoaDongNeu_...) tự làm mới tab đó. datLaiBoNho_() xóa hết, gọi đầu mỗi
+// yêu cầu và ngay sau khi lấy được khóa (vì lúc chờ khóa có thể người khác đã ghi).
+var BO_NHO_ = { bang: {}, tieuDe: {} };
+
+// Các tab nhỏ, ít đổi, được cache thêm 30 giây giữa các yêu cầu. Sửa tay trong Sheet có hiệu lực sau tối đa 30 giây.
+var TAB_CACHE_ = { CauHinh: true, HocKy: true, Mon: true, Tuan: true };
+var GIAY_CACHE_TAB_ = 30;
+
+function datLaiBoNho_() {
+  BO_NHO_ = { bang: {}, tieuDe: {} };
+}
+
+function lamMoiBang_(ten) {
+  delete BO_NHO_.bang[ten];
+  if (TAB_CACHE_[ten]) {
+    try { CacheService.getScriptCache().remove('bang_' + ten); } catch (e) { /* bỏ qua */ }
+  }
+}
+
+function xoaCacheTab_() {
+  var cache = CacheService.getScriptCache();
+  Object.keys(TAB_CACHE_).forEach(function (t) { cache.remove('bang_' + t); });
+}
+
 // Đọc cả tab thành mảng đối tượng, mỗi đối tượng có thêm _dong (số dòng trong Sheet).
 function docBang_(ten) {
+  var coSan = BO_NHO_.bang[ten];
+  if (coSan) return coSan.slice();
+  var kq = null;
+  if (TAB_CACHE_[ten]) {
+    try {
+      var c = CacheService.getScriptCache().get('bang_' + ten);
+      if (c) kq = JSON.parse(c);
+    } catch (e) { kq = null; }
+  }
+  if (!kq) {
+    kq = docBangTho_(ten);
+    if (TAB_CACHE_[ten]) {
+      try {
+        var chuoi = JSON.stringify(kq);
+        if (chuoi.length < 90000) CacheService.getScriptCache().put('bang_' + ten, chuoi, GIAY_CACHE_TAB_);
+      } catch (e) { /* cache đầy hoặc lỗi thì bỏ qua */ }
+    }
+  }
+  BO_NHO_.bang[ten] = kq;
+  return kq.slice();
+}
+
+function docBangTho_(ten) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
   if (!sheet) throw loi_('thieu_tab', 'Thiếu tab ' + ten + '. Hãy chạy khoiTao().');
   var lastRow = sheet.getLastRow();
@@ -29,23 +77,29 @@ function docBang_(ten) {
 }
 
 function tieuDeTab_(sheet) {
+  var ten = sheet.getName();
+  if (BO_NHO_.tieuDe[ten]) return BO_NHO_.tieuDe[ten].slice();
   var lastCol = sheet.getLastColumn();
-  return lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  var tieuDe = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  BO_NHO_.tieuDe[ten] = tieuDe;
+  return tieuDe.slice();
 }
 
 function themDong_(ten, obj) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
   var tieuDe = tieuDeTab_(sheet);
   sheet.appendRow(tieuDe.map(function (h) { return obj[h] === undefined ? '' : obj[h]; }));
+  lamMoiBang_(ten);
 }
 
+// Sửa một dòng bằng một lần đọc và một lần ghi (nhanh hơn ghi từng ô).
 function suaDong_(ten, soDong, thayDoi) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
   var tieuDe = tieuDeTab_(sheet);
-  Object.keys(thayDoi).forEach(function (khoa) {
-    var cot = tieuDe.indexOf(khoa);
-    if (cot !== -1) sheet.getRange(soDong, cot + 1).setValue(thayDoi[khoa]);
-  });
+  var hienCo = sheet.getRange(soDong, 1, 1, tieuDe.length).getValues()[0];
+  var moi = tieuDe.map(function (h, i) { return thayDoi[h] !== undefined ? thayDoi[h] : hienCo[i]; });
+  sheet.getRange(soDong, 1, 1, tieuDe.length).setValues([moi]);
+  lamMoiBang_(ten);
 }
 
 // Xóa các dòng thỏa điều kiện (xóa từ dưới lên để số dòng không lệch).
@@ -53,6 +107,7 @@ function xoaDongNeu_(ten, dieuKien) {
   var cacDong = docBang_(ten).filter(dieuKien).map(function (o) { return o._dong; });
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
   cacDong.sort(function (a, b) { return b - a; }).forEach(function (d) { sheet.deleteRow(d); });
+  if (cacDong.length) lamMoiBang_(ten);
   return cacDong.length;
 }
 
@@ -86,6 +141,7 @@ function bamHex_(chuoi) {
 function voiKhoa_(viec) {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) throw loi_('ban', 'Hệ thống đang bận, thử lại sau vài giây.');
+  datLaiBoNho_(); // trong lúc chờ khóa có thể đã có người ghi, nên đọc lại từ đầu
   try {
     return viec();
   } finally {

@@ -1,5 +1,5 @@
-import { goi } from '../api';
-import { h, xoaHet } from '../dom';
+import { goiNhanh } from '../api';
+import { h, khungCho, xoaHet } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
 import { theCap } from '../cap';
 import type { KetQuaXepHang, KetQuaXepHangCaNhan, NhomXepHang } from '../types';
@@ -73,13 +73,13 @@ export async function veXepHang(goc: HTMLElement, tab = 'nhom'): Promise<void> {
     h('div', { class: 'tabs' },
       h('a', { class: tab === 'nhom' ? 'tab tab-dang' : 'tab', href: '#/xep-hang' }, 'Nhóm'),
       h('a', { class: tab === 'ca-nhan' ? 'tab tab-dang' : 'tab', href: '#/xep-hang/ca-nhan' }, 'Cá nhân')));
-  const vung = h('div', {}, h('p', { class: 'phu' }, 'Đang tải...'));
+  const vung = h('div', {}, khungCho(2));
   goc.append(vung);
   if (tab === 'ca-nhan') {
-    veCaNhan(vung, await goi<KetQuaXepHangCaNhan>('xepHangCaNhan'));
-    chayDinhKy(() => { void goi<KetQuaXepHangCaNhan>('xepHangCaNhan').then((kq) => veCaNhan(vung, kq)).catch(() => undefined); }, 15000);
+    await goiNhanh<KetQuaXepHangCaNhan>('xepHangCaNhan', {}, (kq) => veCaNhan(vung, kq));
+    chayDinhKy(() => { void goiNhanh<KetQuaXepHangCaNhan>('xepHangCaNhan', {}, (kq, tuCache) => { if (!tuCache) veCaNhan(vung, kq); }).catch(() => undefined); }, 15000);
     return;
   }
-  ve(vung, await goi<KetQuaXepHang>('xepHang'));
-  chayDinhKy(() => { void goi<KetQuaXepHang>('xepHang').then((kq) => ve(vung, kq)).catch(() => undefined); }, 15000);
+  await goiNhanh<KetQuaXepHang>('xepHang', {}, (kq) => ve(vung, kq));
+  chayDinhKy(() => { void goiNhanh<KetQuaXepHang>('xepHang', {}, (kq, tuCache) => { if (!tuCache) ve(vung, kq); }).catch(() => undefined); }, 15000);
 }

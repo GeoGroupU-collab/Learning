@@ -26,6 +26,7 @@ function themDiemNhieu_(cacMuc) {
     return tieuDe.map(function (h) { return o[h] === undefined ? '' : o[h]; });
   });
   sheet.getRange(sheet.getLastRow() + 1, 1, hang.length, tieuDe.length).setValues(hang);
+  lamMoiBang_('Diem');
   CacheService.getScriptCache().remove('xhcn');
   return moi.length;
 }
@@ -39,21 +40,17 @@ function tongDiemTheoEmail_() {
   return kq;
 }
 
-function diemLuyenTapTuanKey_(email, tuanKey) {
+function diemTaoDeTuanKey_(email, tuanKey) {
   var tong = 0;
   docBang_('Diem').forEach(function (r) {
-    if (r.loai === 'luyen_tap' && r.tuanKey === tuanKey && chuanHoaEmail(r.email) === email) tong += Number(r.soDiem) || 0;
+    if (r.loai === 'tao_de' && r.tuanKey === tuanKey && chuanHoaEmail(r.email) === email) tong += Number(r.soDiem) || 0;
   });
   return tong;
 }
 
-// Ghi cả một dòng bằng một lệnh (nhanh hơn ghi từng ô).
+// Giữ tên cũ cho các nơi đang gọi; suaDong_ đã ghi cả dòng bằng một lệnh.
 function ghiCaDong_(ten, soDong, thayDoi) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
-  var tieuDe = tieuDeTab_(sheet);
-  var hienCo = sheet.getRange(soDong, 1, 1, tieuDe.length).getValues()[0];
-  var moi = tieuDe.map(function (h, i) { return thayDoi[h] !== undefined ? thayDoi[h] : hienCo[i]; });
-  sheet.getRange(soDong, 1, 1, tieuDe.length).setValues([moi]);
+  suaDong_(ten, soDong, thayDoi);
 }
 
 // ---------- Dựng nội dung xem lại ----------
@@ -84,93 +81,144 @@ function tenMonTheoMa_(maHocKy) {
   return kq;
 }
 
-// ---------- Luyện tập ngoài sự kiện ----------
+// ---------- Tạo đề tự luyện (chọn môn, chọn chương, 30 câu từ ngân hàng) ----------
 
 function thongTinCapCuaToi_(email, cauHinh) {
   var tong = tongDiemTheoEmail_()[email] || 0;
   return capTuDiem(tong, soDiemMoiLevel_(cauHinh));
 }
 
-function luotLuyenTapDangMo_(email) {
-  var ds = docBang_('LuyenTap').filter(function (r) { return chuanHoaEmail(r.email) === email && !daNopLuot_(r); });
+function luotTaoDeDangMo_(email) {
+  var ds = docBang_('DeTuTao').filter(function (r) { return chuanHoaEmail(r.email) === email && !daNopLuot_(r); });
   return ds.length ? ds[ds.length - 1] : null;
 }
 
-function hdLuyenTapThongTin_(email) {
+// Các câu có thể dùng để tạo đề cho một người: đang dùng, không phải câu của chính họ.
+function cauDungDuocChoDe_(maHocKy, email) {
+  return docBang_('CauHoi').filter(function (c) {
+    return c.maHocKy === maHocKy && c.trangThai === 'active' && chuanHoaEmail(c.tacGia) !== email;
+  });
+}
+
+// Danh sách chương của một môn kèm số câu. Nếu chủ chưa nhập danh sách chương thì lấy các giá trị chương
+// đang có trong ngân hàng của môn đó.
+function chuongCuaMon_(mon, cauCuaMon) {
+  var dem = {};
+  cauCuaMon.forEach(function (c) {
+    var k = chuanHoaChu(c.maChuong);
+    if (k !== '') dem[k] = (dem[k] || 0) + 1;
+  });
+  if (mon.chuong && mon.chuong.length) {
+    return mon.chuong.map(function (x) { return { ma: x.ma, ten: x.ten, soCau: dem[chuanHoaChu(x.ma)] || 0 }; });
+  }
+  var thay = {};
+  var kq = [];
+  cauCuaMon.forEach(function (c) {
+    var k = chuanHoaChu(c.maChuong);
+    if (k === '' || thay[k]) return;
+    thay[k] = true;
+    kq.push({ ma: String(c.maChuong).trim(), ten: String(c.maChuong).trim(), soCau: dem[k] });
+  });
+  return kq.sort(function (a, b) { return a.ten < b.ten ? -1 : 1; });
+}
+
+function hdTaoDeThongTin_(email) {
   var hk = hocKyDangMo_();
   var cauHinh = layCauHinh_();
-  var tranTuan = Number(cauHinh.diemToiDaLuyenTapTuan) || 120;
+  var tranTuan = Number(cauHinh.diemToiDaDeTuTaoTuan) || 120;
   var tuanKey = tuanKeVN(Date.now());
-  var daDung = diemLuyenTapTuanKey_(email, tuanKey);
-  var dem = {};
+  var daDung = diemTaoDeTuanKey_(email, tuanKey);
+  var mon = [];
   if (hk) {
-    docBang_('CauHoi').forEach(function (c) {
-      if (c.maHocKy === hk.maHocKy && c.trangThai === 'active' && chuanHoaEmail(c.tacGia) !== email) dem[c.maMon] = (dem[c.maMon] || 0) + 1;
+    var pool = cauDungDuocChoDe_(hk.maHocKy, email);
+    mon = monCuaHocKy_(hk.maHocKy).map(function (m) {
+      var cauMon = pool.filter(function (c) { return c.maMon === m.ma; });
+      return { ma: m.ma, ten: m.ten, mau: m.mau, soCau: cauMon.length, chuong: chuongCuaMon_(m, cauMon) };
     });
   }
   return {
     cap: thongTinCapCuaToi_(email, cauHinh),
     diemTuanNay: daDung,
     diemToiDaTuan: tranTuan,
-    diemMoiLuot: Number(cauHinh.diemMoiLuyenTap) || 20,
-    soCauMoiLuot: Number(cauHinh.soCauLuyenTap) || 10,
-    mon: hk ? monCuaHocKy_(hk.maHocKy).map(function (m) { return { ma: m.ma, ten: m.ten, mau: m.mau, soCauCoSan: dem[m.ma] || 0 }; }) : [],
-    dangMo: !!luotLuyenTapDangMo_(email),
+    diemMoiDe: Number(cauHinh.diemMoiDeTuTao) || 20,
+    soCauMoiDe: Number(cauHinh.soCauDeTuTao) || 30,
+    soCauToiThieu: Number(cauHinh.soCauToiThieuDeTuTao) || 10,
+    mon: mon,
+    dangMo: !!luotTaoDeDangMo_(email),
   };
 }
 
-function guiLuotLuyenTap_(luot, maHocKy) {
+function guiLuotTaoDe_(luot, maHocKy) {
+  var dl = jsonAnToan_(luot.dsCau, { ds: [] });
   return {
     trangThai: 'dang_lam',
     maLuot: luot.maLuot,
+    tenMon: tenMonTheoMa_(maHocKy)[luot.maMon] || luot.maMon,
+    chuong: jsonAnToan_(luot.chuong, []),
     cauHoi: dungDeGui_(luot, cauHoiTheoId_(maHocKy)),
+    soCau: dl.ds.length,
   };
 }
 
-function hdLuyenTapBat_(email, tv, body) {
+function hdTaoDeBat_(email, tv, body) {
   var hk = hocKyDangMo_();
   if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
-  var cu = luotLuyenTapDangMo_(email);
-  if (cu) return guiLuotLuyenTap_(cu, hk.maHocKy);
+  var cu = luotTaoDeDangMo_(email);
+  if (cu) return guiLuotTaoDe_(cu, hk.maHocKy);
 
   var cauHinh = layCauHinh_();
   var maMon = String(body.maMon || '');
   if (monCuaHocKy_(hk.maHocKy).every(function (m) { return m.ma !== maMon; })) throw loi_('mon_sai', 'Môn không hợp lệ.');
-  var soCau = Number(cauHinh.soCauLuyenTap) || 10;
+  var soCau = Number(cauHinh.soCauDeTuTao) || 30;
+  var toiThieu = Number(cauHinh.soCauToiThieuDeTuTao) || 10;
+
+  var chuongChon = Array.isArray(body.chuong) ? body.chuong.map(function (x) { return chuanHoaChu(x); }).filter(function (x) { return x !== ''; }) : [];
+  var chonSet = {};
+  chuongChon.forEach(function (k) { chonSet[k] = true; });
 
   var daGap = {};
-  docBang_('LuotThi').concat(docBang_('LuyenTap')).forEach(function (r) {
+  docBang_('LuotThi').concat(docBang_('DeTuTao')).forEach(function (r) {
     if (chuanHoaEmail(r.email) !== email) return;
     jsonAnToan_(r.dsCau, { ds: [] }).ds.forEach(function (c) { daGap[c.id] = true; });
   });
-  var pool = docBang_('CauHoi')
-    .filter(function (c) { return c.maHocKy === hk.maHocKy && c.maMon === maMon; })
+  var pool = cauDungDuocChoDe_(hk.maHocKy, email)
+    .filter(function (c) { return c.maMon === maMon && (chuongChon.length === 0 || chonSet[chuanHoaChu(c.maChuong)]); })
     .map(function (c) { return { id: c.id, maMon: c.maMon, soTuan: Number(c.soTuan), tacGia: c.tacGia, trangThai: c.trangThai }; });
+  if (pool.length < toiThieu) {
+    throw loi_('khong_du_cau', 'Chỉ có ' + pool.length + ' câu phù hợp, cần ít nhất ' + toiThieu + '. Hãy chọn thêm chương hoặc môn khác.');
+  }
   var chuaGap = pool.filter(function (c) { return !daGap[c.id]; });
-  var opts = { email: email, monChon: [maMon], soCauMoiMon: soCau, soTuan: -1 };
+  var opts = { email: email, monChon: [maMon], soCauMoiMon: Math.min(soCau, pool.length), soTuan: -1 };
   var de = rutDe(chuaGap, opts);
-  if (de.ds.length < soCau) de = rutDe(pool, opts); // hết câu mới thì cho làm lại câu đã gặp
-  if (de.ds.length === 0) throw loi_('khong_du_cau', 'Môn này chưa có câu hỏi để luyện tập.');
+  if (de.ds.length < opts.soCauMoiMon) de = rutDe(pool, opts); // hết câu mới thì cho làm lại câu đã gặp
 
   return voiKhoa_(function () {
-    var daMo = luotLuyenTapDangMo_(email);
-    if (daMo) return guiLuotLuyenTap_(daMo, hk.maHocKy);
+    var daMo = luotTaoDeDangMo_(email);
+    if (daMo) return guiLuotTaoDe_(daMo, hk.maHocKy);
     var maLuot = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
-    themDong_('LuyenTap', {
-      maLuot: maLuot, email: email, batDauLuc: new Date(), maMon: maMon,
+    themDong_('DeTuTao', {
+      maLuot: maLuot, email: email, batDauLuc: new Date(), maMon: maMon, chuong: JSON.stringify(Array.isArray(body.chuong) ? body.chuong.slice(0, 60) : []),
       dsCau: JSON.stringify({ ds: de.ds, monChon: [maMon] }), traLoi: '{}', tuanKey: tuanKeVN(Date.now()),
     });
-    return guiLuotLuyenTap_(luotLuyenTapDangMo_(email), hk.maHocKy);
+    return guiLuotTaoDe_(luotTaoDeDangMo_(email), hk.maHocKy);
   });
 }
 
-function hdLuyenTapNop_(email, tv, body) {
+// Bỏ đề đang làm dở để tạo đề khác. Không được cộng điểm.
+function hdTaoDeHuy_(email) {
+  return voiKhoa_(function () {
+    var n = xoaDongNeu_('DeTuTao', function (r) { return chuanHoaEmail(r.email) === email && !daNopLuot_(r); });
+    return { daHuy: n > 0 };
+  });
+}
+
+function hdTaoDeNop_(email, tv, body) {
   var hk = hocKyDangMo_();
   if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
   var cauHinh = layCauHinh_();
   var maLuot = String(body.maLuot || '');
-  var luot = docBang_('LuyenTap').filter(function (r) { return r.maLuot === maLuot && chuanHoaEmail(r.email) === email; })[0];
-  if (!luot) throw loi_('khong_thay', 'Không tìm thấy lượt luyện tập.');
+  var luot = docBang_('DeTuTao').filter(function (r) { return r.maLuot === maLuot && chuanHoaEmail(r.email) === email; })[0];
+  if (!luot) throw loi_('khong_thay', 'Không tìm thấy đề.');
   var cauTheoId = cauHoiTheoId_(hk.maHocKy);
   var tenMon = tenMonTheoMa_(hk.maHocKy);
   var dl = jsonAnToan_(luot.dsCau, { ds: [] });
@@ -186,30 +234,108 @@ function hdLuyenTapNop_(email, tv, body) {
   if (daNopLuot_(luot)) return traVe(luot);
 
   return voiKhoa_(function () {
-    var moi = docMotDong_('LuyenTap', luot._dong);
+    var moi = docMotDong_('DeTuTao', luot._dong);
     if (daNopLuot_(moi)) return traVe(moi);
     var traLoi = lamSachTraLoi_(body.traLoi, dl.ds);
     var dapAn = {};
     dl.ds.forEach(function (c) { dapAn[c.id] = cauTheoId[c.id] ? cauTheoId[c.id].dapAn : ''; });
     var kq = chamBai(dl.ds, traLoi, dapAn);
     var daTraLoi = Object.keys(traLoi).length;
-    var hopLe = kq.soCau > 0 && daTraLoi / kq.soCau >= (Number(cauHinh.luyenTapToiThieuTraLoi) || 0);
+    var hopLe = kq.soCau > 0 && daTraLoi / kq.soCau >= (Number(cauHinh.deTuTaoToiThieuTraLoi) || 0);
 
     var tuanKey = tuanKeVN(Date.now());
-    var diemMoi = Number(cauHinh.diemMoiLuyenTap) || 20;
-    var tran = Number(cauHinh.diemToiDaLuyenTapTuan) || 120;
-    var thuong = hopLe ? diemThuongLuyenTap(diemLuyenTapTuanKey_(email, tuanKey), diemMoi, tran) : 0;
+    var diemMoi = Number(cauHinh.diemMoiDeTuTao) || 20;
+    var tran = Number(cauHinh.diemToiDaDeTuTaoTuan) || 120;
+    var thuong = hopLe ? diemThuongLuyenTap(diemTaoDeTuanKey_(email, tuanKey), diemMoi, tran) : 0;
 
-    ghiCaDong_('LuyenTap', moi._dong, {
+    ghiCaDong_('DeTuTao', moi._dong, {
       nopLuc: new Date(), traLoi: JSON.stringify(traLoi), soDung: kq.soDung, soCau: kq.soCau,
       diem: diemCaNhan(kq.soDung, kq.soCau), diemThuong: thuong, tuanKey: tuanKey,
     });
     if (thuong > 0) {
-      themDiemNhieu_([{ email: email, loai: 'luyen_tap', soDiem: thuong, tuanKey: tuanKey, khoa: 'lt:' + maLuot, ghiChu: moi.maMon }]);
+      themDiemNhieu_([{ email: email, loai: 'tao_de', soDiem: thuong, tuanKey: tuanKey, khoa: 'td:' + maLuot, ghiChu: moi.maMon }]);
     }
-    ghiNhatKy_(email, 'nopLuyenTap', maLuot, { soDung: kq.soDung, soCau: kq.soCau, thuong: thuong });
-    var xong = docMotDong_('LuyenTap', moi._dong);
-    return traVe(xong, thuong);
+    ghiNhatKy_(email, 'nopDeTuTao', maLuot, { soDung: kq.soDung, soCau: kq.soCau, thuong: thuong });
+    return traVe(docMotDong_('DeTuTao', moi._dong), thuong);
+  });
+}
+
+// ---------- Quản trị danh sách chương ----------
+
+function hdDsMon_() {
+  var hk = hocKyDangMo_();
+  if (!hk) return { mon: [] };
+  var tatCa = docBang_('CauHoi').filter(function (c) { return c.maHocKy === hk.maHocKy && c.trangThai !== 'removed'; });
+  return {
+    mon: monCuaHocKy_(hk.maHocKy).map(function (m) {
+      var cauMon = tatCa.filter(function (c) { return c.maMon === m.ma; });
+      var giaTri = {};
+      cauMon.forEach(function (c) {
+        var k = String(c.maChuong || '').trim();
+        giaTri[k] = (giaTri[k] || 0) + 1;
+      });
+      return {
+        ma: m.ma, ten: m.ten, mau: m.mau, chuong: m.chuong, soCau: cauMon.length,
+        giaTriTrongNganHang: Object.keys(giaTri).sort().map(function (k) { return { giaTri: k, soCau: giaTri[k] }; }),
+      };
+    }),
+  };
+}
+
+function hdLuuChuong_(email, tv, body) {
+  var hk = hocKyDangMo_();
+  if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
+  var ten = Array.isArray(body.chuong) ? body.chuong : [];
+  if (ten.length > 60) throw loi_('qua_nhieu', 'Tối đa 60 chương mỗi môn.');
+  return voiKhoa_(function () {
+    var dong = docBang_('Mon').filter(function (m) { return m.maHocKy === hk.maHocKy && m.maMon === String(body.maMon || ''); })[0];
+    if (!dong) throw loi_('khong_thay', 'Không tìm thấy môn.');
+    var cu = jsonAnToan_(dong.danhSachChuong, []);
+    var maCu = {};
+    cu.forEach(function (c) { maCu[chuanHoaChu(c.ten)] = c.ma; });
+    var daDung = {};
+    var moi = [];
+    ten.forEach(function (x) {
+      var t = String(typeof x === 'string' ? x : (x && x.ten) || '').replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      if (t.length > 80) throw loi_('ten_dai', 'Tên chương tối đa 80 ký tự.');
+      var khoa = chuanHoaChu(t);
+      if (daDung[khoa]) return;
+      daDung[khoa] = true;
+      moi.push({ ten: t, ma: maCu[khoa] || null });
+    });
+    // Chương mới được cấp mã c1, c2... không trùng mã đang có.
+    var dungMa = {};
+    moi.forEach(function (c) { if (c.ma) dungMa[c.ma] = true; });
+    var dem = 0;
+    moi.forEach(function (c) {
+      if (c.ma) return;
+      do { dem++; } while (dungMa['c' + dem]);
+      c.ma = 'c' + dem;
+      dungMa[c.ma] = true;
+    });
+    suaDong_('Mon', dong._dong, { danhSachChuong: JSON.stringify(moi) });
+    ghiNhatKy_(email, 'luuChuong', body.maMon, { soChuong: moi.length });
+    return { chuong: moi };
+  });
+}
+
+// Đổi giá trị chương của các câu hỏi trong ngân hàng (dùng để gộp các cách gõ tự do vào chương chuẩn).
+function hdDoiChuongCau_(email, tv, body) {
+  var hk = hocKyDangMo_();
+  if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
+  var tu = chuanHoaChu(body.tu);
+  var den = String(body.den == null ? '' : body.den).trim();
+  return voiKhoa_(function () {
+    var n = 0;
+    docBang_('CauHoi').forEach(function (c) {
+      if (c.maHocKy === hk.maHocKy && c.maMon === String(body.maMon || '') && chuanHoaChu(c.maChuong) === tu) {
+        suaDong_('CauHoi', c._dong, { maChuong: den });
+        n++;
+      }
+    });
+    ghiNhatKy_(email, 'doiChuongCau', body.maMon, { tu: body.tu, den: den, soCau: n });
+    return { soCau: n };
   });
 }
 

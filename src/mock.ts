@@ -183,22 +183,34 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
         nhomToi: 'n2',
       };
     }
-    case 'luyenTap.thongTin':
+    case 'trangChu':
+      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia() };
+    case 'taoDe.thongTin':
       return {
-        cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiLuot: 20, soCauMoiLuot: 10, dangMo: false,
-        mon: MON_GIA.map((m, i) => ({ ma: m.ma, ten: m.ten, mau: m.mau, soCauCoSan: i === 3 ? 0 : 60 })),
+        cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
+        mon: MON_GIA.map((m, i) => ({
+          ma: m.ma, ten: m.ten, mau: m.mau, soCau: i === 3 ? 4 : 75,
+          chuong: i === 0 ? [{ ma: 'c1', ten: 'Chương 1: Mở đầu', soCau: 40 }, { ma: 'c2', ten: 'Chương 2: Thống kê', soCau: 25 }, { ma: 'c3', ten: 'Chương 3: Học máy', soCau: 6 }, { ma: 'c4', ten: 'Chương 4: Trống', soCau: 0 }] : [],
+        })),
       };
-    case 'luyenTap.bat':
+    case 'taoDe.bat':
       return {
-        trangThai: 'dang_lam', maLuot: 'lt1',
-        cauHoi: Array.from({ length: 10 }, (_, i) => ({ id: 'q' + i, maMon: String(payload.maMon), noiDung: `Câu luyện tập số ${i + 1}`, dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Đáp án ${k}` })) })),
+        trangThai: 'dang_lam', maLuot: 'td1', tenMon: 'Khoa học dữ liệu', soCau: 30, chuong: (payload.chuong as string[]) ?? [],
+        cauHoi: Array.from({ length: 30 }, (_, i) => ({ id: 'q' + i, maMon: String(payload.maMon), noiDung: `Câu trong đề tự tạo số ${i + 1}`, dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Đáp án ${k}` })) })),
       };
-    case 'luyenTap.nop': {
+    case 'taoDe.huy':
+      return { daHuy: true };
+    case 'taoDe.nop': {
       const thuong = Math.max(0, Math.min(20, 120 - diemLuyenTapTuan));
       diemLuyenTapTuan += thuong;
       tongDiemGia += thuong;
-      return { soDung: 6, soCau: 10, diem: 60, diemThuong: thuong, cauHoi: cauXemLaiGia(10), cap: capGia() };
+      return { soDung: 18, soCau: 30, diem: 60, diemThuong: thuong, cauHoi: cauXemLaiGia(10), cap: capGia() };
     }
+    case 'admin.dsMon':
+      return { mon: MON_GIA.map((m, i) => ({ ma: m.ma, ten: m.ten, mau: m.mau, chuong: i === 0 ? m.chuong : [], soCau: 40, giaTriTrongNganHang: [{ giaTri: 'c1', soCau: 30 }, { giaTri: i === 0 ? 'Chương hai' : 'Mở đầu', soCau: 10 }] })) };
+    case 'admin.luuChuong':
+    case 'admin.doiChuongCau':
+      return { soCau: 10, chuong: [] };
     case 'xepHangCaNhan':
       return {
         bang: [

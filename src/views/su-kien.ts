@@ -1,5 +1,5 @@
-import { goi, LoiApi } from '../api';
-import { h, xoaHet, thongBao } from '../dom';
+import { goi, goiNhanh, LoiApi } from '../api';
+import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { datGioMayChu, demNguoc, dinhDangNgay, dungDongHo } from '../gio';
 import type { BanNhap, CauCuaToi, CauNhap, MonNop, TuanHienTai } from '../types';
 
@@ -19,8 +19,14 @@ function khungDemNguoc(luc: number, nhan: string, khiHet: () => void): HTMLEleme
 export async function veSuKien(goc: HTMLElement): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Sự kiện'), h('p', { class: 'phu' }, 'Đang tải...'));
-  const tt = await goi<TuanHienTai>('tuanHienTai');
+  goc.append(h('h1', {}, 'Sự kiện'), khungCho(2));
+  await goiNhanh<TuanHienTai>('tuanHienTai', {}, (tt) => {
+    dungDongHo();
+    dungSuKien(goc, tt);
+  });
+}
+
+function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   datGioMayChu(tt.now);
   xoaHet(goc);
   goc.append(h('h1', {}, 'Sự kiện'));

@@ -197,14 +197,21 @@ export interface ThongTinCap {
   levelConLaiDenCapKe: number | null;
 }
 
-export interface ThongTinLuyenTap {
+export interface ThongTinTaoDe {
   cap: ThongTinCap;
   diemTuanNay: number;
   diemToiDaTuan: number;
-  diemMoiLuot: number;
-  soCauMoiLuot: number;
-  mon: { ma: string; ten: string; mau: string; soCauCoSan: number }[];
+  diemMoiDe: number;
+  soCauMoiDe: number;
+  soCauToiThieu: number;
+  mon: { ma: string; ten: string; mau: string; soCau: number; chuong: { ma: string; ten: string; soCau: number }[] }[];
   dangMo: boolean;
+}
+
+export interface TrangChuData {
+  me: Me;
+  tuan: TuanHienTai;
+  cap: ThongTinCap;
 }
 
 export interface CauXemLai {
@@ -220,7 +227,7 @@ export interface CauXemLai {
   laDung: boolean;
 }
 
-export interface KetQuaLuyenTap {
+export interface KetQuaTaoDe {
   soDung: number;
   soCau: number;
   diem: number;
@@ -229,10 +236,22 @@ export interface KetQuaLuyenTap {
   cap: ThongTinCap;
 }
 
-export interface DeLuyenTap {
+export interface DeTaoDe {
   trangThai: 'dang_lam';
   maLuot: string;
+  tenMon: string;
+  chuong: string[];
+  soCau: number;
   cauHoi: CauThi[];
+}
+
+export interface MonQuanTri {
+  ma: string;
+  ten: string;
+  mau: string;
+  chuong: { ma: string; ten: string }[];
+  soCau: number;
+  giaTriTrongNganHang: { giaTri: string; soCau: number }[];
 }
 
 export interface DongXepHangCaNhan {

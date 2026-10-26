@@ -263,6 +263,7 @@ function chotMotTuan_(hk, t, grace) {
 
 // Chạy mỗi 15 phút bằng trigger (xem datTrigger).
 function chotTuanTuDong() {
+  datLaiBoNho_();
   var hk = hocKyDangMo_();
   if (!hk) return;
   var grace = graceGiay_(layCauHinh_());

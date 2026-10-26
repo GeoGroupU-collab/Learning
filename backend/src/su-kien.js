@@ -1,6 +1,7 @@
 // Sự kiện hàng tuần: lịch tuần, nộp câu hỏi, lưu nháp, xin miễn.
 
 function msCua_(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : 0; // trình duyệt gửi mili giây dạng số
   var t = v instanceof Date ? v.getTime() : Date.parse(v);
   return isNaN(t) ? 0 : t;
 }

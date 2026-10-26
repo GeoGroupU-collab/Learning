@@ -2,6 +2,7 @@ import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
 import { dinhDangNgay } from '../gio';
 import { veNganHang } from './ngan-hang';
+import { veChuong } from './chuong';
 import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
 const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', assistant: 'Trợ lý', member: 'Thành viên' };
@@ -16,13 +17,14 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const laChu = me.vaiTro === 'owner';
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['cau-hoi', 'Câu hỏi']] : [['thanh-vien', 'Thành viên'], ['cau-hoi', 'Câu hỏi']];
+  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
   const noiDung = h('div', {});
   goc.append(noiDung);
   if (tab === 'chia-nhom' && laChu) await veChiaNhom(noiDung);
   else if (tab === 'tuan' && laChu) await veTuan(noiDung);
+  else if (tab === 'chuong') await veChuong(noiDung, laChu);
   else if (tab === 'cau-hoi') await veNganHang(noiDung, laChu);
   else await veThanhVien(noiDung, laChu);
 }
