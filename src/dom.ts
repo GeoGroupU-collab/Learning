@@ -34,3 +34,11 @@ export function khungCho(soThe = 3): HTMLElement {
   for (let i = 0; i < soThe; i++) goc.append(h('div', { class: 'card the-cho' }, h('div', { class: 'dong-cho dai' }), h('div', { class: 'dong-cho' }), h('div', { class: 'dong-cho ngan' })));
   return goc;
 }
+
+// Cập nhật số câu chờ duyệt trên nút Quản trị (nếu có).
+export function datHuyHieuDuyet(n: number): void {
+  const el = document.getElementById('dau-so-duyet');
+  if (!el) return;
+  el.textContent = String(n);
+  el.hidden = n <= 0;
+}

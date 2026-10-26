@@ -163,3 +163,34 @@ function docMotDong_(ten, soDong) {
   for (var i = 0; i < tieuDe.length; i++) o[tieuDe[i]] = gt[i];
   return o;
 }
+
+// Ghi một cột cho nhiều dòng bằng một lần đọc và một lần ghi. giaTriTheoDong: {soDong: giaTri}.
+function datCotNhieuDong_(ten, tenCot, giaTriTheoDong) {
+  var dong = Object.keys(giaTriTheoDong).map(Number);
+  if (!dong.length) return;
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
+  var cot = tieuDeTab_(sheet).indexOf(tenCot);
+  var lastRow = sheet.getLastRow();
+  if (cot < 0 || lastRow < 2) return;
+  var vung = sheet.getRange(2, cot + 1, lastRow - 1, 1);
+  var gt = vung.getValues();
+  dong.forEach(function (d) { if (d >= 2 && d <= lastRow) gt[d - 2][0] = giaTriTheoDong[d]; });
+  vung.setValues(gt);
+  lamMoiBang_(ten);
+}
+
+// Xóa nhiều dòng: gộp các dòng liền nhau thành từng đoạn, xóa từ dưới lên để số dòng không lệch.
+function xoaNhieuDong_(ten, cacDong) {
+  var ds = cacDong.slice().sort(function (a, b) { return b - a; });
+  if (!ds.length) return 0;
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
+  var i = 0;
+  while (i < ds.length) {
+    var j = i;
+    while (j + 1 < ds.length && ds[j + 1] === ds[j] - 1) j++;
+    sheet.deleteRows(ds[j], j - i + 1);
+    i = j + 1;
+  }
+  lamMoiBang_(ten);
+  return ds.length;
+}

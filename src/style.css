@@ -178,6 +178,8 @@ ul, ol { margin: 0; padding: 0; }
   background: transparent; color: var(--chu); font-size: 0.86rem; font-weight: 500; cursor: pointer;
 }
 .nut-dau:hover { background: var(--mat-2); }
+.dau-so { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--loi); color: #fff; font-size: 0.72rem; font-weight: 600; line-height: 20px; text-align: center; }
+.dau-so[hidden] { display: none; }
 .chu-cai {
   display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
   background: var(--nhan-nen); color: var(--nhan); font-weight: 600; font-size: 0.9rem; border: 1px solid var(--vien);

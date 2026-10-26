@@ -20,7 +20,7 @@ var TABS = [
     name: 'CauHoi',
     headers: [
       'id', 'maHocKy', 'soTuan', 'maMon', 'maChuong', 'trangNguon', 'noiDung',
-      'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop',
+      'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop', 'ghiChuDuyet',
     ],
   },
   { name: 'Diem', headers: ['thoiGian', 'email', 'loai', 'soDiem', 'maHocKy', 'soTuan', 'tuanKey', 'khoa', 'ghiChu'] },
@@ -69,6 +69,7 @@ var CAU_HINH_MAC_DINH = [
   ['hienCauKhoNhat', true, 'Hiện 5 câu khó nhất tuần sau khi đóng cửa'],
   ['giaiTienBo', false, 'Bật giải nhóm tiến bộ nhất'],
   ['xoaGpaSauChiaNhom', false, 'Tự nhắc xóa cột GPA sau khi chia nhóm'],
+  ['duyetCauHoiTruoc', true, 'Câu hỏi mới nộp phải được chủ hoặc trợ lý duyệt trước khi vào đề (FALSE là vào ngân hàng ngay)'],
   ['soCauDeTuTao', 30, 'Số câu mỗi đề thành viên tự tạo (chọn môn và chương, lấy từ ngân hàng)'],
   ['soCauToiThieuDeTuTao', 10, 'Số câu tối thiểu trong ngân hàng (theo môn và chương đã chọn) để tạo được đề'],
   ['diemMoiDeTuTao', 20, 'Điểm cá nhân cộng cho mỗi đề tự tạo làm xong (hợp lệ)'],

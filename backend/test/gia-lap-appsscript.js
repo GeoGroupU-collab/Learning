@@ -21,6 +21,7 @@ class TrangTinh {
   setFrozenRows() {}
   appendRow(arr) { this.dong.push(arr.slice()); }
   deleteRow(r) { this.dong.splice(r - 1, 1); }
+  deleteRows(r, n) { this.dong.splice(r - 1, n); }
   getRange(r, c, nr = 1, nc = 1) {
     const sheet = this;
     return {
@@ -148,6 +149,16 @@ export function taoMoiTruong() {
 
   return {
     ...xuat,
+    // Các bài kiểm tra cũ giả định câu nộp vào ngân hàng ngay, nên mặc định tắt bước duyệt; bài kiểm tra duyệt bật lại bằng datCauHinh.
+    khoiTao() {
+      xuat.khoiTao();
+      this.datCauHinh('duyetCauHoiTruoc', false);
+    },
+    datCauHinh(khoa, giaTri) {
+      const dong = ss.getSheetByName('CauHinh').dong.find((r) => r[0] === khoa);
+      dong[1] = giaTri;
+      boNho.delete('bang_CauHinh');
+    },
     ss,
     props,
     thuMucDrive,

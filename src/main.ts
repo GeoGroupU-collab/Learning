@@ -11,7 +11,7 @@ import { mauMon } from './mau';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from './config';
 import { docCache, ghiCache, goi, LoiApi, xoaCache } from './api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth';
-import { h, khungCho, xoaHet, thongBao } from './dom';
+import { datHuyHieuDuyet, h, khungCho, xoaHet, thongBao } from './dom';
 import { layManifest, veBaiHoc, veDanhSachBai, veDanhSachMon, laMoi } from './views/bai-hoc';
 import { veNhom } from './views/nhom';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
@@ -159,6 +159,7 @@ async function khoiDong(): Promise<void> {
     duLieuTrangChu = moi;
     thoiDiemTaiTrangChu = Date.now();
     datGioMayChu(moi.tuan.now);
+    datHuyHieuDuyet(moi.choDuyet ?? 0);
     taiTruocCacMuc();
     if (!daVe || doiVaiTro) {
       veKhung();
@@ -203,7 +204,8 @@ function veKhung(): void {
       h('a', { class: 'logo', href: '#/' }, dauHieu(30) as unknown as HTMLElement, h('span', {}, CONFIG.TEN_WEB)),
       thanhDuoi,
       h('div', { class: 'dau-phai' },
-        laQuanTri ? h('a', { class: 'nut-dau', href: '#/quan-tri/thanh-vien' }, icon('khien', 16) as unknown as HTMLElement, h('span', {}, 'Quản trị')) : null,
+        laQuanTri ? h('a', { class: 'nut-dau', href: '#/quan-tri/thanh-vien' }, icon('khien', 16) as unknown as HTMLElement, h('span', {}, 'Quản trị'),
+          h('span', { class: 'dau-so', id: 'dau-so-duyet', hidden: !duLieuTrangChu?.choDuyet }, String(duLieuTrangChu?.choDuyet ?? 0))) : null,
         h('a', { class: 'chu-cai', href: '#/cai-dat', 'aria-label': 'Tài khoản' }, chuCai))),
     vungNoiDung
   );
@@ -276,6 +278,7 @@ async function lamMoiTrangChu(): Promise<void> {
     duLieuTrangChu = moi;
     thoiDiemTaiTrangChu = Date.now();
     datGioMayChu(moi.tuan.now);
+    datHuyHieuDuyet(moi.choDuyet ?? 0);
     if ((location.hash || '#/') === '#/') veTrangChu(vungNoiDung);
   } catch {
     /* giữ dữ liệu cũ */

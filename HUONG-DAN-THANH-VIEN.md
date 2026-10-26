@@ -22,6 +22,7 @@ Trong **Nộp câu hỏi** bấm **Dùng AI soạn câu hỏi**:
 2. Bỏ file này vào AI (ChatGPT, Claude, Gemini...), **đưa thêm tài liệu tham khảo** và **nói rõ môn, chương**.
 3. Sao chép câu trả lời, dán vào ô **Dán câu hỏi từ AI**, bấm **Nhập vào form**.
 4. **Tự kiểm tra từng câu với tài liệu gốc**, rồi bấm **Nộp tất cả**. AI có thể nhầm, bạn chịu trách nhiệm về câu mình nộp.
+5. Câu bạn nộp sẽ **chờ lớp trưởng hoặc trợ lý duyệt** trước khi vào ngân hàng, nên chưa xuất hiện ngay trong đề. Xem trạng thái (Chờ duyệt, Đang dùng, Không được duyệt kèm lý do) ở **Câu hỏi của tôi**. Nộp đủ là bạn đã được vào phòng thi, không cần chờ duyệt xong.
 
 ## Điểm nhóm
 Điểm nhóm = tổng điểm các thành viên chia cho số thành viên (trừ người được miễn). Người không thi tính 0 điểm nhưng vẫn nằm trong mẫu số, nên cả nhóm nhắc nhau thi. Nhóm cùng điểm: nhóm nhiều người thi hơn xếp trên, rồi nhóm làm nhanh hơn.

@@ -246,8 +246,8 @@ export async function veNopCauHoi(goc: HTMLElement): Promise<void> {
           try {
             clearTimeout(hen);
             const cauHoi = ban.monChon.flatMap((ma) => (ban.cau[ma] ?? []).slice(0, yc.soCauMoiMon).map((c) => ({ ...c, maMon: ma })));
-            await goi('nopCauHoi', { cauHoi });
-            thongBao('Đã nộp câu hỏi');
+            const kq = await goi<{ choDuyet?: boolean }>('nopCauHoi', { cauHoi });
+            thongBao(kq.choDuyet ? 'Đã nộp câu hỏi, chờ chủ lớp duyệt trước khi vào đề' : 'Đã nộp câu hỏi');
             location.hash = '#/su-kien';
           } catch (e) {
             vungLoi.textContent = (e as LoiApi).message;

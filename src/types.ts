@@ -92,6 +92,7 @@ export interface TuanHienTai {
   mon?: MonNop[];
   yeuCau?: { soMon: number; soCauMoiMon: number };
   soMienToiDa?: number;
+  duyetTruoc?: boolean;
   soCauDaNop?: number;
   soCauCanNop?: number;
   moKhoa?: boolean;
@@ -175,6 +176,7 @@ export interface CauCuaToi {
   trangNguon: string;
   giaiThich: string;
   trangThai: string;
+  ghiChuDuyet?: string;
   soBaoSai: number;
 }
 
@@ -216,6 +218,7 @@ export interface TrangChuData {
   me: Me;
   tuan: TuanHienTai;
   cap: ThongTinCap;
+  choDuyet?: number; // chỉ quản trị viên: số câu đang chờ duyệt
 }
 
 export interface CauXemLai {
@@ -312,12 +315,14 @@ export interface CauNganHang {
   giaiThich: string;
   tacGia: string;
   tenTacGia: string;
-  trangThai: 'active' | 'suspended' | 'removed';
+  trangThai: 'active' | 'suspended' | 'removed' | 'cho_duyet' | 'tu_choi';
+  ghiChuDuyet?: string;
   ngayNop: string;
   soBaoSai: number;
 }
 
 export interface KetQuaNganHang {
+  soChoDuyet: number;
   tong: number;
   trang: number;
   coTrang: number;
@@ -329,6 +334,8 @@ export interface XemTruocNhap {
   loi: { id: string; loi: string[] }[];
   khongCo: string[];
   khongDoi: number;
+  soDuyet?: number;
+  soTuChoi?: number;
 }
 
 export interface CauDe {
@@ -411,4 +418,45 @@ export interface SaoLuuKq {
   url: string;
   soBanToiDa: number;
   ban: { ten: string; ngay: string; url: string }[];
+}
+
+// Đợt câu hỏi chờ duyệt xuất ra để rà soát bên ngoài. Tác giả chỉ hiện bằng mã (T01, T02...).
+export interface CauChoDuyet {
+  id: string;
+  maHocKy: string;
+  soTuan: number;
+  maMon: string;
+  tenMon: string;
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  giaiThich: string;
+  maTacGia: string;
+  nghiTrung: { id: string; doGiong: number }[];
+  quyetDinh: string;
+  ghiChuDuyet: string;
+}
+
+export interface CauThamKhao {
+  id: string;
+  maMon: string;
+  maChuong: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  maTacGia: string;
+}
+
+export interface DotChoDuyet {
+  meta: { ngayXuat: string; maHocKy: string; soChoDuyet: number; soThamKhao: number; soNghiTrung: number; huongDan: string };
+  cho: CauChoDuyet[];
+  thamKhao: CauThamKhao[];
 }

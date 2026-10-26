@@ -80,6 +80,7 @@ function hdTuanHienTai_(email) {
     mon: monCuaHocKy_(hk.maHocKy),
     yeuCau: { soMon: soMon, soCauMoiMon: soCauMoiMon },
     soMienToiDa: Number(cauHinh.soTuanMienToiDa) || 0,
+    duyetTruoc: duyetTruoc_(cauHinh),
   };
   if (!t) return res;
   var mien = mienCuaEmail_(hk.maHocKy, email);
@@ -178,18 +179,19 @@ function hdNopCauHoi_(email, tv, body) {
       return c.maHocKy === hk.maHocKy && Number(c.soTuan) === t.soTuan && chuanHoaEmail(c.tacGia) === email;
     });
     var bayGio = new Date();
+    var trangThaiMoi = duyetTruoc_(cauHinh) ? 'cho_duyet' : 'active'; // câu mới chờ duyệt thì chưa vào đề
     sach.forEach(function (c) {
       themDong_('CauHoi', {
         id: Utilities.getUuid(), maHocKy: hk.maHocKy, soTuan: t.soTuan, maMon: c.maMon, maChuong: c.maChuong, trangNguon: c.trangNguon,
         noiDung: c.noiDung, A: c.A, B: c.B, C: c.C, D: c.D, dapAn: c.dapAn, giaiThich: c.giaiThich,
-        tacGia: email, trangThai: 'active', ngayNop: bayGio,
+        tacGia: email, trangThai: trangThaiMoi, ngayNop: bayGio,
       });
     });
     xoaDongNeu_('NhapCauHoi', function (x) {
       return x.maHocKy === hk.maHocKy && Number(x.soTuan) === t.soTuan && chuanHoaEmail(x.email) === email;
     });
     ghiNhatKy_(email, 'nopCauHoi', hk.maHocKy + '/' + t.soTuan, { soCau: sach.length });
-    return { soCau: sach.length, moKhoa: true };
+    return { soCau: sach.length, moKhoa: true, choDuyet: trangThaiMoi === 'cho_duyet' };
   });
 }
 
@@ -236,7 +238,7 @@ function hdCauHoiCuaToi_(email) {
     .map(function (c) {
       return {
         id: c.id, soTuan: Number(c.soTuan), tenMon: tenMon[c.maHocKy + '/' + c.maMon] || c.maMon, maChuong: c.maChuong, noiDung: c.noiDung,
-        A: c.A, B: c.B, C: c.C, D: c.D, dapAn: c.dapAn, trangNguon: c.trangNguon, giaiThich: c.giaiThich, trangThai: c.trangThai,
+        A: c.A, B: c.B, C: c.C, D: c.D, dapAn: c.dapAn, trangNguon: c.trangNguon, giaiThich: c.giaiThich, trangThai: c.trangThai, ghiChuDuyet: c.ghiChuDuyet || '',
         soBaoSai: baoSai[c.id] ? Object.keys(baoSai[c.id]).length : 0,
       };
     });

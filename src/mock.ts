@@ -84,7 +84,7 @@ const cauXemLaiGia = (n: number) => Array.from({ length: n }, (_, i) => ({
 const nganHangGia = Array.from({ length: 7 }, (_, i) => ({
   id: 'ch' + i, maHocKy: 'hk1-2026-2027', soTuan: 1, maMon: 'khoa-hoc-du-lieu', maChuong: 'c1', trangNguon: 'tr.' + i,
   noiDung: `Nội dung câu hỏi trong ngân hàng số ${i + 1}`, A: 'a' + i, B: 'b' + i, C: 'c' + i, D: 'd' + i, dapAn: 'A', giaiThich: '',
-  tacGia: `sv${i}@example.test`, tenTacGia: `Bạn ${i}`, trangThai: (i === 2 ? 'suspended' : 'active') as 'active' | 'suspended' | 'removed', ngayNop: '2026-11-05T10:00:00Z', soBaoSai: i === 2 ? 2 : 0,
+  tacGia: `sv${i}@example.test`, tenTacGia: `Bạn ${i}`, trangThai: (i === 2 ? 'suspended' : i >= 5 ? 'cho_duyet' : 'active') as 'active' | 'suspended' | 'removed' | 'cho_duyet' | 'tu_choi', ngayNop: '2026-11-05T10:00:00Z', soBaoSai: i === 2 ? 2 : 0,
 }));
 
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
@@ -136,9 +136,9 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'nopCauHoi': {
       const ds = payload.cauHoi as (CauCuaToi & { maMon: string; noiDung: string })[];
       if (ds.some((c) => !String(c.noiDung).trim())) throw new LoiApi('cau_hoi_sai', 'Câu 1: thiếu nội dung câu hỏi.\nCâu 2: thiếu nội dung câu hỏi.');
-      cauDaNop = ds.map((c, i) => ({ ...c, id: String(i), soTuan: 1, tenMon: MON_GIA.find((m) => m.ma === c.maMon)?.ten ?? c.maMon, trangThai: 'active', soBaoSai: 0 }));
+      cauDaNop = ds.map((c, i) => ({ ...c, id: String(i), soTuan: 1, tenMon: MON_GIA.find((m) => m.ma === c.maMon)?.ten ?? c.maMon, trangThai: 'cho_duyet', soBaoSai: 0 }));
       nhapGia = null;
-      return { soCau: ds.length, moKhoa: true };
+      return { soCau: ds.length, moKhoa: true, choDuyet: true };
     }
     case 'xinMien':
       mienGia = true;
@@ -188,7 +188,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       };
     }
     case 'trangChu':
-      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia() };
+      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), ...(vai !== 'member' ? { choDuyet: nganHangGia.filter((c) => c.trangThai === 'cho_duyet').length } : {}) };
     case 'taoDe.thongTin':
       return {
         cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
@@ -301,10 +301,35 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
         })),
       };
     case 'admin.nganHang':
-      return { tong: nganHangGia.length, trang: 1, coTrang: 50, cauHoi: nganHangGia };
+      return { soChoDuyet: nganHangGia.filter((c) => c.trangThai === 'cho_duyet').length, tong: nganHangGia.length, trang: 1, coTrang: 50, cauHoi: nganHangGia };
     case 'admin.suaCauHoi':
     case 'admin.doiTrangThaiCau':
       return {};
+    case 'admin.duyetCau': {
+      const ids = (payload.ids as string[] | undefined) ?? nganHangGia.filter((c) => c.trangThai === 'cho_duyet').map((c) => c.id);
+      let n = 0;
+      nganHangGia.forEach((c) => {
+        if (c.trangThai === 'cho_duyet' && ids.includes(c.id)) {
+          c.trangThai = payload.quyetDinh === 'duyet' ? 'active' : 'tu_choi';
+          (c as { ghiChuDuyet?: string }).ghiChuDuyet = String(payload.lyDo ?? '');
+          n++;
+        }
+      });
+      return { soCau: n, trangThai: payload.quyetDinh === 'duyet' ? 'active' : 'tu_choi' };
+    }
+    case 'admin.xuatChoDuyet': {
+      const cho = nganHangGia.filter((c) => c.trangThai === 'cho_duyet');
+      return {
+        meta: { ngayXuat: new Date().toISOString(), maHocKy: 'hk1-2026-2027', soChoDuyet: cho.length, soThamKhao: 0, soNghiTrung: 0, huongDan: '' },
+        cho: cho.map((c, i) => ({ ...c, tenMon: 'Khoa học dữ liệu', maTacGia: 'T0' + (i + 1), nghiTrung: [], quyetDinh: '', ghiChuDuyet: '' })),
+        thamKhao: [],
+      };
+    }
+    case 'admin.donCauTuChoi': {
+      const truoc = nganHangGia.length;
+      for (let i = nganHangGia.length - 1; i >= 0; i--) if (nganHangGia[i].trangThai === 'tu_choi') nganHangGia.splice(i, 1);
+      return { soCau: truoc - nganHangGia.length };
+    }
     case 'admin.xuatNganHang':
       return nganHangGia;
     case 'admin.xemTruocNhap':

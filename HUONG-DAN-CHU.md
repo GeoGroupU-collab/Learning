@@ -589,3 +589,30 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
   - Trang chủ không còn đọc lại tab `CauHoi` (tab lớn nhất) ở mỗi lần mở; số câu đã nộp được nhớ 2 phút và tự cập nhật ngay khi có người nộp hay sửa câu hỏi.
   - Màn hình đăng nhập "đánh thức" Apps Script ngay khi mở, nên lúc bấm vào đỡ chờ vài giây khởi động nguội.
   - Sau khi vào trang chủ, web tải trước Xếp hạng và Nhóm (một lần mỗi phiên) nên bấm sang là hiện ngay.
+
+---
+
+## Phụ lục 2. Duyệt câu hỏi trước khi vào ngân hàng
+
+**Làm gì (một lần):** dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**, **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**. Sau đó commit và push bản web, chờ Actions tick xanh, **Ctrl+F5**. **Chạy `khoiTao` một lần** (chọn hàm `khoiTao` ở thanh trên, bấm **Chạy**; không mất dữ liệu) để thêm cột `ghiChuDuyet` vào tab `CauHoi` và dòng cấu hình `duyetCauHoiTruoc`. Làm bước này trước khi duyệt câu đầu tiên, nếu không lý do từ chối sẽ không được lưu.
+
+**Từ giờ câu hỏi chạy thế nào:**
+1. Thành viên nộp câu, câu ở trạng thái **Chờ duyệt**. Việc nộp vẫn tính đủ để mở khóa phòng thi, nhưng câu chưa được rút vào đề nào (đề sự kiện, đề tự tạo).
+2. Nút **Quản trị** hiện số đỏ là số câu đang chờ duyệt.
+3. Bạn hoặc trợ lý vào **Quản trị, Câu hỏi**. Khung **Duyệt câu hỏi** ở trên cùng cho phép:
+   - **Chỉ xem câu chờ duyệt**, rồi bấm **Duyệt** hoặc **Từ chối** từng câu (từ chối thì nhập lý do, người nộp sẽ thấy lý do ở **Câu hỏi của tôi**).
+   - **Duyệt cả bộ lọc hiện tại**: lọc theo tuần, môn hoặc người nộp rồi duyệt cả loạt.
+4. Câu bị từ chối không vào đề. Câu được duyệt chuyển sang **Đang dùng**.
+
+**Làm đợt rà soát bằng AI (chỉ chủ):**
+1. Trong khung **Duyệt câu hỏi**, mở **Rà soát cả đợt bằng AI**, giữ tick **Kèm các câu đã duyệt để so trùng**, bấm **Xuất đợt chờ duyệt**. Máy tải về hai tệp: `cho-duyet-<ngày>.md` (để đọc) và `cho-duyet-<ngày>.json` (đầy đủ dữ liệu). Tên người nộp chỉ hiện là T01, T02, không lộ email. Mỗi câu có gợi ý "nghi trùng" nếu giống câu khác từ 70%.
+2. Đưa tệp `.md` cho AI (hoặc cho tôi đọc trong Claude Code), nhờ phân loại: câu nào **trùng**, câu nào **dở**, câu nào **hay**. Yêu cầu AI trả lại một mảng JSON theo mẫu ở đầu tệp `.md`: mỗi câu có `id`, `quyetDinh` (`duyet` hoặc `tu_choi`, để trống nếu chưa quyết), `ghiChuDuyet` (lý do), và các trường đã sửa nếu có.
+3. Lưu kết quả thành tệp `.json`, vào **Xuất và nhập ngân hàng**, chọn tệp ở ô **Nhập bản đã sửa**. Web cho **xem trước** (có dòng "sẽ duyệt X câu, từ chối Y câu"), bạn đọc rồi bấm **Áp dụng**.
+4. Muốn lưu lại cả đợt để sau tra cứu (câu nào trùng, dở, hay): đặt tệp `.md`, `.json` đã xuất và tệp kết quả vào thư mục `ngan-hang-luu-tru/` trong dự án. Thư mục này **không bao giờ được đẩy lên GitHub** (đã chặn trong `.gitignore`).
+5. Khi đã lưu xong, bấm **Dọn câu bị từ chối** để xóa hẳn các câu bị từ chối khỏi Sheet cho nhẹ. Nút này **chỉ xóa câu đang ở trạng thái Bị từ chối**, không đụng tới câu đã duyệt hay câu chờ duyệt.
+
+**Lưu ý quan trọng:**
+- **Đừng đẩy ngân hàng câu hỏi hoặc đáp án lên GitHub của dự án.** Kho này công khai, ai cũng đọc được đáp án trước giờ thi. Muốn lưu lịch sử trên GitHub, tạo một kho **riêng tư** khác và đẩy lên đó.
+- **Phải duyệt trước tối Thứ Sáu.** Đề chỉ rút câu đã duyệt. Nếu chưa duyệt kịp, đề thiếu câu (hệ thống lấy bù từ tuần khác hoặc làm đề ngắn hơn).
+- Câu **đã duyệt vẫn nằm trong Sheet**, vì đề thi và bảng điểm cần chúng. Chỉ câu bị từ chối mới bị dọn đi.
+- Muốn tắt hẳn bước duyệt (câu nộp vào ngân hàng ngay): ở tab `CauHinh` đặt `duyetCauHoiTruoc` thành `FALSE`.

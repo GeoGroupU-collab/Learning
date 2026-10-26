@@ -72,6 +72,9 @@ var HANH_DONG_ = {
   'admin.nganHang': { vaiTro: CHU_TRO_LY_, chay: hdNganHang_ },
   'admin.suaCauHoi': { vaiTro: CHU_, chay: hdSuaCauHoi_ },
   'admin.doiTrangThaiCau': { vaiTro: CHU_TRO_LY_, chay: hdDoiTrangThaiCau_ },
+  'admin.duyetCau': { vaiTro: CHU_TRO_LY_, chay: hdDuyetCau_ },
+  'admin.xuatChoDuyet': { vaiTro: CHU_, chay: hdXuatChoDuyet_ },
+  'admin.donCauTuChoi': { vaiTro: CHU_, chay: hdDonCauTuChoi_ },
   'admin.xuatNganHang': { vaiTro: CHU_, chay: hdXuatNganHang_ },
   'admin.xemTruocNhap': { vaiTro: CHU_, chay: hdXemTruocNhap_ },
   'admin.nhapNganHang': { vaiTro: CHU_, chay: hdNhapNganHang_ },
@@ -143,7 +146,12 @@ function hdCapNhatHoTen_(email, tv, body) {
 
 // Gom mọi thứ trang chủ cần vào một yêu cầu để mở web nhanh hơn: thông tin cá nhân, tuần hiện tại, cấp bậc.
 function hdTrangChu_(email, tv) {
-  return { me: hdMe_(email, tv), tuan: hdTuanHienTai_(email), cap: thongTinCapCuaToi_(email, layCauHinh_()) };
+  var kq = { me: hdMe_(email, tv), tuan: hdTuanHienTai_(email), cap: thongTinCapCuaToi_(email, layCauHinh_()) };
+  if (tv.vaiTro !== 'member') {
+    var hk = hocKyDangMo_();
+    kq.choDuyet = hk ? demChoDuyet_(hk.maHocKy) : 0; // số câu đang chờ duyệt, hiện trên nút Quản trị
+  }
+  return kq;
 }
 
 function hdMe_(email, tv) {

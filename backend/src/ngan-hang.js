@@ -109,7 +109,7 @@ function hangCauHoiQuanTri_(c, soBaoSai, tenTacGia) {
   return {
     id: c.id, maHocKy: c.maHocKy, soTuan: Number(c.soTuan), maMon: c.maMon, maChuong: c.maChuong, trangNguon: c.trangNguon,
     noiDung: c.noiDung, A: c.A, B: c.B, C: c.C, D: c.D, dapAn: c.dapAn, giaiThich: c.giaiThich,
-    tacGia: chuanHoaEmail(c.tacGia), tenTacGia: tenTacGia || '', trangThai: c.trangThai, ngayNop: c.ngayNop ? new Date(msCua_(c.ngayNop)).toISOString() : '',
+    tacGia: chuanHoaEmail(c.tacGia), tenTacGia: tenTacGia || '', trangThai: c.trangThai, ghiChuDuyet: c.ghiChuDuyet || '', ngayNop: c.ngayNop ? new Date(msCua_(c.ngayNop)).toISOString() : '',
     soBaoSai: soBaoSai || 0,
   };
 }
@@ -154,7 +154,8 @@ function hdNganHang_(email, tv, body) {
   });
   var coKichThuoc = 50;
   var trang = Math.max(1, Number(body.trang) || 1);
-  return { tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
+  var soChoDuyet = docBang_('CauHoi').filter(function (c) { return (!maHk || c.maHocKy === maHk) && c.trangThai === 'cho_duyet'; }).length;
+  return { soChoDuyet: soChoDuyet, tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
 }
 
 function hdSuaCauHoi_(email, tv, body) {
@@ -179,7 +180,7 @@ function hdSuaCauHoi_(email, tv, body) {
 function hdDoiTrangThaiCau_(email, tv, body) {
   var id = String(body.id || '');
   var moi = String(body.trangThai || '');
-  if (['active', 'suspended', 'removed'].indexOf(moi) === -1) throw loi_('trang_thai_sai', 'Trạng thái không hợp lệ.');
+  if (['active', 'suspended', 'removed', 'cho_duyet', 'tu_choi'].indexOf(moi) === -1) throw loi_('trang_thai_sai', 'Trạng thái không hợp lệ.');
   if (tv.vaiTro !== 'owner' && moi === 'removed') throw loi_('cam', 'Chỉ chủ mới xóa câu hỏi.');
   return voiKhoa_(function () {
     var c = docBang_('CauHoi').filter(function (x) { return x.id === id; })[0];
@@ -209,15 +210,20 @@ function soKhopNhapNganHang_(rows) {
   var loi = [];
   var khongCo = [];
   var khongDoi = 0;
-  rows.forEach(function (r) {
-    var c = hienCo[String(r.id || '')];
-    if (!c) { khongCo.push(String(r.id || '(trống)')); return; }
+  rows.forEach(function (r0) {
+    var c = hienCo[String(r0.id || '')];
+    if (!c) { khongCo.push(String(r0.id || '(trống)')); return; }
+    // quyetDinh trong file (duyet hoặc tu_choi) đổi thành trạng thái tương ứng; để trống thì giữ nguyên.
+    var r = {};
+    Object.keys(r0).forEach(function (k) { r[k] = r0[k]; });
+    if (r0.quyetDinh === 'duyet') r.trangThai = 'active';
+    else if (r0.quyetDinh === 'tu_choi') r.trangThai = 'tu_choi';
     var diff = soSanhCauHoi(c, r);
     if (!Object.keys(diff).length) { khongDoi++; return; }
     var merged = {};
     Object.keys(c).forEach(function (k) { merged[k] = c[k]; });
     Object.keys(diff).forEach(function (k) { merged[k] = diff[k].den; });
-    var l = kiemTraMotCau(merged);
+    var l = merged.trangThai === 'tu_choi' ? [] : kiemTraMotCau(merged); // câu bị từ chối không cần đủ định dạng
     if (l.length) loi.push({ id: c.id, loi: l });
     else thayDoi.push({ id: c.id, dong: c._dong, diff: diff });
   });
@@ -226,7 +232,11 @@ function soKhopNhapNganHang_(rows) {
 
 function hdXemTruocNhap_(email, tv, body) {
   var kq = soKhopNhapNganHang_(body.rows);
-  return { thayDoi: kq.thayDoi.map(function (t) { return { id: t.id, diff: t.diff }; }), loi: kq.loi, khongCo: kq.khongCo, khongDoi: kq.khongDoi };
+  var dem = function (tt) { return kq.thayDoi.filter(function (t) { return t.diff.trangThai && t.diff.trangThai.den === tt; }).length; };
+  return {
+    thayDoi: kq.thayDoi.map(function (t) { return { id: t.id, diff: t.diff }; }), loi: kq.loi, khongCo: kq.khongCo, khongDoi: kq.khongDoi,
+    soDuyet: dem('active'), soTuChoi: dem('tu_choi'),
+  };
 }
 
 function hdNhapNganHang_(email, tv, body) {

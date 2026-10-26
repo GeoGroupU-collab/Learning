@@ -411,14 +411,14 @@ function trangThaiTheoBaoSai(soNguoi, nguongTam, nguongXoa, hienTai) {
 
 // ---------- Sửa câu hỏi hàng loạt (nhập bản đã rà soát) ----------
 
-var TRUONG_SUA_ = ['noiDung', 'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'trangNguon', 'maChuong', 'trangThai'];
+var TRUONG_SUA_ = ['noiDung', 'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'trangNguon', 'maChuong', 'trangThai', 'ghiChuDuyet'];
 
 // Kiểm tra một câu sau khi sửa. Trả mảng lỗi (rỗng là hợp lệ).
 function kiemTraMotCau(c) {
   var loi = [];
   ['noiDung', 'A', 'B', 'C', 'D'].forEach(function (k) { if (String(c[k] == null ? '' : c[k]).trim() === '') loi.push('thiếu ' + k); });
   if (['A', 'B', 'C', 'D'].indexOf(String(c.dapAn)) === -1) loi.push('đáp án đúng phải là A, B, C hoặc D');
-  if (['active', 'suspended', 'removed'].indexOf(String(c.trangThai)) === -1) loi.push('trạng thái phải là active, suspended hoặc removed');
+  if (['active', 'suspended', 'removed', 'cho_duyet', 'tu_choi'].indexOf(String(c.trangThai)) === -1) loi.push('trạng thái phải là active, cho_duyet, tu_choi, suspended hoặc removed');
   var k4 = {};
   ['A', 'B', 'C', 'D'].forEach(function (k) { k4[chuanHoaChu(c[k])] = true; });
   if (Object.keys(k4).length < 4) loi.push('bốn đáp án phải khác nhau');
@@ -468,6 +468,54 @@ function rutTheoPhanBo(cacCau, phanBo, rng) {
   return { chon: chon, thieu: thieu };
 }
 
+// ---------- Gợi ý câu nghi trùng ----------
+
+function tapTu_(s) {
+  var o = {};
+  var dem = 0;
+  String(s == null ? '' : s).normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).forEach(function (x) {
+    if (x.length > 1 && !o[x]) { o[x] = true; dem++; }
+  });
+  return { tu: o, dem: dem };
+}
+
+function doGiongTapTu_(a, b) {
+  if (!a.dem || !b.dem) return 0;
+  var chung = 0;
+  Object.keys(a.tu).forEach(function (k) { if (b.tu[k]) chung++; });
+  return chung / (a.dem + b.dem - chung);
+}
+
+// Độ giống nhau (0 đến 1) của hai đoạn chữ theo tập từ. 1 là giống hệt (sau khi bỏ dấu câu, hoa thường).
+function doGiongNhau(a, b) {
+  return doGiongTapTu_(tapTu_(a), tapTu_(b));
+}
+
+// Tìm các câu nghi trùng nhau trong cùng một môn. cau: [{id, maMon, noiDung}].
+// Trả {id: [{id, doGiong}]} chỉ gồm các câu có ít nhất một câu giống từ nguong trở lên, tối đa 3 câu giống nhất.
+function timCauNghiTrung(cau, nguong) {
+  var theoMon = {};
+  cau.forEach(function (c) { (theoMon[c.maMon] = theoMon[c.maMon] || []).push({ id: c.id, t: tapTu_(c.noiDung) }); });
+  var kq = {};
+  Object.keys(theoMon).forEach(function (m) {
+    var ds = theoMon[m];
+    for (var i = 0; i < ds.length; i++) {
+      for (var j = i + 1; j < ds.length; j++) {
+        var g = doGiongTapTu_(ds[i].t, ds[j].t);
+        if (g >= nguong) {
+          (kq[ds[i].id] = kq[ds[i].id] || []).push({ id: ds[j].id, doGiong: Math.round(g * 100) / 100 });
+          (kq[ds[j].id] = kq[ds[j].id] || []).push({ id: ds[i].id, doGiong: Math.round(g * 100) / 100 });
+        }
+      }
+    }
+  });
+  Object.keys(kq).forEach(function (id) {
+    kq[id].sort(function (a, b) { return b.doGiong - a.doGiong; });
+    kq[id] = kq[id].slice(0, 3);
+  });
+  return kq;
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     docGpa: docGpa, chiaNhom: chiaNhom, doLechGpa: doLechGpa, chuanHoaEmail: chuanHoaEmail, laLinkHopLe: laLinkHopLe,
@@ -476,6 +524,6 @@ if (typeof module !== 'undefined') {
     rutDe: rutDe, chamBai: chamBai, diemCaNhan: diemCaNhan, diemNhomTuan: diemNhomTuan, xepHangNhom: xepHangNhom, diemLuyKe: diemLuyKe,
     CAP_LON: CAP_LON, capTuDiem: capTuDiem, tuanKeVN: tuanKeVN, diemThuongLuyenTap: diemThuongLuyenTap, diemThuongNhom: diemThuongNhom,
     docBangDiemNhom: docBangDiemNhom, chonDanhHieuCaNhan: chonDanhHieuCaNhan, xepHangCaNhan: xepHangCaNhan, cauKhoNhat: cauKhoNhat,
-    dungDeCoDinh: dungDeCoDinh, rutTheoPhanBo: rutTheoPhanBo, trangThaiTheoBaoSai: trangThaiTheoBaoSai, kiemTraMotCau: kiemTraMotCau, soSanhCauHoi: soSanhCauHoi,
+    dungDeCoDinh: dungDeCoDinh, doGiongNhau: doGiongNhau, timCauNghiTrung: timCauNghiTrung, rutTheoPhanBo: rutTheoPhanBo, trangThaiTheoBaoSai: trangThaiTheoBaoSai, kiemTraMotCau: kiemTraMotCau, soSanhCauHoi: soSanhCauHoi,
   };
 }
