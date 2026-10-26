@@ -3,3 +3,6 @@ dist/
 backend/dist/
 .env
 *.local
+client_secret*.json
+*.pem
+*.key

@@ -180,3 +180,57 @@ Nếu đăng nhập báo lỗi, hãy chụp màn hình và gửi cho mình. Hai 
 5. Tên môn, màu và chương nằm trong file `mon.json` của từng thư mục môn.
 
 Bài học hiện có: Địa chất kiến trúc, Khoáng vật thạch học, Trắc địa công trình, Triết học Mác-Lênin. **Khoa học dữ liệu chưa có bài học** (mình chỉ thấy file ôn thi, đó là quiz nên không đăng). Khi bạn có file bài học, upload vào `khoa-hoc-du-lieu`.
+
+---
+
+## Phần 3. Lịch tuần, nộp câu hỏi, xin miễn (mốc M2)
+
+Phần này có thêm tab `NhapCauHoi` trong Sheet và nhiều hành động mới ở máy chủ, nên **phải cập nhật Apps Script** trước khi dùng.
+
+### Bước 16. Cập nhật Apps Script
+
+1. Mở Apps Script của Sheet. Mở file `backend/dist/Code.gs` mới, **Ctrl+A**, **Ctrl+C**.
+2. Dán đè toàn bộ vào `Code.gs` trong Apps Script, **Ctrl+S**.
+3. Chọn hàm `khoiTao`, bấm **Chạy**. Hàm này an toàn, chỉ thêm tab `NhapCauHoi` còn thiếu.
+4. **Triển khai**, **Quản lý triển khai**, bấm biểu tượng cây bút, ở "Phiên bản" chọn **Phiên bản mới**, bấm **Triển khai**. Không chọn "Triển khai mới" vì địa chỉ `/exec` sẽ đổi.
+
+Làm đúng khi thấy: Sheet có thêm tab `NhapCauHoi`, và trong Apps Script nhật ký ghi "Đã tạo tab NhapCauHoi".
+
+### Bước 17. Đưa bản web mới lên
+
+Trong GitHub Desktop: ô Summary gõ `Thêm sự kiện và nộp câu hỏi`, bấm **Commit to main**, rồi **Push origin**. Vào tab **Actions** của kho chờ dấu tick xanh, rồi nhấn **Ctrl+F5** trên web.
+
+### Bước 18. Tạo lịch các tuần
+
+1. Đăng nhập web bằng tài khoản chủ, vào **Quản trị**, tab **Tuần**.
+2. **Ngày Thứ Bảy của sự kiện đầu tiên**: `07/11/2026`. **Số tuần**: `5`. Bấm **Tạo lịch**.
+3. Mỗi tuần có thể bấm mở để sửa giờ (ví dụ lùi hạn nộp), rồi bấm **Lưu giờ**.
+
+Làm đúng khi thấy: hiện 5 tuần, tuần 1 mở cửa Thứ Bảy 07/11. Mặc định: hạn nộp 23:59 Thứ Sáu, mở cửa 00:00 Thứ Bảy, đóng cửa 23:59 Chủ nhật.
+
+Lịch 5 tuần tương ứng các ngày 7-8/11, 14-15/11, 21-22/11, 28-29/11 và 5-6/12.
+
+### Bước 19. (Tùy chọn) Điền danh sách chương mỗi môn
+
+Mở tab `Mon` trong Sheet, cột `danhSachChuong`, điền dạng:
+
+`[{"ma":"c1","ten":"Chương 1: Mở đầu"},{"ma":"c2","ten":"Chương 2: ..."}]`
+
+Môn nào có chương thì thành viên chọn chương trong danh sách. Môn để `[]` thì thành viên tự gõ chương hoặc chủ đề.
+
+### Bước 20. Thử vòng nộp câu hỏi
+
+1. Vào **Quản trị**, **Thành viên**, mở **Thêm người đăng ký muộn**, thêm một email Google thử nghiệm của bạn (tài khoản thứ hai).
+2. Đăng nhập web bằng tài khoản thử đó. Vào **Sự kiện**: phải thấy đếm ngược đến hạn nộp và "Đã nộp 0/15 câu".
+3. Bấm **Nộp câu hỏi**, chọn 3 môn, điền thử 5 câu mỗi môn. Thoát ra rồi vào lại, bản nháp phải còn.
+4. Bấm **Nộp tất cả**. Làm đúng khi thấy "Đã nộp đủ 15 câu. Bạn được vào phòng thi."
+5. Thử nộp lại một câu trùng nội dung với câu đã có: phải bị báo trùng.
+6. Thử với tài khoản khác (chưa nộp): bấm **Xin miễn tuần này**, rồi **Hủy xin miễn**.
+7. Xong thử nghiệm, vào Sheet xóa các dòng thử trong tab `CauHoi`, `Mien`, `NhapCauHoi`, và xóa dòng tài khoản thử trong `ThanhVien`.
+
+### Quy tắc đang áp dụng
+- Mỗi người nộp đúng 3 môn × 5 câu. Mỗi câu cần nội dung, 4 đáp án khác nhau, đáp án đúng và trang hoặc slide nguồn. Giải thích không bắt buộc.
+- Câu không được trùng nội dung với câu khác trong ngân hàng của học kỳ (so sánh không phân biệt hoa thường, bỏ dấu câu).
+- Sửa câu đã nộp bằng cách vào lại **Nộp câu hỏi** và nộp lại, đến hết hạn.
+- Được xin miễn tối đa 1 tuần trong học kỳ, trước hạn nộp, và chỉ khi chưa nộp câu hỏi.
+- Phòng thi (làm bài, chấm điểm) chưa có, sẽ làm ở mốc M3.

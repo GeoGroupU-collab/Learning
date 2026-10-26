@@ -68,3 +68,72 @@ export interface MonHoc {
 export interface Manifest {
   hocKy: { ma: string; mon: MonHoc[] }[];
 }
+
+export interface MonNop {
+  ma: string;
+  ten: string;
+  mau: string;
+  chuong: { ma: string; ten: string }[];
+}
+
+export interface TuanHienTai {
+  now: number;
+  tuan: null | {
+    soTuan: number;
+    hanNop: number;
+    moCua: number;
+    dongCua: number;
+    trangThai: 'nop_cau_hoi' | 'cho_mo_cua' | 'mo' | 'dong';
+    moc: { nhan: string; luc: number } | null;
+  };
+  mon?: MonNop[];
+  yeuCau?: { soMon: number; soCauMoiMon: number };
+  soMienToiDa?: number;
+  soCauDaNop?: number;
+  soCauCanNop?: number;
+  moKhoa?: boolean;
+  mien?: boolean;
+  soMienDaDung?: number;
+}
+
+export interface CauNhap {
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  giaiThich: string;
+}
+
+export interface BanNhap {
+  monChon: string[];
+  cau: Record<string, CauNhap[]>;
+}
+
+export interface CauCuaToi {
+  id: string;
+  soTuan: number;
+  tenMon: string;
+  maChuong: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  trangNguon: string;
+  giaiThich: string;
+  trangThai: string;
+  soBaoSai: number;
+}
+
+export interface TuanQuanTri {
+  soTuan: number;
+  hanNop: number;
+  moCua: number;
+  dongCua: number;
+  trangThai: string;
+}

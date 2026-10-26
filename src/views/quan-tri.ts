@@ -1,6 +1,7 @@
 import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
-import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc } from '../types';
+import { dinhDangNgay } from '../gio';
+import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
 const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', assistant: 'Trợ lý', member: 'Thành viên' };
 const NHAN_TRANG_THAI: Record<string, string> = { active: 'Đang hoạt động', pending: 'Chờ duyệt', withdrawn: 'Đã rút', removed: 'Đã gỡ' };
@@ -14,12 +15,13 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const laChu = me.vaiTro === 'owner';
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm']] : [['thanh-vien', 'Thành viên']];
+  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần']] : [['thanh-vien', 'Thành viên']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
   const noiDung = h('div', {});
   goc.append(noiDung);
   if (tab === 'chia-nhom' && laChu) await veChiaNhom(noiDung);
+  else if (tab === 'tuan' && laChu) await veTuan(noiDung);
   else await veThanhVien(noiDung, laChu);
 }
 
@@ -202,4 +204,54 @@ async function veNhomHienTai(vung: HTMLElement): Promise<void> {
     kq.chuaCoNhom.forEach((t) => ds.append(h('li', {}, h('span', {}, t.hoTen || t.email), chonNhom(t.email, ''))));
     vung.append(h('div', { class: 'nhom-xem' }, h('h4', {}, `Chưa có nhóm (${kq.chuaCoNhom.length})`), ds));
   }
+}
+
+// ---------- Lịch tuần ----------
+
+// Chuyển mili giây sang giá trị cho ô datetime-local theo giờ Việt Nam, và ngược lại.
+const sangO = (ms: number): string => new Date(ms + 7 * 3600000).toISOString().slice(0, 16);
+const tuO = (v: string): number => Date.parse(`${v}:00+07:00`);
+
+async function veTuan(noi: HTMLElement): Promise<void> {
+  noi.append(h('p', { class: 'phu' }, 'Đang tải...'));
+  let kq: { maHocKy: string | null; tuan: TuanQuanTri[] };
+  try {
+    kq = await goi('admin.dsTuan');
+  } catch (e) {
+    xoaHet(noi);
+    noi.append(h('p', { class: 'loi' }, (e as Error).message));
+    return;
+  }
+  xoaHet(noi);
+  const lamMoi = async (): Promise<void> => { xoaHet(noi); await veTuan(noi); };
+
+  const ngay = h('input', { class: 'o-nhap', type: 'date', value: '2026-11-07' }) as HTMLInputElement;
+  const so = h('input', { class: 'o-nhap', type: 'number', min: 1, max: 30, value: 5 }) as HTMLInputElement;
+  noi.append(h('div', { class: 'card' },
+    h('h3', {}, 'Tạo lịch tự động'),
+    h('p', { class: 'phu' }, 'Mỗi tuần một sự kiện: hạn nộp 23:59 Thứ Sáu, mở cửa 00:00 Thứ Bảy, đóng cửa 23:59 Chủ nhật. Tạo lại sẽ thay thế lịch hiện có.'),
+    h('label', { class: 'nhan-o' }, 'Ngày Thứ Bảy của sự kiện đầu tiên', ngay),
+    h('label', { class: 'nhan-o' }, 'Số tuần', so),
+    h('button', { class: 'nut', onclick: async () => {
+      if (kq.tuan.length && !confirm('Đã có lịch. Tạo lại sẽ thay thế toàn bộ giờ đã chỉnh. Tiếp tục?')) return;
+      try { await goi('admin.taoLichTuan', { thuBayDau: ngay.value, soTuan: Number(so.value) }); thongBao('Đã tạo lịch'); await lamMoi(); } catch (e) { baoLoi(e); }
+    } }, 'Tạo lịch')));
+
+  if (!kq.tuan.length) {
+    noi.append(h('p', { class: 'phu' }, 'Chưa có tuần nào.'));
+    return;
+  }
+  kq.tuan.forEach((t) => {
+    const a = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.hanNop) }) as HTMLInputElement;
+    const b = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.moCua) }) as HTMLInputElement;
+    const c = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.dongCua) }) as HTMLInputElement;
+    noi.append(h('details', { class: 'card' },
+      h('summary', {}, `Tuần ${t.soTuan}: ${dinhDangNgay(t.moCua)}`, h('span', { class: 'nhan' }, t.trangThai)),
+      h('label', { class: 'nhan-o' }, 'Hạn nộp câu hỏi', a),
+      h('label', { class: 'nhan-o' }, 'Mở cửa phòng thi', b),
+      h('label', { class: 'nhan-o' }, 'Đóng cửa phòng thi', c),
+      h('button', { class: 'nut', onclick: async () => {
+        try { await goi('admin.suaTuan', { soTuan: t.soTuan, hanNop: tuO(a.value), moCua: tuO(b.value), dongCua: tuO(c.value) }); thongBao('Đã lưu'); await lamMoi(); } catch (e) { baoLoi(e); }
+      } }, 'Lưu giờ')));
+  });
 }

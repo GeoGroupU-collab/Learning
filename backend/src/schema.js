@@ -23,6 +23,7 @@ var TABS = [
       'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop',
     ],
   },
+  { name: 'NhapCauHoi', headers: ['maHocKy', 'soTuan', 'email', 'duLieu', 'capNhat'] },
   { name: 'BaoSai', headers: ['idCauHoi', 'email', 'lyDo', 'thoiGian'] },
   { name: 'Mien', headers: ['maHocKy', 'soTuan', 'email', 'lyDo', 'thoiGian'] },
   {

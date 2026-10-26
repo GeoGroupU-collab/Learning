@@ -1,6 +1,6 @@
 // Máy chủ giả để xem giao diện khi chưa có Google. Chỉ được nạp khi chạy `npm run dev:mock`.
 import { LoiApi } from './api';
-import type { ThanhVienDs, NhomXemTruoc, NguoiGpa } from './types';
+import type { ThanhVienDs, NhomXemTruoc, NguoiGpa, BanNhap, CauCuaToi } from './types';
 
 const vai = (new URLSearchParams(location.search).get('vai') ?? 'owner') as 'owner' | 'assistant' | 'member';
 const EMAIL_TOI = 'toi@example.test';
@@ -30,6 +30,39 @@ function chiaThu(soNhom: number): NhomXemTruoc[] {
     kq[vong % 2 === 0 ? v : soNhom - 1 - v].thanhVien.push(p);
   });
   return kq;
+}
+
+// Dữ liệu giả cho sự kiện. ?tt=nop (mặc định), cho, mo, dong chọn trạng thái tuần.
+const trangThaiGia = (new URLSearchParams(location.search).get('tt') ?? 'nop') as 'nop' | 'cho' | 'mo' | 'dong';
+const MON_GIA = [
+  { ma: 'khoa-hoc-du-lieu', ten: 'Khoa học dữ liệu', mau: '#4cc9f0', chuong: [{ ma: 'c1', ten: 'Chương 1' }, { ma: 'c2', ten: 'Chương 2' }] },
+  { ma: 'dia-chat-kien-truc', ten: 'Địa chất kiến trúc', mau: '#f4a261', chuong: [] },
+  { ma: 'triet-hoc-mac-lenin', ten: 'Triết học Mác-Lênin', mau: '#e5383b', chuong: [] },
+  { ma: 'khoang-vat-thach-hoc', ten: 'Khoáng vật thạch học', mau: '#b5179e', chuong: [] },
+];
+let nhapGia: BanNhap | null = null;
+let cauDaNop: CauCuaToi[] = [];
+let mienGia = false;
+
+function tuanGia() {
+  const now = Date.now();
+  const gio = 3600000;
+  const moc = { nop: [now + 50 * gio, now + 51 * gio, now + 99 * gio], cho: [now - 2 * gio, now + 5 * gio, now + 53 * gio], mo: [now - 30 * gio, now - 6 * gio, now + 18 * gio], dong: [now - 90 * gio, now - 66 * gio, now - 42 * gio] }[trangThaiGia];
+  const [hanNop, moCua, dongCua] = moc;
+  const tt = trangThaiGia === 'nop' ? 'nop_cau_hoi' : trangThaiGia === 'cho' ? 'cho_mo_cua' : trangThaiGia === 'mo' ? 'mo' : 'dong';
+  const keTiep = tt === 'nop_cau_hoi' ? { nhan: 'Hạn nộp câu hỏi', luc: hanNop } : tt === 'cho_mo_cua' ? { nhan: 'Phòng thi mở cửa', luc: moCua } : tt === 'mo' ? { nhan: 'Phòng thi đóng cửa', luc: dongCua } : null;
+  return {
+    now,
+    tuan: { soTuan: 1, hanNop, moCua, dongCua, trangThai: tt, moc: keTiep },
+    mon: MON_GIA,
+    yeuCau: { soMon: 3, soCauMoiMon: 5 },
+    soMienToiDa: 1,
+    soCauDaNop: cauDaNop.length,
+    soCauCanNop: 15,
+    moKhoa: cauDaNop.length >= 15,
+    mien: mienGia,
+    soMienDaDung: mienGia ? 1 : 0,
+  };
 }
 
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
@@ -65,6 +98,33 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       if (n) n.tenNhom = String(payload.tenNhom);
       return { tenNhom: payload.tenNhom };
     }
+    case 'tuanHienTai':
+      return tuanGia();
+    case 'nhapLay':
+      return { duLieu: nhapGia };
+    case 'nhapLuu':
+      nhapGia = payload.duLieu as BanNhap;
+      return { daLuu: true };
+    case 'nopCauHoi': {
+      const ds = payload.cauHoi as (CauCuaToi & { maMon: string; noiDung: string })[];
+      if (ds.some((c) => !String(c.noiDung).trim())) throw new LoiApi('cau_hoi_sai', 'Câu 1: thiếu nội dung câu hỏi.\nCâu 2: thiếu nội dung câu hỏi.');
+      cauDaNop = ds.map((c, i) => ({ ...c, id: String(i), soTuan: 1, tenMon: MON_GIA.find((m) => m.ma === c.maMon)?.ten ?? c.maMon, trangThai: 'active', soBaoSai: 0 }));
+      nhapGia = null;
+      return { soCau: ds.length, moKhoa: true };
+    }
+    case 'xinMien':
+      mienGia = true;
+      return { mien: true };
+    case 'huyMien':
+      mienGia = false;
+      return { mien: false };
+    case 'cauHoiCuaToi':
+      return cauDaNop;
+    case 'admin.dsTuan':
+      return { maHocKy: 'hk1-2026-2027', tuan: [1, 2, 3, 4, 5].map((i) => ({ soTuan: i, hanNop: Date.now() + i * 86400000, moCua: Date.now() + (i + 1) * 86400000, dongCua: Date.now() + (i + 3) * 86400000, trangThai: 'nop_cau_hoi' })) };
+    case 'admin.taoLichTuan':
+    case 'admin.suaTuan':
+      return { soTuan: 5 };
     case 'admin.dsThanhVien':
       return thanhVien;
     case 'admin.nhapDangKy':
