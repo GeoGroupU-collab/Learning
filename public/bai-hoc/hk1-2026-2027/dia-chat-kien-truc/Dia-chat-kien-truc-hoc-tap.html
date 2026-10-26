@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Địa chất kiến trúc – Học tương tác</title>
+<style>
+:root{
+  --bg:#f6f7fb;--panel:#fff;--ink:#1c2333;--muted:#5d6780;--line:#dfe3ee;
+  --brand:#1f5fbf;--brand2:#0f3d82;--accent:#e8912d;--ok:#1b9a5b;--bad:#d24545;
+  --c1:#1f5fbf;--c2:#7a3fb8;--c3:#0e8a7d;
+  --shadow:0 2px 10px rgba(20,30,60,.08);
+}
+:root[data-theme=dark]{
+  --bg:#12151e;--panel:#1b2030;--ink:#e6e9f2;--muted:#9aa4bd;--line:#2c3348;
+  --brand:#6ea3ff;--brand2:#9dc1ff;--accent:#f0a850;--shadow:0 2px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--brand)}
+#app{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto;padding:16px 14px}
+aside h1{font-size:18px;margin:0 0 2px;color:var(--brand2)}
+aside .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.chap{margin:6px 0}
+.chap>button{width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:8px;font:600 14px inherit;color:var(--ink);cursor:pointer;display:flex;gap:8px;align-items:center}
+.chap>button:hover{background:var(--bg)}
+.chap.open>button{background:var(--bg)}
+.chap .num{width:24px;height:24px;border-radius:50%;color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.sec{display:none;margin:2px 0 6px 18px;border-left:2px solid var(--line)}
+.chap.open .sec{display:block}
+.sec a{display:flex;justify-content:space-between;padding:4px 10px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:6px}
+.sec a:hover{background:var(--bg);color:var(--ink)}
+.sec a.active{color:var(--brand);font-weight:600;background:var(--bg)}
+.sec a .tick{color:var(--ok)}
+.tools{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tools button,.btn{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:6px 11px;border-radius:8px;cursor:pointer;font:13px inherit}
+.tools button:hover,.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+main{padding:28px min(5vw,56px) 80px;max-width:1080px;width:100%}
+.topbar{display:none}
+.hero{background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border-radius:16px;padding:28px;margin-bottom:22px}
+.hero h2{margin:0 0 6px;font-size:26px}
+.hero p{margin:0;opacity:.92}
+.hero .pill{display:inline-block;background:rgba(255,255,255,.18);padding:2px 10px;border-radius:99px;font-size:12px;margin-bottom:8px}
+h2.st{font-size:24px;margin:0 0 4px;color:var(--brand2)}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h4{margin:14px 0 6px;font-size:15px}
+.note,.warn,.key,.check{border-radius:12px;padding:12px 16px;margin:14px 0;font-size:15px;border-left:5px solid}
+.note{background:rgba(31,95,191,.08);border-color:var(--brand)}
+.key{background:rgba(232,145,45,.12);border-color:var(--accent)}
+.warn{background:rgba(210,69,69,.09);border-color:var(--bad)}
+.check{background:rgba(27,154,91,.1);border-color:var(--ok)}
+.note b:first-child,.key b:first-child,.warn b:first-child,.check b:first-child{display:block;margin-bottom:2px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:rgba(31,95,191,.1)}
+.tw{overflow-x:auto}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.mini{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.mini h4{margin:0 0 4px}
+.mini.click{cursor:pointer;transition:.15s}
+.mini.click:hover,.mini.sel{border-color:var(--brand);transform:translateY(-1px);box-shadow:var(--shadow)}
+.lab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;font-size:14px}
+.lab input[type=range]{flex:1;min-width:140px}
+.lab select,.lab input[type=number],.lab input[type=text]{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.val{font-weight:700;color:var(--brand);min-width:52px}
+canvas,svg.w{max-width:100%;background:var(--bg);border-radius:12px;border:1px solid var(--line)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tag{display:inline-block;font-size:12px;padding:1px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);margin:2px 3px 2px 0}
+.tag.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.bar{height:14px;background:var(--bg);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#6ea3ff)}
+.tl{position:relative;margin:14px 0 6px;padding-left:20px;border-left:3px solid var(--brand)}
+.tl .ev{position:relative;margin:0 0 12px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.tl .ev:before{content:"";position:absolute;left:-30px;top:14px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--brand)}
+.tl .ev.open{border-color:var(--brand)}
+.tl .ev .d{display:none;color:var(--muted);font-size:14px;margin-top:4px}
+.tl .ev.open .d{display:block}
+.tl .ev b{color:var(--brand2)}
+.pager{display:flex;justify-content:space-between;margin-top:30px;gap:10px}
+.mtab{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.mtab button{padding:5px 11px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;cursor:pointer;font:13px inherit}
+.mtab button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+sub,sup{line-height:0}
+.ov{text-decoration:overline}
+.res{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+.sw{display:inline-block;width:18px;height:18px;border-radius:4px;vertical-align:middle;border:1px solid var(--line)}
+@media(max-width:860px){
+  #app{grid-template-columns:1fr}
+  aside{position:fixed;left:-310px;width:290px;z-index:20;transition:.2s;box-shadow:var(--shadow)}
+  aside.on{left:0}
+  .topbar{display:flex;position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 14px;gap:10px;align-items:center}
+  .two{grid-template-columns:1fr}
+}
+
+.fig{margin:16px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 12px 8px;box-shadow:var(--shadow)}
+.fig svg{width:100%;height:auto;display:block}
+.fig figcaption{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+
+</style>
+</head>
+<body>
+<div class="topbar"><button class="btn" id="menuBtn">☰ Mục lục</button><b>Địa chất kiến trúc</b></div>
+<div id="app">
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+<!-- Thêm mỗi chương một file content: content1.js, content2.js, ... -->
+<script>
+window.CHAPTERS = window.CHAPTERS || [];
+window.CHAPTERS.push({
+ id: 'c1', num: 1, title: 'Nhập môn: kiến tạo mảng & biến dạng',
+ blurb: 'Địa chất kiến trúc học gì; ba kiểu ranh giới mảng; ứng suất, biến dạng đàn hồi – dẻo – phá huỷ.',
+ sections: [
+  { id: 'gioi-thieu', title: '1. Địa chất kiến trúc là gì?', html: `
+   <p>Bài này trả lời ba câu hỏi: môn học nghiên cứu cái gì, học để làm gì và cần biết trước những gì.</p>
+   <div class="key"><b>Địa chất kiến trúc (Structural Geology)</b>Nghiên cứu kiến trúc/cấu tạo của vỏ Trái Đất và các quá trình làm biến dạng nó: nếp uốn, đứt gãy, khe nứt… và hình thái không gian của các thể địa chất (thế nằm).</div>
+   <h3>Học để làm gì?</h3>
+   <p>Cấu trúc của đá quyết định nơi nước ngầm chứa và chảy, nơi dầu khí bị bẫy, nơi khoáng sản tập trung, độ ổn định của mái dốc, hầm và nền móng, và nơi xảy ra động đất. Vì thế kiến thức này dùng trong địa chất dầu khí, khoáng sản, địa chất công trình – thuỷ văn, quy hoạch xây dựng và đánh giá tai biến.</p>
+   <h3>Ba chuẩn đầu ra của môn</h3>
+   <div class="grid">
+    <div class="mini"><h4>L.O.1</h4>Giải thích cơ chế hình thành các đặc điểm kiến trúc địa chất, từ đó khôi phục lịch sử phát triển địa chất của khu vực.</div>
+    <div class="mini"><h4>L.O.2</h4>Xây dựng cơ sở dữ liệu từ số liệu đo đạc thực tế.</div>
+    <div class="mini"><h4>L.O.3</h4>Phân tích, xử lý số liệu trong phòng, viết báo cáo và đánh giá.</div>
+   </div>
+   <h3>Đánh giá và tài liệu</h3>
+   <div class="tw"><table><tr><th>Thành phần</th><th>Tỷ trọng</th></tr>
+    <tr><td>Bài tập</td><td>10%</td></tr><tr><td>Thực hành</td><td>10%</td></tr><tr><td>Thực tập</td><td>30%</td></tr>
+    <tr><td>Thi (cuối kì 40% + kiểm tra hằng tuần 10%)</td><td>50%</td></tr></table></div>
+   <p>Giáo trình tham khảo: <i>Địa chất kiến trúc, đo vẽ bản đồ địa chất và một số vấn đề cơ bản của địa kiến tạo</i> (La Thị Chích – Phạm Huy Long, ĐHQG TP.HCM, tái bản lần II, 2011); <i>Structural Geology of Rocks and Regions</i> (Davis, Reynolds, Kluth, 3rd ed., 2012).</p>
+   <h3>Kiến thức nền cần nhớ lại</h3>
+   <ul><li>Kiến tạo mảng và ranh giới mảng; biến dạng, nếp uốn, đứt gãy (sẽ ôn ngay trong chương này).</li>
+   <li>Các nguyên tắc địa tầng (chương 7); ba nhóm đá magma – trầm tích – biến chất.</li>
+   <li>Đọc bản đồ địa hình và vẽ mặt cắt địa hình (chương 3).</li></ul>
+   <div class="note"><b>Môn học nối tiếp</b>Địa chất khu vực; Địa mạo – Tân kiến tạo – Trầm tích Đệ Tứ; Trầm tích học và nhịp địa tầng; Cơ học đá.</div>` },
+
+  { id: 'kien-tao-mang', title: '2. Kiến tạo mảng: ba kiểu ranh giới', html: `
+   <p>Phần lớn biến dạng của vỏ Trái Đất xuất hiện dọc theo <b>rìa các mảng kiến tạo</b>, nên trước tiên cần nắm cách các mảng chuyển động tương đối với nhau.</p>
+   <div data-w="fig" data-name="plates" data-cap="Ba kiểu ranh giới mảng: tách giãn, hội tụ (hút chìm) và chuyển dạng."></div>
+   <div class="card"><h3>Chọn kiểu ranh giới</h3><div data-w="plates"></div></div>
+   <div class="tw"><table><tr><th>Kiểu ranh giới</th><th>Chuyển động</th><th>Ví dụ</th></tr>
+    <tr><td>Tách giãn</td><td>Hai mảng rời xa nhau</td><td>Sống núi giữa đại dương (bazan); tách giãn trên lục địa Đông Phi; mở biển Biển Đỏ – vịnh Aden</td></tr>
+    <tr><td>Hội tụ – đại dương/lục địa</td><td>Thạch quyển đại dương hút chìm dưới lục địa</td><td>Dãy Andes và cung núi lửa (mảng Nazca – Nam Mỹ)</td></tr>
+    <tr><td>Hội tụ – đại dương/đại dương</td><td>Một thạch quyển đại dương chìm dưới mảng kia</td><td>Cung núi lửa đảo Ryukyu (mảng Philippines chìm dưới mảng Á-Âu)</td></tr>
+    <tr><td>Hội tụ – lục địa/lục địa</td><td>Hai thạch quyển lục địa va chạm, ép nhau</td><td>Mảng Ấn Độ – mảng Á-Âu (Himalaya)</td></tr>
+    <tr><td>Chuyển dạng</td><td>Trượt ngang qua nhau, đổi hướng dịch chuyển</td><td>Đứt gãy San Andreas</td></tr></table></div>
+   <div class="note"><b>Mở rộng</b>Thạch quyển đại dương có tỷ trọng lớn hơn thạch quyển lục địa nên luôn là bên bị hút chìm; hai thạch quyển lục địa đều nổi nên không chìm sâu mà bị nén, dày lên và nhô cao thành núi.</div>` },
+
+  { id: 'ung-suat', title: '3. Lực, ứng suất và biến dạng', html: `
+   <p>Đá bị biến dạng khi chịu lực. Bài này phân biệt ba đại lượng hay bị lẫn: <b>lực</b>, <b>ứng suất</b> và <b>biến dạng</b>.</p>
+   <div class="key"><b>Định nghĩa</b><b>Biến dạng (deformation)</b>: mọi thay đổi về hình dạng/kích thước của đá so với ban đầu.<br><b>Ứng suất (stress)</b>: lực tác dụng trên một đơn vị diện tích.<br><b>Strain</b> (cũng dịch là biến dạng): sự thay đổi hình dạng hoặc kích thước của đá <i>do</i> ứng suất gây ra.</div>
+   <h3>Ba kiểu ứng suất</h3>
+   <div data-w="fig" data-name="stress3" data-cap="Nét đứt: khối đá ban đầu; khối màu: sau biến dạng. Mũi tên chỉ hướng lực tác dụng."></div>
+   <div data-w="filtercards" data-items='[["Ứng suất ép (compressional)","Ép đá lại: khối đá ngắn đi theo phương ép và dày lên theo phương thẳng đứng. Sinh nếp uốn, đứt gãy nghịch.","Ép"],["Ứng suất kéo (tensional)","Kéo giãn đá: khối đá dài ra theo phương ngang và mỏng đi theo phương đứng. Sinh đứt gãy thuận.","Kéo"],["Ứng suất cắt (shear)","Hai phần đá bị đẩy trượt ngược chiều nhau. Sinh dịch chuyển dọc đới đứt gãy hoặc chảy dẻo; là kiểu biến dạng bảo toàn thể tích.","Cắt"]]'></div>
+   <p>Ví dụ dễ hình dung cho biến dạng cắt là xấp bài: đẩy mặt trên, các lá bài trượt lên nhau, vòng tròn vẽ trên cạnh xấp bài biến thành elip nhưng thể tích không đổi. Các đá phân lớp (trầm tích) hoặc phân phiến (phiến mica trong đá biến chất) đặc biệt dễ biến dạng theo kiểu này vì chúng có sẵn các mặt yếu.</p>
+   <div class="warn"><b>Hay nhầm</b>Ứng suất là “nguyên nhân” (lực trên diện tích), biến dạng là “kết quả” (thay đổi hình dạng, kích thước). Ứng suất không tự thể hiện thành nếp uốn hay đứt gãy nếu chưa vượt sức bền của đá.</div>
+   <p>Khi ứng suất lớn hơn sức bền, đá bắt đầu biến dạng theo một trong ba cách: <b>uốn nếp (folding)</b>, <b>chảy (flowing)</b> hoặc <b>phá huỷ (fracturing)</b>. Bài kế tiếp giải thích vì sao.</p>` },
+
+  { id: 'kieu-bien-dang', title: '4. Đàn hồi – dẻo – phá huỷ', html: `
+   <p>Cùng một ứng suất nhưng đá có thể phản ứng rất khác nhau. Đồ thị ứng suất – biến dạng cho thấy ba giai đoạn liên tiếp.</p>
+   <div class="card"><h3>Kéo thử một mẫu đá</h3><p style="margin-top:0">Kéo thanh trượt để tăng biến dạng; bật “Thôi tác dụng lực” để xem phần nào hồi phục.</p><div data-w="stressStrain"></div></div>
+   <div class="tw"><table><tr><th>Kiểu</th><th>Đặc điểm</th><th>Sản phẩm</th></tr>
+   <tr><td>Đàn hồi</td><td>Hình dạng, kích thước trở về gần như ban đầu khi thôi tác dụng lực</td><td>Không để lại cấu trúc</td></tr>
+   <tr><td>Dẻo (ductile)</td><td>Vượt giới hạn đàn hồi: biến dạng vĩnh viễn nhưng chưa nứt</td><td>Nếp uốn, dòng chảy dẻo</td></tr>
+   <tr><td>Phá huỷ (brittle)</td><td>Vượt giới hạn bền: đá nứt, vỡ</td><td>Khe nứt, đứt gãy</td></tr></table></div>
+   <div class="key"><b>Ghi nhớ</b>Đàn hồi → (giới hạn đàn hồi) → dẻo → (điểm phá huỷ) → gãy. Sau biến dạng dẻo, nhả tải chỉ lấy lại phần đàn hồi; phần còn lại là <b>biến dạng dư (permanent strain)</b>.</div>
+   <p>Hầu hết đá biến chất chịu tác dụng đồng thời của áp suất và nhiệt độ cao nên có xu hướng biến dạng dẻo, tạo những nếp uốn nhỏ li ti trong phiến đá. Ở vùng nông, lạnh, đá cứng hơn nên xu hướng phá huỷ chiếm ưu thế. Vì vậy nếp uốn (kết quả của biến dạng dẻo) và đứt gãy (kết quả của phá huỷ) là hai sản phẩm chính sẽ học ở các chương 5 và 6.</p>
+   <div class="note"><b>Mở rộng</b>Ngoài áp suất và nhiệt độ, tốc độ biến dạng, thành phần đá và sự có mặt của nước cũng quyết định đá xử sự dẻo hay giòn: biến dạng càng chậm, càng nóng, càng sâu thì càng dễ dẻo.</div>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c2', num: 2, title: 'Thế nằm & các yếu tố thế nằm',
+ blurb: 'Đường phương, hướng dốc, góc dốc; cách đo, cách ghi và ký hiệu trên bản đồ.',
+ sections: [
+  { id: 'the-nam', title: '1. Thế nằm là gì?', html: `
+   <p>Muốn vẽ được bản đồ và mặt cắt địa chất, ta phải mô tả được <b>vị trí của một mặt đá trong không gian</b>. Đó là việc của “thế nằm”.</p>
+   <div class="key"><b>Thế nằm</b>Là sự phân bố trong không gian của các đá, các thể địa chất và các vật thể có tính định hướng (mặt lớp, mặt đứt gãy, mặt trục nếp uốn…). Thế nằm của một vật thể được xác định bởi ba <b>yếu tố thế nằm</b>: <b>đường phương, hướng dốc, góc dốc</b>, thường đo bằng địa bàn địa chất.</div>
+   <p>Ba dạng thế nằm cơ bản của lớp đá: <b>nằm ngang</b> (chương 3), <b>nằm nghiêng</b> (chương 4) và <b>nếp uốn/đứt gãy</b> (các chương 5–6, khi các lớp bị uốn cong hoặc dịch chuyển). Nắm vững cách mô tả một mặt phẳng là nền tảng cho tất cả.</p>` },
+
+  { id: 'yeu-to', title: '2. Đường phương, hướng dốc, góc dốc', html: `
+   <p>Hình dung một mái nhà: nước mưa chảy xuống theo hướng dốc nhất; đường nằm ngang trên mái (song song với nóc nhà) là đường phương.</p>
+   <div class="grid">
+    <div class="mini"><h4>Đường phương (strike)</h4>Giao tuyến của mặt lớp với một mặt phẳng nằm ngang, tức là đường nằm ngang nằm trên mặt lớp. Có hai phương vị lệch nhau 180°.</div>
+    <div class="mini"><h4>Hướng dốc (dip direction)</h4>Hình chiếu của đường dốc nhất (đường nước chảy) lên mặt phẳng nằm ngang. Chỉ có một chiều, nên chỉ có một giá trị phương vị, <b>vuông góc</b> với đường phương.</div>
+    <div class="mini"><h4>Góc dốc (dip angle)</h4>Góc giữa đường dốc nhất và hình chiếu của nó trên mặt phẳng nằm ngang; nằm trong khoảng 0°–90°.</div>
+   </div>
+   <div class="key"><b>Quan hệ then chốt</b>Hướng dốc β = phương vị đường phương ± 90°. Chỉ cần biết hướng dốc và góc dốc là suy ra được đường phương.</div>
+   <div data-w="fig" data-name="strikeDip" data-cap="Ba yếu tố thế nằm của một mặt lớp: đường phương (xanh), hướng dốc (cam) và góc dốc α."></div>
+   <div class="card"><h3>Thử thay đổi thế nằm</h3><p style="margin-top:0">Kéo hai thanh trượt để xem đường phương, hướng dốc, góc dốc và cách ghi tương ứng.</p><div data-w="dipDemo"></div></div>` },
+
+  { id: 'cach-ghi', title: '3. Cách ghi và ký hiệu', html: `
+   <p>Ngoài thực địa, thường chỉ đo <b>phương vị hướng dốc</b> và <b>góc dốc</b> bằng địa bàn địa chất, rồi ghi vào nhật ký địa chất và báo cáo.</p>
+   <div data-w="fig" data-name="symbols" data-cap="Ký hiệu thế nằm thường dùng trên bản đồ địa chất."></div>
+   <h3>Hai cách ghi thường gặp</h3>
+   <div class="tw"><table><tr><th>Cách ghi</th><th>Ví dụ</th><th>Ý nghĩa</th></tr>
+    <tr><td>Phương vị hướng dốc ∠ góc dốc (β∠α)</td><td>320∠40</td><td>Hướng dốc 320° (tây bắc), dốc 40°. Không ghi dấu độ.</td></tr>
+    <tr><td>Đường phương + góc dốc + phía dốc</td><td>N10E, 45NW</td><td>Đường phương N10°E, dốc 45° về phía tây bắc (NW).</td></tr></table></div>
+   <p>Ở cách ghi thứ hai, “N10E” chỉ đường phương (đo từ hướng bắc lệch 10° về phía đông); “45NW” cho biết góc dốc 45° và mặt lớp dốc về phía góc phần tư tây–bắc, tức là phía vuông góc với đường phương. Với đường phương N10E thì hướng dốc chỉ có thể là phía tây bắc (≈ 280°) hoặc phía đông nam (≈ 100°); phần “NW/SE” cho biết chọn cái nào.</p>
+   <div class="key"><b>Kiểm tra nhanh</b>N10E, 45NW ⇒ đường phương 10° ⇒ hướng dốc = 10° + 270° = 280° (vuông góc, về phía tây bắc) ⇒ có thể ghi 280∠45. Có thể kiểm tra lại bằng thanh trượt ở bài 2.</div>
+   <h3>Ký hiệu trên bản đồ</h3>
+   <ul>
+    <li><b>Lớp nằm nghiêng (α ≠ 0):</b> một đoạn đường phương, vạch ngắn vuông góc hướng về phía dốc, ghi số góc dốc bên cạnh.</li>
+    <li><b>Lớp thẳng đứng (α = 90°):</b> chỉ đo được đường phương (ví dụ phương vị 45° và 225°); ký hiệu là đoạn đường phương có vạch cắt vuông góc ở cả hai phía.</li>
+    <li><b>Lớp nằm ngang:</b> ký hiệu dấu cộng “+”.</li>
+   </ul>
+   <div class="warn"><b>Hay nhầm</b>Đường phương có <i>hai</i> phương vị (lệch 180°) nhưng hướng dốc chỉ có <i>một</i>. Khi cho β∠α thì luôn đọc β là hướng dốc, không phải đường phương.</div>
+   <div class="note"><b>Mở rộng</b>Có hai quy ước thường dùng: ghi hướng dốc (dip direction) như trên, hoặc ghi đường phương theo “quy tắc bàn tay phải” (hướng dốc nằm ở bên phải khi nhìn dọc theo phương vị đường phương). Khi đọc số liệu của người khác nên xác định họ dùng quy ước nào.</div>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c3', num: 3, title: 'Thế nằm ngang',
+ blurb: 'Ranh giới lớp song song đường đồng mức; nội suy đồng mức; bề dày thật; dựng mặt cắt địa hình và chọn tỷ lệ.',
+ sections: [
+  { id: 'the-nam-ngang', title: '1. Thế nằm ngang và đặc điểm', html: `
+   <p>Bài này trả lời: thế nằm ngang là gì và nhận ra nó trên bản đồ bằng dấu hiệu nào?</p>
+   <div class="key"><b>Thế nằm ngang</b>Các mặt lớp nằm ngang hoặc hơi nghiêng. Trong vỏ Trái Đất không có mặt lớp nằm ngang một cách lý tưởng, nên thế nằm ngang được hiểu là thế nằm có <b>góc dốc nhỏ hơn vài độ</b>.</div>
+   <p>Thế nằm ngang điển hình gặp ở vùng biển và các môi trường trầm tích rộng lớn: các lớp trầm tích hoặc đá phun trào dưới nước lắng đọng gần như nằm ngang (nguyên tắc lớp nằm ngang nguyên thuỷ – chương 7).</p>
+   <div class="key"><b>Dấu hiệu nhận biết trên bản đồ</b>Các đường ranh giới địa chất của các lớp nằm ngang <b>song song với đường đồng mức</b> (mỗi ranh giới trùng một đường đồng mức, vì cùng một cao độ).</div>
+   <div data-w="fig" data-name="horizMap" data-cap="Lớp nằm ngang: ranh giới các lớp trùng đường đồng mức trên bình đồ; đá trẻ nhất ở đỉnh đồi."></div>
+   <h3>Hệ quả về tuổi</h3>
+   <p>Lớp nằm dưới già hơn lớp nằm trên. Vì địa hình cao thì lớp trên cùng lộ ra, nên với thế nằm ngang: <b>đá trẻ nhất lộ ở nơi địa hình cao nhất, đá cổ nhất lộ ở nơi địa hình thấp nhất</b>. Bạn sẽ dùng điều này để kiểm tra lại khi vẽ mặt cắt.</p>
+   <h3>Các thành tạo thường nằm ngang (trầm tích Đệ Tứ)</h3>
+   <div class="tw"><table><tr><th>Ký hiệu</th><th>Tên</th><th>Đặc điểm</th></tr>
+    <tr><td>eQ (eluvi)</td><td>Tàn tích</td><td>Sản phẩm phong hoá còn nằm tại chỗ hoặc hầu như không bị vận chuyển, lấp đầy chỗ trũng</td></tr>
+    <tr><td>dQ (delluvi)</td><td>Sườn tích</td><td>Sản phẩm phá huỷ tích tụ và vận chuyển ngắn xuống sườn; nằm nghiêng nhất định</td></tr>
+    <tr><td>pQ (proluvi)</td><td>Lũ tích</td><td>Trầm tích trước núi, khối lượng đá rất lớn; ít khi còn dạng nằm ngang ban đầu</td></tr>
+    <tr><td>aQ (aluvi)</td><td>Bồi tích</td><td>Trầm tích lục địa phổ biến nhất; nằm ngang, rất thoải</td></tr>
+    <tr><td>amQ, mQ, lQ</td><td>Trầm tích sông biển, biển, hồ</td><td>Phụ thuộc mực nước sông, hồ, biển; thường có dạng nằm ngang</td></tr></table></div>` },
+
+  { id: 'noi-suy', title: '2. Nội suy và dựng đường đồng mức', html: `
+   <p>Số liệu thực địa cho ta cao độ tại một số điểm rời rạc. Muốn có đường đồng mức phải <b>nội suy</b> giữa các điểm.</p>
+   <h3>Quy trình nội suy điểm</h3>
+   <ol>
+    <li><b>Vẽ bình đồ điểm:</b> chấm các điểm lên bản đồ và ghi cao độ (vd: −106, −18, 114, 82, 325, 217, 244, −53, 23, −97 m; tỷ lệ thước 1 km).</li>
+    <li><b>Nối các điểm thành mạng tam giác</b> sao cho các cạnh không cắt nhau (nên ưu tiên nối những điểm gần nhau).</li>
+    <li><b>Trên mỗi cạnh tam giác, chia đều</b> theo cao độ để tìm điểm có cao độ đồng mức (nội suy tuyến tính, coi sườn dốc đều giữa hai điểm).</li>
+    <li><b>Nối các điểm cùng cao độ</b> bằng đường cong trơn, thành các đường đồng mức khép kín hoặc chạy ra mép bản đồ.</li>
+   </ol>
+   <div class="card"><h3>Máy tính nội suy trên một cạnh</h3><p style="margin-top:0">Ví dụ mẫu: giữa điểm 345 và 209, khoảng cao đều 50 m, có hai đồng mức 300 và 250.</p><div data-w="contour"></div></div>
+   <div class="warn"><b>Lưu ý khi vẽ đồng mức</b>Các đường đồng mức <b>không cắt nhau</b>. Đồng mức không thể “nhảy” từ 800 sang 1200 mà bỏ đồng mức 1000. Trong đường đồng mức đỉnh, giá trị bên trong phải lớn hơn (hoặc nhỏ hơn) bên ngoài một cách nhất quán; khu vực trong đường 1200 m nhưng ngoài đường 1000 m có cao độ nằm giữa 1000 và 1200 m. Điểm cao độ đo được (vd 1397′ hay 872′) phải phù hợp với vị trí của nó so với đồng mức xung quanh.</div>
+   <div class="note"><b>Mẹo đọc hướng dốc</b>Đồng mức càng dày thì sườn càng dốc; đồng mức thưa thì sườn thoải.</div>` },
+
+  { id: 'be-day', title: '3. Bề dày lớp nằm ngang', html: `
+   <p>Với lớp nằm ngang, cách tính bề dày rất đơn giản, nhưng có một điều cần cẩn thận.</p>
+   <div class="key"><b>Bề dày thật</b>Của lớp nằm ngang = <b>hiệu số cao độ tuyệt đối của nóc và đáy</b> lớp. Không dùng bề dày biểu kiến (bề dày đo dọc theo sườn dốc hay theo đường bất kỳ, thường lớn hơn bề dày thật).</div>
+   <p>Ví dụ: nóc lớp lộ ở đồng mức 60 m, đáy lộ ở đồng mức 40 m thì bề dày thật là 60 − 40 = 20 m, dù sườn đồi rộng bao nhiêu, dốc bao nhiêu.</p>` },
+
+  { id: 'mat-cat', title: '4. Dựng mặt cắt địa hình', html: `
+   <p>Mặt cắt địa hình là “lát cắt thẳng đứng” của địa hình dọc theo một tuyến; trên đó ta vẽ tiếp ranh giới các lớp đá.</p>
+   <h3>Chọn tuyến cắt</h3>
+   <ul>
+    <li>Đi qua địa hình <b>cao nhất</b> và <b>thấp nhất</b> của khu vực.</li>
+    <li>Đi qua <b>tất cả các lớp đá</b>.</li>
+    <li>Đi từ <b>mép bên này đến mép bên kia</b> bản đồ.</li>
+    <li>Nếu có tài liệu <b>lỗ khoan</b>, nên tận dụng bằng cách chọn tuyến đi qua các lỗ khoan; khi đó mặt cắt là đường gãy khúc và phải ghi rõ hướng cắt tại mỗi lỗ khoan.</li>
+   </ul>
+   <h3>Các bước dựng</h3>
+   <ol>
+    <li>Vẽ đường tuyến AB trên bản đồ; đánh dấu các giao điểm với từng đường đồng mức và ranh giới địa chất.</li>
+    <li>Vẽ hệ trục: trục ngang là khoảng cách dọc tuyến, trục đứng là cao độ; kẻ các đường cao độ song song, cách đều nhau theo khoảng cao đều.</li>
+    <li>Từ mỗi giao điểm dóng xuống hệ trục để chấm điểm địa hình đúng cao độ; nối bằng đường cong trơn được đường địa hình.</li>
+    <li>Dóng các giao điểm ranh giới địa chất lên đường địa hình rồi vẽ ranh giới lớp (với lớp nằm ngang: các ranh giới là các đường ngang đúng cao độ).</li>
+   </ol>
+   <div class="check"><b>Kiểm tra</b>Trên mặt cắt lớp nằm ngang, đá trẻ nhất phải ở chỗ cao nhất, đá cổ nhất ở chỗ thấp nhất.</div>` },
+
+  { id: 'ty-le', title: '5. Tỷ lệ mặt cắt', html: `
+   <p>Mặt cắt cần đủ lớn để vẽ được lớp mỏng, nhưng cũng cần đúng tỷ lệ để không bóp méo hình dạng.</p>
+   <div class="key"><b>Nguyên tắc</b>Tỷ lệ mặt cắt lấy đúng theo tỷ lệ bản đồ, tức là <b>tỷ lệ ngang = tỷ lệ đứng</b>. Khi đó độ dốc thật được giữ nguyên.</div>
+   <p>Với lớp quá mỏng thì tỷ lệ này không vẽ được: ví dụ lớp dày 10 m ở tỷ lệ 1/100.000 chỉ còn 10 000 mm / 100 000 = 0,1 mm. Phải nâng tỷ lệ lên 1/10.000, khi đó 10 m ứng với 1 mm.</p>
+   <div class="card"><h3>Tính bề dày vẽ trên mặt cắt</h3><div data-w="scaleCalc"></div></div>
+   <div class="warn"><b>Lưu ý</b>Nếu bạn chỉ tăng tỷ lệ đứng mà giữ nguyên tỷ lệ ngang thì mặt cắt bị “phóng đại đứng” (vertical exaggeration), các góc dốc trông lớn hơn thực tế. Khi làm vậy phải ghi rõ hệ số phóng đại trên mặt cắt (ví dụ “Vertical exaggeration = 4”) và không đo góc dốc trực tiếp trên hình.</div>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c4', num: 4, title: 'Thế nằm nghiêng',
+ blurb: 'Xác định thế nằm thật từ hai thế nằm biểu kiến và từ ba lỗ khoan; cự ly chiếu; tam giác vỉa; thế nằm đảo.',
+ sections: [
+  { id: 'the-nam-nghieng', title: '1. Thế nằm nghiêng', html: `
+   <p>Thế nằm nghiêng là dạng phổ biến nhất trên bản đồ địa chất. Mục tiêu của chương: xác định, biểu diễn lên bản đồ và đọc lại thế nằm từ bản đồ.</p>
+   <div class="key"><b>Thế nằm nghiêng</b>Các lớp đều nghiêng về một phía. Phạm vi các lớp cùng nghiêng về một phía gọi là vùng có <b>cấu tạo đơn tà</b>. Để xác định lớp trong không gian phải xác định ba yếu tố thế nằm (đường phương, hướng dốc, góc dốc – xem chương 2).</div>
+   <h3>Nguồn số liệu</h3>
+   <ul><li>Đo trực tiếp tại điểm lộ ngoài thực địa bằng địa bàn;</li><li>tính từ tài liệu lỗ khoan (bài 3);</li><li>suy ra từ hai thế nằm biểu kiến (bài 2);</li><li>đọc từ dạng lộ của lớp trên bản đồ (bài 4–6).</li></ul>
+   <h3>Đưa thế nằm lên bản đồ</h3>
+   <p>Với thế nằm 320∠40 tại điểm J1: từ J1 vẽ đường phương (phương vị 320° − 90° = 230° và 50°), vẽ vạch ngắn về phía hướng dốc 320° và ghi số 40. Ký hiệu này chính là đoạn đường phương kèm vạch dốc và góc dốc.</p>` },
+
+  { id: 'bieu-kien', title: '2. Thế nằm thật từ hai thế nằm biểu kiến', html: `
+   <p>Nhiều khi vách lộ chỉ cho thấy mặt lớp qua một mặt cắt <i>bất kỳ</i>, không vuông góc đường phương. Ta có các số đo “biểu kiến”, cần suy ra thế nằm thật.</p>
+   <div class="key"><b>Định nghĩa</b><b>Đường dốc biểu kiến</b>: đường dốc bất kỳ trên mặt lớp, không trùng với đường dốc có góc dốc lớn nhất. <b>Hướng dốc biểu kiến</b>: hình chiếu của nó lên mặt phẳng nằm ngang. <b>Góc dốc biểu kiến</b>: góc giữa đường dốc biểu kiến và hình chiếu của nó. Luôn có <b>α<sub>bk</sub> &lt; α thật</b>.</div>
+   <h3>Cách dựng hình (ví dụ: 140∠35 và 230∠65)</h3>
+   <ol>
+    <li>Vẽ vòng tròn tâm O. Từ O vẽ tia phương 140° (β₁) và 230° (β₂).</li>
+    <li>Từ O vẽ hai đường thẳng vuông góc với β₁ và β₂ cắt vòng tròn tại D′ và D″.</li>
+    <li>Vẽ các góc 90° − α₁ và 90° − α₂ (tại D′ và D″); cạnh của chúng cắt β₁, β₂ tại A và B.</li>
+    <li>Nối AB: đó là <b>đường phương</b> của lớp.</li>
+    <li>Từ O vẽ OC ⟂ AB: OC là hình chiếu của hướng dốc lên mặt phẳng nằm ngang, hướng của OC là <b>hướng dốc thật</b>.</li>
+    <li>Từ O vẽ OD‴ ⟂ OC với OD‴ = OD′ (bán kính), nối CD‴: góc OCD‴ chính là <b>góc dốc thật α</b>.</li>
+   </ol>
+   <h3>Cách tính</h3>
+   <div class="key"><b>Công thức</b>Với hướng có phương vị β<sub>bk</sub>: tan α<sub>bk</sub> = tan α · cos(β<sub>bk</sub> − β). Viết cho hai hướng ta được hệ hai phương trình, giải ra β và α.</div>
+   <div class="card"><h3>Máy tính thế nằm thật</h3><p style="margin-top:0">Ví dụ 140∠35 và 230∠65 cho β ≈ 212°, α ≈ 66°. Kết quả này khớp với cách dựng hình ở trên.</p><div data-w="apparentDip"></div></div>
+   <div class="warn"><b>Điều kiện</b>Hai hướng đo phải khác nhau rõ rệt. Nếu chúng trùng nhau hoặc ngược nhau thì hai số đo không cung cấp thêm thông tin và không giải được.</div>` },
+
+  { id: 'lo-khoan', title: '3. Thế nằm thật từ tài liệu lỗ khoan', html: `
+   <p>Ba lỗ khoan không thẳng hàng cùng gặp nóc của một vỉa cho ba điểm trong không gian; ba điểm xác định duy nhất một mặt phẳng. Đây là “bài toán ba điểm”.</p>
+   <h3>Các bước</h3>
+   <ol>
+    <li>Tính <b>cao độ nóc vỉa</b> tại mỗi lỗ khoan = cao độ miệng lỗ khoan − độ sâu gặp nóc vỉa.</li>
+    <li>Nối ba lỗ khoan thành tam giác; trên cạnh nối điểm cao nhất và thấp nhất, <b>nội suy</b> điểm có cùng cao độ với điểm trung gian.</li>
+    <li>Nối hai điểm cùng cao độ: đó là <b>đường phương</b>. Vẽ thêm các đường phương song song, mỗi đường một cao độ (cách đều nhau).</li>
+    <li>Từ điểm cao nhất kẻ đường vuông góc xuống đường phương thấp hơn (hướng cao độ giảm): đó là <b>hướng dốc</b>; đo phương vị bằng thước đo độ. </li>
+    <li>Đo khoảng cách ngang a giữa hai đường phương cách nhau chênh cao h; góc dốc <b>tan α = h / a</b> (đổi a ra mét thực bằng cách nhân với mẫu số tỷ lệ bản đồ: AB = số đo × tỷ lệ).</li>
+   </ol>
+   <p>Ví dụ 1 (tỷ lệ 1/500): LK1 = 490 m / 350 m; LK2 = 530 m / 340 m; LK3 = 520 m / 410 m (cao độ miệng / độ sâu gặp nóc vỉa than). Cao độ nóc vỉa là 140 m, 190 m và 110 m. Ví dụ 2: LKa = 350/100, LKb = 300/100, LKc = 450/100 cho nóc vỉa ở 250 m, 200 m và 350 m.</p>
+   <div class="card"><h3>Thử với ba lỗ khoan</h3><p style="margin-top:0">Kéo các điểm để đặt vị trí lỗ khoan. Đường cam là các đường phương (đồng mức của nóc vỉa) cách nhau 10 m.</p><div data-w="threePoint"></div></div>
+   <div class="note"><b>Về số liệu</b>Chương trình chỉ cho số liệu cao độ, còn vị trí ba lỗ khoan phụ thuộc bản đồ; vì vậy trong hình trên bạn tự kéo vị trí và quan sát sự thay đổi của kết quả. Nếu đo được toạ độ ngoài bản đồ thì chỉ cần nhập vào đúng như vậy.</div>` },
+
+  { id: 'cu-ly-chieu', title: '4. Cự ly chiếu và đường phương chiếu', html: `
+   <p>Bề rộng vết lộ của một lớp nghiêng trên bản đồ phụ thuộc vào góc dốc lớp và độ nghiêng địa hình. Công cụ để nghiên cứu là <b>cự ly chiếu</b> và <b>đường phương chiếu</b>.</p>
+   <div class="key"><b>Cự ly chiếu a</b>Là hình chiếu, lên mặt phẳng nằm ngang, của khoảng cách giữa hai đường phương của mặt nóc (hoặc mặt đáy) của lớp nằm nghiêng ứng với hai mặt nằm ngang song song cách đều nhau khoảng h.</div>
+   <div class="key"><b>Công thức</b>a = h · cot α · T (với T là tỷ lệ bản đồ dạng phân số, ví dụ 1/2000), nghĩa là tan α = h · T / a.</div>
+   <ul>
+    <li>a tỷ lệ <b>nghịch</b> với α: lớp càng dốc thì a càng nhỏ, các đường phương chiếu càng sít nhau.</li>
+    <li>a tỷ lệ <b>thuận</b> với h và với T (tỷ lệ bản đồ càng lớn thì a vẽ ra càng dài).</li>
+   </ul>
+   <div class="card"><h3>Tính cự ly chiếu</h3><p style="margin-top:0">Ví dụ minh hoạ: h = 10 m, α = 23°, tỷ lệ 1/2000 cho a ≈ 11,8 mm (ứng với h = 5 mm trên bản đồ).</p><div data-w="projDist"></div></div>` },
+
+  { id: 'tam-giac-via', title: '5. Tam giác vỉa và vết lộ', html: `
+   <p>Trên bản đồ tỷ lệ lớn, hình dạng vết lộ của lớp cho biết thế nằm của nó, đặc biệt khi lớp cắt qua thung lũng hoặc sống núi.</p>
+   <div class="key"><b>Tam giác vỉa</b>Vết lộ có dạng chữ V trên bản đồ, do lớp nghiêng cắt qua thung lũng hoặc sống núi. Mũi nhọn của chữ V cho biết hướng dốc của lớp.</div>
+   <ul>
+    <li>Tại vị trí thấp nhất của địa hình (thung lũng, điểm M): vết lộ cho biết góc hướng và <b>hướng dốc</b> của lớp (chữ V chỉ theo hướng dốc).</li>
+    <li>Tại vị trí cao nhất của địa hình (sống núi, điểm N): góc hướng <b>ngược chiều</b> với hướng dốc của lớp.</li>
+   </ul>
+   <h3>Góc dốc và hình dạng vết lộ (cùng một địa hình)</h3>
+   <div class="tw"><table><tr><th>Lớp</th><th>Vết lộ trên bản đồ</th></tr>
+    <tr><td>Dốc thẳng đứng</td><td>Đường thẳng</td></tr><tr><td>Dốc nhiều</td><td>Góc tù (V mở rộng)</td></tr><tr><td>Dốc thoải</td><td>Góc nhọn (V hẹp, uốn theo đường đồng mức)</td></tr><tr><td>Nằm ngang</td><td>Trùng đường đồng mức</td></tr></table></div>
+   <div data-w="fig" data-name="vRule" data-cap="Cùng một thung lũng: lớp càng dốc, vết lộ càng thẳng (chữ V càng tù); lớp càng thoải, chữ V càng nhọn."></div>
+   <div class="key"><b>Khi bản đồ không có đường đồng mức</b>Dùng quy luật chung: trong trường hợp bình thường lớp luôn nghiêng về phía trầm tích trẻ.</div>
+   <div class="note"><b>Mở rộng</b>Quy tắc chữ V có ngoại lệ: khi lớp dốc cùng chiều với dòng chảy và thoải hơn độ dốc lòng suối thì mũi V có thể chỉ ngược dòng. Nếu tính toán cho kết quả khác với đoán nhanh bằng chữ V, hãy tin vào phép tính.</div>` },
+
+  { id: 'the-nam-dao', title: '6. Thế nằm đảo', html: `
+   <p>Trong điều kiện bình thường lớp trẻ nằm trên, lớp cổ nằm dưới. Nhưng khi đá bị biến dạng mạnh, thứ tự này có thể lộn ngược.</p>
+   <div class="key"><b>Thế nằm bình thường</b>Nóc ở trên, đáy ở dưới. <b>Thế nằm đảo</b>: lớp bị quay quá 90°, đáy nằm cao hơn nóc (mặt lớp cũ “nằm lộn ngược”). Xác định được điều này rất quan trọng trong nghiên cứu địa tầng, trầm tích và kiến tạo, vì nếu bỏ sót sẽ đảo ngược thứ tự tuổi.</div>
+   <p>Trong sơ đồ mặt cắt của một nếp uốn, nửa trên của đường AB đáy lớp nằm cao hơn nóc nên có thế nằm đảo; nửa dưới, lớp có thế nằm bình thường.</p>
+   <h3>Năm dấu hiệu phân biệt thế nằm bình thường và đảo</h3>
+   <div data-w="timeline" data-items='[["1. Tuổi","Dựa vào hóa thạch hoặc xác định tuổi tuyệt đối: lớp trẻ hơn phải nằm trên. Nếu lớp cổ hơn lại nằm trên thì thế nằm đảo."],["2. Hố, lõm ở mặt bào mòn","Trên mặt bào mòn của lớp có những hố, lõm (thấu kính) chứa vật liệu vụn thô như cuội. Vật liệu thô lấp vào hố từ phía trên: hố mở về phía nóc lớp bình thường."],["3. Phân lớp xiên chéo","Các lớp xiên bị cắt cụt ở phía nóc (bị bào mòn) và uốn cong thoải dần, tiếp xúc tiệm cận với mặt đáy lớp; nhìn hình dạng đó để biết đâu là nóc, đâu là đáy."],["4. Vết nứt nguyên sinh, dấu vết sinh vật, dấu hạt mưa","Vết nứt bùn khô (nứt nẻ nguyên sinh) hở rộng ở phía trên và thu hẹp nhọn dần xuống dưới; dấu vết sinh vật và dấu hạt mưa in trên mặt lớp bên dưới. Nếu vết nứt hở về phía dưới thì lớp đã bị lộn ngược."],["5. Bọt khí trong đá phun trào","Magma phun trào tiếp xúc không khí, nguội nhanh nên bọt khí thường tập trung ở bề mặt trên của lớp dung nham."]]'></div>
+   <div class="warn"><b>Lưu ý</b>Chỉ dùng một dấu hiệu là chưa chắc chắn; nên đối chiếu nhiều dấu hiệu. Dấu hiệu tuổi (hóa thạch, tuổi tuyệt đối) là cơ sở chắc chắn nhất.</div>` },
+
+  { id: 'ranh-gioi', title: '7. Vẽ ranh giới địa chất một mặt lớp', html: `
+   <p>Đây là ví dụ tổng hợp: biết ba điểm của một mặt lớp (một ranh giới) cùng cao độ, ta vẽ vết lộ của nó trên bản đồ địa hình như sau.</p>
+   <ol>
+    <li>Cho ba điểm A (150 m), B (170 m), C (210 m) trên bản đồ có đường đồng mức. Nối ba điểm thành tam giác.</li>
+    <li>Nội suy trên các cạnh để tìm các điểm có cao độ tròn (160, 170, 180, 190, 200 m…). Nối các điểm cùng cao độ: đó là các <b>đường phương</b> của mặt lớp (song song và cách đều nhau, vì mặt lớp là mặt phẳng).</li>
+    <li>Trên bản đồ, đánh dấu các giao điểm của đường phương có cao độ x với đường đồng mức địa hình cùng cao độ x. Đó là những điểm mà mặt lớp cắt địa hình.</li>
+    <li>Nối các giao điểm liên tiếp bằng đường cong trơn: đường thu được là <b>ranh giới địa chất (vết lộ)</b> của mặt lớp.</li>
+   </ol>
+   <div class="check"><b>Kiểm tra</b>Vết lộ phải cắt qua đúng các cặp đồng mức và đường phương cùng cao độ, và có dạng chữ V ở chỗ cắt thung lũng, sống núi (bài 5).</div>
+   <p>Bước cuối của việc “đọc thế nằm từ bản đồ”: từ vết lộ, xác định đường phương (nối hai điểm cùng cao độ), hướng dốc (về phía đồng mức giảm/trầm tích trẻ) và góc dốc (bằng tan α = h/a).</p>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c5', num: 5, title: 'Nếp uốn',
+ blurb: 'Thành phần, phân loại, cơ chế hình thành và phương pháp nghiên cứu nếp uốn; vòm, bồn trũng, đơn nghiêng.',
+ sections: [
+  { id: 'thanh-phan', title: '1. Nếp uốn và các thành phần', html: `
+   <p>Sau khi đá biến dạng dẻo, các lớp vốn phẳng bị uốn cong thành nếp uốn. Để mô tả, đo đạc và so sánh, cần thống nhất các thuật ngữ hình học.</p>
+   <div class="key"><b>Nếp uốn (fold)</b>Là kết quả của biến dạng dẻo: các lớp đá (hoặc các mặt có sẵn như phân lớp, phân phiến) bị uốn cong nhưng vẫn liên tục.</div>
+   <div class="tw"><table><tr><th>Thuật ngữ</th><th>Ý nghĩa</th></tr>
+    <tr><td>Cánh (limb)</td><td>Hai bên của nếp uốn, phần tương đối phẳng nằm giữa hai đường uốn cong nhất kế tiếp</td></tr>
+    <tr><td>Bản lề / đới bản lề (hinge zone), đường bản lề (hinge line)</td><td>Phần uốn cong mạnh nhất của nếp uốn; đường bản lề nối các điểm bản lề (hinge points) trên một mặt lớp</td></tr>
+    <tr><td>Trục nếp uốn (fold axis)</td><td>Đường thẳng vạch dọc theo các điểm có độ cong lớn nhất của mỗi lớp (đường bản lề, xét cho nếp trụ)</td></tr>
+    <tr><td>Mặt trục (axial plane / axial surface)</td><td>Bề mặt chia nếp uốn thành hai phần đối xứng; đi qua các đường bản lề của các lớp. Giao của mặt trục với mặt đất là vết mặt trục (axial trace)</td></tr>
+    <tr><td>Điểm / đường uốn (inflection point/line)</td><td>Nơi độ cong đổi dấu, nằm giữa hai bản lề kế tiếp</td></tr>
+    <tr><td>Bước sóng (wavelength), biên độ (amplitude)</td><td>Khoảng cách giữa hai bản lề cùng loại kế tiếp; độ cao nửa dao động</td></tr>
+    <tr><td>Góc giữa hai cánh (interlimb angle)</td><td>Góc kẹp giữa hai cánh; nhỏ nghĩa là nếp uốn chặt</td></tr>
+    <tr><td>Nếp trụ / không trụ (cylindrical / non-cylindrical)</td><td>Nếp trụ có thể tạo bằng cách quét một đường thẳng song song với trục; nếp không trụ thì không</td></tr></table></div>
+   <div data-w="fig" data-name="foldAnatomy" data-cap="Giải phẫu một nếp uốn trong mặt cắt: cánh, bản lề, điểm uốn, mặt trục, bước sóng, biên độ."></div>
+   <h3>Nếp uốn đối xứng: trục nằm ngang hay nghiêng</h3>
+   <ul><li><b>A – Nếp lồi đối xứng:</b> trục nếp uốn song song với mặt phẳng nằm ngang.</li>
+   <li><b>B – Nếp lồi có trục cắm (plunging):</b> mặt trục vẫn thẳng đứng nhưng trục nếp uốn nghiêng một góc (góc cắm, plunge) so với mặt phẳng ngang. Trên bản đồ, vết lộ của các lớp quanh đầu nếp cắm khép lại thành hình chữ U hoặc chữ V.</li></ul>
+   <div class="note"><b>Mở rộng</b>Nếp uốn có trục cắm, vẽ trên bản đồ nhìn xuống, cho các vết lộ khép kín ở đầu cắm: với nếp lồi cắm, các lớp cổ ở giữa và mũi chữ V chỉ theo hướng cắm; với nếp lõm cắm, mũi chữ V chỉ ngược hướng cắm.</div>` },
+
+  { id: 'phan-loai', title: '2. Phân loại nếp uốn', html: `
+   <p>Có nhiều cách phân loại, mỗi cách trả lời một câu hỏi khác nhau: nếp uốn <i>lồi hay lõm</i>, <i>đối xứng hay không</i>, <i>khép chặt hay mở</i>.</p>
+   <h3>Theo hình dạng: lồi và lõm</h3>
+   <div class="grid">
+    <div class="mini"><h4>Nếp lồi (anticline)</h4>Tạo vòm; hai cánh dốc ra xa trục; đá cổ ở nhân (giữa), đá trẻ ở hai bên.</div>
+    <div class="mini"><h4>Nếp lõm (syncline)</h4>Tạo trũng; hai cánh dốc vào phía trục; đá trẻ ở nhân, đá cổ ở hai bên.</div>
+    <div class="mini"><h4>Đơn nghiêng (monocline)</h4>Nếp uốn dạng bậc thang: các lớp nằm ngang hoặc gần ngang ở hai bên bị uốn dốc ở giữa (xem bài 3).</div>
+   </div>
+   <div class="note"><b>Antiform / synform</b>Antiform (lồi) và synform (lõm) chỉ hình học “lồi/lõm” của nếp uốn mà không quan tâm tuổi các lớp. Anticline/syncline dùng khi biết trình tự tuổi (nếp lồi: cổ ở giữa; nếp lõm: trẻ ở giữa). Khi lớp bị đảo thì hai khái niệm có thể không trùng nhau. Trong tài liệu tiếng Anh còn có <b>neutral fold</b> (nếp uốn đóng sang bên, trục nằm ngang, không lồi cũng không lõm) và <b>vertical fold</b> (nếp trung tính mà mọi mặt lớp cắm thẳng đứng).</div>
+   <h3>Theo tính đối xứng của mặt trục</h3>
+   <ul>
+    <li><b>Đối xứng (symmetrical):</b> mặt trục là mặt đối xứng, hai cánh dốc bằng nhau nhưng ngược chiều.</li>
+    <li><b>Bất đối xứng (asymmetrical):</b> mặt trục không phải mặt đối xứng, hai cánh dốc không bằng nhau.</li>
+    <li><b>Đảo (overturned):</b> một cánh bị lộn ngược, dốc quá 90°; cả hai cánh cùng dốc về một phía.</li>
+   </ul>
+   <div data-w="fig" data-name="foldTypes" data-cap="Bốn dạng nếp uốn: đối xứng, bất đối xứng, đảo và đơn nghiêng."></div>
+   <div class="card"><h3>Dựng nếp uốn</h3><p style="margin-top:0">Chọn nếp lồi/lõm rồi chỉnh góc dốc hai cánh. Khi cánh phải &gt; 90° thì nếp uốn bị đảo.</p><div data-w="foldExplorer"></div></div>
+   <div class="warn"><b>Hay nhầm</b>“Nếp lồi” không có nghĩa là địa hình lồi. Sau bào mòn, nếp lồi có thể nằm trong thung lũng và nếp lõm nằm trên đỉnh núi; hãy nhận biết bằng tuổi các lớp và hướng dốc, không bằng hình dạng địa hình.</div>
+   <div class="note"><b>Mở rộng</b>Có thể mô tả độ khép của nếp uốn theo góc giữa hai cánh: thoải (180°–120°), mở (120°–70°), khép (70°–30°), chặt (30°–0°), đồng tà/isoclinal (0°, hai cánh song song).</div>` },
+
+  { id: 'vom-bon', title: '3. Vòm, bồn trũng và đơn nghiêng', html: `
+   <p>Không phải nếp uốn nào cũng kéo dài thành dải. Khi nếp uốn có dạng tròn hoặc hơi kéo dài, ta có vòm và bồn trũng.</p>
+   <div class="tw"><table><tr><th></th><th>Vòm (dome)</th><th>Bồn trũng (basin)</th></tr>
+    <tr><td>Hình dạng</td><td>Cấu trúc tròn hoặc hơi kéo dài; đá được nâng lên ở giữa</td><td>Cấu trúc tròn hoặc hơi kéo dài; đá võng xuống ở trung tâm</td></tr>
+    <tr><td>Tuổi đá</td><td>Đá <b>cổ nhất lộ ở giữa</b>, đá trẻ nằm xung quanh</td><td>Đá <b>trẻ nằm ở gần tâm</b>, đá cổ ở rìa</td></tr>
+    <tr><td>Ví dụ</td><td>Black Hills (Nam Dakota): cấu trúc vòm lớn, lõi là đá magma và biến chất cứng lộ ra ở giữa</td><td>Bồn trũng Michigan – một trong các bồn trũng lớn nhất Bắc Mỹ</td></tr></table></div>
+   <div class="key"><b>Quy tắc chung</b>Nhìn bản đồ địa chất của cấu trúc khép kín: cổ ở giữa ⇒ vòm; trẻ ở giữa ⇒ bồn trũng. Với nếp dạng dải: cổ ở giữa ⇒ nếp lồi; trẻ ở giữa ⇒ nếp lõm.</div>
+   <div data-w="fig" data-name="domeBasin" data-cap="Vòm và bồn trũng trên bình đồ và mặt cắt. Mũi tên chỉ hướng dốc của lớp."></div>
+   <h3>Đơn nghiêng (monocline)</h3>
+   <p>Các lớp nằm gần ngang ở hai bên nhưng gấp xuống dốc ở giữa thành một “bậc thang”; thường quan sát được một phần của nếp uốn lớn. Đơn nghiêng thường là kết quả của <b>đứt gãy bị chôn vùi</b> (các lớp phủ bên trên uốn cong theo chuyển động của đứt gãy bên dưới). Ví dụ: vùng San Rafael Swell (miền nam Utah), có liên quan đến biến dạng ép.</p>` },
+
+  { id: 'co-che', title: '4. Cơ chế hình thành: uốn gập', html: `
+   <p>Vì sao một lớp phẳng lại cong thành sóng đều đặn? Cơ chế chính là <b>uốn gập (buckling)</b>.</p>
+   <div class="key"><b>Điều kiện</b>1) Lớp chịu <b>rút ngắn song song với mặt lớp</b> (parallel shortening). 2) Có <b>tương phản độ nhớt (viscosity contrast)</b> giữa lớp và môi trường bao quanh (nền/matrix): lớp cứng hơn nền.</div>
+   <div data-w="fig" data-name="buckling" data-cap="Uốn gập: lớp cứng nằm trong nền mềm bị rút ngắn song song với lớp và cong dần thành nếp uốn."></div>
+   <p>Khi bị ép dọc theo lớp, trạng thái phẳng của lớp cứng mất ổn định: chỉ cần một nhiễu nhỏ ban đầu thì lớp bắt đầu cong, và nếp uốn phát triển theo một <b>bước sóng ưu thế</b> phụ thuộc vào bề dày lớp và tỷ số độ nhớt lớp/nền. Sự mất ổn định vật liệu này có thể tạo ra nếp uốn có nhiều bước sóng khác nhau trong cùng một đá (thấy rõ ở lớp mỏng và lớp dày xen kẽ).</p>
+   <ul>
+    <li>Không có tương phản độ nhớt (lớp và nền như nhau) thì lớp bị rút ngắn đồng đều, không uốn gập.</li>
+    <li>Lớp càng cứng hơn nền, bước sóng càng lớn so với bề dày lớp.</li>
+   </ul>
+   <div class="note"><b>Mở rộng</b>Ngoài uốn gập còn có các cơ chế khác như uốn cong do trượt dọc phân lớp, do chảy dẻo hoặc do đứt gãy bên dưới kéo lớp phủ cong theo (nếp uốn liên quan đứt gãy), nhưng bài giảng tập trung vào uốn gập.</div>` },
+
+  { id: 'nghien-cuu', title: '5. Phương pháp nghiên cứu nếp uốn', html: `
+   <p>Nếp uốn thường quá lớn để nhìn thấy toàn bộ tại một điểm lộ, nên phải ghép nhiều nguồn thông tin.</p>
+   <div data-w="filtercards" data-items='[["Phân tích ảnh viễn thám","Dùng ảnh hàng không và ảnh vệ tinh để nhận ra các dải lớp cong, vẽ vết trục nếp uốn và ranh giới lớp trước khi ra thực địa.","Gián tiếp"],["Mặt cắt địa chất","Vẽ mặt cắt từ bản đồ địa chất theo một tuyến để thấy hình dạng nếp uốn theo chiều sâu.","Bản đồ"],["Khảo sát địa vật lý","Tuyến địa chấn phản xạ cho hình ảnh các mặt phản xạ (ranh giới lớp) uốn cong dưới sâu, dùng để dựng nếp uốn và đứt gãy trong thăm dò dầu khí.","Gián tiếp"],["Đo thế nằm của đá","Đo thế nằm tại nhiều điểm lộ liên tiếp: chuỗi góc dốc thay đổi chiều cho thấy vị trí trục nếp lồi, nếp lõm và độ dốc hai cánh.","Thực địa"],["Khoan địa chất","Các lỗ khoan cho vị trí nóc/đáy các lớp tại từng điểm; nối các điểm để dự báo hình dạng lớp. Nhiều khả năng nối vỉa: nếp uốn, thấu kính hoặc bị đứt gãy cắt.","Thực địa"],["Dự báo từ khoan và thế nằm","Kết hợp số đo thế nằm với tài liệu khoan để dự báo hình dạng nếp uốn ở nơi chưa có lộ hoặc chưa khoan.","Tổng hợp"]]'></div>
+   <div class="warn"><b>Lưu ý</b>Từ số liệu khoan, nối vỉa giữa hai lỗ khoan có nhiều lời giải (liên tục, nhỏ dần thành thấu kính, bị đứt gãy dịch chuyển). Phải dùng thêm thế nằm và bối cảnh kiến tạo để chọn lời giải hợp lý nhất, và ghi rõ đó là dự báo.</div>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c6', num: 6, title: 'Khe nứt & đứt gãy',
+ blurb: 'Khe nứt (stylolite, khe nứt tách), đứt gãy thuận – nghịch – bằng, cách nhận biết, và ví dụ mặt trượt phẳng.',
+ sections: [
+  { id: 'khe-nut', title: '1. Khe nứt', html: `
+   <p>Nứt là dạng phá huỷ “nhỏ” và phổ biến nhất của đá. Bài này gom các khái niệm về khe nứt để phân biệt với đứt gãy.</p>
+   <div class="key"><b>Khe nứt (fracture)</b>Là mặt gián đoạn (discontinuity) trong đá có <b>độ dịch chuyển hạn chế</b>. Nếu dịch chuyển đủ lớn để nhận thấy và có ý nghĩa cấu trúc thì gọi là đứt gãy (bài 2).</div>
+   <h3>Khe nứt tách (extension fracture)</h3>
+   <p>Các khối kề nhau dịch chuyển <b>vuông góc</b> với mặt nứt, tức là rời xa nhau theo phương của <b>ứng suất nhỏ nhất (σ₃)</b>; mặt nứt song song với phương ứng suất lớn nhất (σ₁). Khe nứt tách thường được lấp bằng khoáng vật (thạch anh, calcit…) thành mạch. Khi nhiều khe nứt tách xếp so le nhau theo hàng, ta gọi là <b>dãy xếp bậc (en échelon)</b>; dãy này cho biết hướng cắt của đới ứng suất.</p>
+   <h3>Khe nứt stylolite</h3>
+   <ul>
+    <li>Là mặt gián đoạn hình thành từ cơ chế biến dạng <b>hoà tan do áp suất (pressure-solution)</b>.</li>
+    <li>Hình thành nhờ sự hoà tan dọc theo bề mặt khe nứt khi ứng suất nén tác dụng vuông góc với mặt đó.</li>
+    <li>Thường <b>sẫm màu</b> hơn đá chủ vì hạt không hoà tan bao oxit sắt tích tụ lại. Trên mặt cắt, khe nứt có dạng răng cưa (các nón nhọn).</li>
+    <li>Các nón răng cưa luôn chỉ về <b>hướng của ứng suất lớn nhất</b>.</li>
+   </ul>
+   <div class="note"><b>Mở rộng</b>Bài giảng nêu “hai loại khe nứt” nhưng chi tiết chỉ giới thiệu loại thứ nhất (khe nứt tách). Loại còn lại trong phân loại chuẩn là <b>khe nứt cắt (shear fracture)</b>: hai khối dịch chuyển <i>song song</i> với mặt nứt; khi dịch chuyển lớn thì đó là đứt gãy.</div>` },
+
+  { id: 'dut-gay', title: '2. Đứt gãy: khái niệm và phân loại', html: `
+   <p>Khi đá phá huỷ và các khối hai bên mặt nứt trượt qua nhau một khoảng đáng kể thì có <b>đứt gãy</b>.</p>
+   <div class="key"><b>Đứt gãy (fault)</b>Bề mặt phá huỷ/đới nứt kéo dài mà dọc theo đó đá dịch chuyển. Chuyển động nhanh dọc đứt gãy có thể gây <b>động đất</b>.</div>
+   <h3>Các yếu tố</h3>
+   <ul>
+    <li><b>Mặt đứt gãy (fault plane):</b> mặt dọc theo đó xảy ra dịch chuyển; có đường phương, hướng dốc, góc dốc như mặt lớp (chương 2).</li>
+    <li><b>Vách treo (hanging wall):</b> khối nằm <i>phía trên</i> mặt đứt gãy. <b>Vách nằm (footwall):</b> khối nằm <i>phía dưới</i> mặt đứt gãy.</li>
+   </ul>
+   <h3>Phân loại theo dịch chuyển tương đối</h3>
+   <p>Dịch chuyển có thể theo phương đứng, ngang hoặc hỗn hợp:</p>
+   <div class="tw"><table><tr><th>Loại</th><th>Dịch chuyển</th><th>Ứng suất chủ đạo</th></tr>
+    <tr><td>Đứt gãy thuận (normal)</td><td>Vách treo trượt <b>xuống</b> so với vách nằm</td><td>Kéo</td></tr>
+    <tr><td>Đứt gãy nghịch (reverse) / chờm nghịch (thrust)</td><td>Vách treo trượt <b>lên</b> so với vách nằm</td><td>Ép</td></tr>
+    <tr><td>Đứt gãy bằng (strike-slip)</td><td>Chủ yếu <b>theo phương ngang</b>, song song đường phương đứt gãy</td><td>Cắt</td></tr>
+    <tr><td>Hỗn hợp (oblique)</td><td>Vừa đứng vừa ngang</td><td>Tổ hợp</td></tr></table></div>
+   <div class="card"><h3>Chuyển động dọc đứt gãy</h3><p style="margin-top:0">Chọn loại đứt gãy rồi kéo thanh trượt để tăng độ dịch chuyển.</p><div data-w="faultDemo"></div></div>` },
+
+  { id: 'ba-loai', title: '3. Thuận – nghịch – bằng', html: `
+   <p>Ba loại chính có hình học và bối cảnh kiến tạo khác nhau.</p>
+   <div data-w="fig" data-name="faultTypes" data-cap="Ba loại đứt gãy chính: thuận, nghịch (mặt cắt) và bằng phải (bình đồ)."></div>
+   <h3>Đứt gãy thuận (normal fault)</h3>
+   <p>Hình thành do <b>ứng suất kéo</b>, vỏ bị kéo giãn. Vách treo trượt xuống. Khi nhiều đứt gãy thuận xuất hiện cạnh nhau thì tạo <b>địa luỹ (horst)</b> – phần nâng cao – xen với <b>địa hào (graben)</b> – phần sụt thấp, cùng các bán địa hào (half graben). Ví dụ điển hình: vùng Basin and Range (Bắc Mỹ), nơi vỏ bị kéo giãn khi mảng Bắc Mỹ trườn lên mảng Thái Bình Dương đang chìm.</p>
+   <div data-w="fig" data-name="horstGraben" data-cap="Các đứt gãy thuận kề nhau tạo địa luỹ và địa hào xen kẽ."></div>
+   <h3>Đứt gãy nghịch (reverse fault) và chờm nghịch</h3>
+   <p>Hình thành do <b>ứng suất ép</b>, vỏ rút ngắn và dày lên. Vách treo bị đẩy lên. Khi mặt đứt gãy rất thoải (góc cắm &lt; 15° theo cách nêu trong bài) ta có <b>đứt gãy chờm nghịch (overthrust)</b>; đá có thể bị chờm đi hàng chục km. Ví dụ Lewis Overthrust gần Vườn quốc gia Glacier: đá Tiền Cambri cổ chờm lên trên đá Creta trẻ hơn nhiều.</p>
+   <div class="warn"><b>Chú ý</b>Ở đứt gãy chờm nghịch, đá cổ nằm trên đá trẻ — ngược với thứ tự địa tầng bình thường. Đó là dấu hiệu để nhận ra chờm nghịch khi đọc bản đồ.</div>
+   <h3>Đứt gãy bằng (strike-slip fault)</h3>
+   <p>Dịch chuyển chủ yếu theo phương ngang, song song với đường phương đứt gãy. Cách gọi phải/trái:</p>
+   <div class="grid">
+    <div class="mini"><h4>Bằng phải (right-lateral / dextral)</h4>Đứng ở một bên nhìn sang: khối đối diện dịch chuyển về phía <b>bên phải</b>.</div>
+    <div class="mini"><h4>Bằng trái (left-lateral / sinistral)</h4>Đứng ở một bên nhìn sang: khối đối diện dịch chuyển về phía <b>bên trái</b>.</div>
+   </div>
+   <p>Cách xác định này cho cùng một kết quả dù bạn đứng ở bên nào. Ví dụ: đứt gãy San Andreas (bằng phải), khu vực hồ Mead (nam Nevada).</p>` },
+
+  { id: 'nhan-biet', title: '4. Nhận biết đứt gãy và khoảng dịch chuyển', html: `
+   <p>Ngoài thực địa, đứt gãy không luôn hiện rõ. Phải dựa vào dấu hiệu gián tiếp.</p>
+   <h3>Dấu hiệu nhận biết</h3>
+   <div data-w="timeline" data-items='[["Lớp bị cắt và dịch chuyển","Một tập lớp đánh dấu bị cắt đứt đột ngột, hai bên dịch lệch nhau: đo được khoảng cách dịch chuyển bằng cách nối lại lớp chuẩn ở hai bên. Xác định loại đứt gãy từ chiều dịch chuyển của vách treo."],["Địa hình dạng tuyến","Thung lũng thẳng (linear valley), vách dốc thẳng tắp, sườn thềm; chứng tỏ có đới nứt yếu bị xói mòn."],["Sông suối bị lệch","Dòng chảy bị cắt và dịch chuyển (offset drainage) khi đi qua đứt gãy bằng."],["Ao sụt (sag pond) và vết đứt gãy hoạt động","Vũng nước tích tụ trong chỗ sụt dọc đứt gãy bằng; vết đứt gãy hoạt động (active traces) khác vết đã ngừng hoạt động (inactive)."],["Chờm đá cổ lên đá trẻ","Trên mặt cắt, đá cổ nằm trên đá trẻ mà không phải thế nằm đảo: dấu hiệu đứt gãy chờm nghịch."],["Bản đồ đứt gãy khu vực","Ở quy mô lớn (ví dụ bản đồ đứt gãy Việt Nam) các đứt gãy được phân cấp I, II, III kèm các đới phát sinh động đất."]]'></div>
+   <div class="note"><b>Quy trình xác định trên ảnh mặt cắt</b>(1) Tìm lớp chuẩn bị cắt; (2) xác định khối lên/xuống (thuận hay nghịch) hay trượt ngang (bằng); (3) đo khoảng dịch chuyển bằng cách nối lại lớp chuẩn hai bên; (4) xét mặt đứt gãy dốc về phía nào để biết đâu là vách treo.</div>
+   <p>Sau khi xác định đường phương, hướng dốc, góc dốc của mặt đứt gãy (chương 2) và chiều dịch chuyển của vách treo, bạn có thể gọi tên loại đứt gãy và biểu diễn lên bản đồ bằng ký hiệu đứt gãy kèm vạch dốc.</p>` },
+
+  { id: 'mat-truot', title: '5. Ví dụ: trượt trên hai hệ khe nứt', html: `
+   <p>Khe nứt và đứt gãy quyết định ổn định của mái dốc đá. Ví dụ tính toán dưới đây dùng phép chiếu lập thể (stereographic projection).</p>
+   <div class="tw"><table><tr><th>Yếu tố</th><th>Giá trị</th></tr>
+    <tr><td>Hệ khe nứt 1</td><td>Đường phương N32°E, góc dốc 65° về phía tây (W)</td></tr>
+    <tr><td>Hệ khe nứt 2</td><td>Đường phương N (bắc – nam), góc dốc 60° về phía đông (E)</td></tr>
+    <tr><td>Giao tuyến của hai mặt phẳng</td><td>Cắm <b>28°</b> về hướng <b>N18°E</b></td></tr>
+    <tr><td>Góc ma sát trong của khe nứt</td><td>φ<sub>j</sub> = 25°</td></tr></table></div>
+   <div class="check"><b>Kiểm tra bằng tính toán</b>Chuyển về hướng dốc: mặt 1 dốc 65° về hướng 302°, mặt 2 dốc 60° về hướng 090°. Giao tuyến hai mặt cắm khoảng 28° về hướng khoảng 018° (N18°E) – khớp với kết quả chiếu lập thể.</div>
+   <p>Giao tuyến của hai mặt cắt đá thành một <b>nêm</b>. Trong phân tích ổn định, nêm có khả năng trượt dọc giao tuyến khi giao tuyến cắm dốc hơn góc ma sát (28° &gt; 25°) và lộ ra ngoài mái dốc (“daylight”). Ở đây góc cắm giao tuyến lớn hơn ma sát nên có nguy cơ trượt nêm nếu mái dốc cắt qua giao tuyến.</p>
+   <div class="note"><b>Mở rộng</b>Điều kiện kể trên là điều kiện động học đơn giản (chưa xét lực dính, áp lực nước lỗ rỗng, tải trọng). Đánh giá đầy đủ cần tính hệ số an toàn — nội dung của môn Cơ học đá.</div>` }
+ ]
+});
+
+</script>
+<script>
+window.CHAPTERS.push({
+ id: 'c7', num: 7, title: 'Địa tầng học, niên đại & lập bản đồ',
+ blurb: 'Các nguyên tắc địa tầng, bất chỉnh hợp, thang niên đại địa chất, tuổi tuyệt đối và đọc bản đồ địa chất.',
+ sections: [
+  { id: 'nguyen-tac', title: '1. Địa tầng học và các nguyên tắc', html: `
+   <p>Bản đồ địa chất là bản ghi về <b>thứ tự và mối quan hệ</b> giữa các thành tạo. Địa tầng học cung cấp quy tắc để sắp xếp chúng theo thời gian.</p>
+   <div class="key"><b>Địa tầng học (stratigraphy)</b>Nghiên cứu mối quan hệ giữa các thành tạo địa chất và khôi phục lịch sử phát triển địa chất khu vực; tập trung vào đá trầm tích và magma phun trào; dùng phương pháp định tuổi <b>tương đối</b> và <b>tuyệt đối</b>.</div>
+   <div data-w="filtercards" data-items='[["Tính kế tục địa tầng (superposition)","Trong chuỗi lớp trầm tích kế tục nhau, chưa bị xáo trộn, lớp dưới luôn già hơn lớp trên.","Nguyên tắc 1"],["Lớp nằm ngang nguyên thuỷ","Dưới tác dụng của trọng lực, lớp trầm tích lắng đọng ban đầu nằm ngang. Lớp nghiêng đã bị biến dạng sau đó.","Nguyên tắc 2"],["Tính liên tục theo phương ngang","Một lớp trầm tích lắng đọng trải liên tục theo mọi phía cho đến khi mỏng dần hoặc chuyển sang loại trầm tích khác; hai bên thung lũng cùng lớp nên đối sánh được.","Nguyên tắc 3"],["Quan hệ xuyên cắt","Thể địa chất cắt qua thể khác thì trẻ hơn thể bị cắt.","Nguyên tắc 4"],["Bất chỉnh hợp (unconformity)","Mặt bào mòn hoặc gián đoạn trầm tích chôn vùi ngăn cách hai khối đá khác tuổi; có ba kiểu.","Nguyên tắc 5"],["Bắt tù (included fragments)","Mảnh đá nằm trong đá khác thì già hơn đá bao quanh.","Nguyên tắc 6"],["Kế tục động vật","Sinh vật cổ đơn giản hơn sinh vật trẻ; nhóm hoá thạch xuất hiện theo trật tự nhất định nên đối sánh các lớp xa nhau.","Nguyên tắc 7"]]'></div>` },
+
+  { id: 'tuong-doi', title: '2. Kế tục, nằm ngang, liên tục, xuyên cắt', html: `
+   <h3>Tính kế tục địa tầng – Steno (1638–1686)</h3>
+   <p>Trong chuỗi chưa bị đảo lộn, đá cổ nhất ở dưới cùng. Nguyên tắc này là cơ sở để sắp xếp tuổi tương đối của trầm tích.</p>
+   <h3>Lớp nằm ngang nguyên thuỷ – Steno</h3>
+   <p>Lớp trầm tích lắng đọng theo trọng lực nên ban đầu gần như nằm ngang (có ngoại lệ như trầm tích lắng trên sườn dốc hoặc cồn cát). Vì vậy khi thấy lớp nghiêng, lớp đã bị nâng, nghiêng hoặc uốn sau khi thành tạo (chương 4, 5).</p>
+   <h3>Tính liên tục theo phương ngang</h3>
+   <p>Một lớp lắng đọng rồi trải rộng đến khi <b>thu hẹp dần ở rìa bồn</b> hoặc <b>chuyển tướng sang loại trầm tích khác</b>. Nếu sau đó sông cắt qua tạo thung lũng, hai bên vẫn là cùng một lớp: nhờ vậy nối được lớp ở hai bờ.</p>
+   <h3>Quan hệ xuyên cắt – Hutton (1726–1797)</h3>
+   <p>Thể địa chất cắt qua thể khác thì <b>trẻ hơn</b> thể bị cắt: mạch đá, khối xâm nhập, đứt gãy, bề mặt bào mòn đều trẻ hơn những gì chúng cắt qua.</p>
+   <div data-w="fig" data-name="crossCut" data-cap="Mặt cắt minh hoạ quan hệ xuyên cắt: mỗi thể địa chất trẻ hơn những gì nó cắt qua hoặc phủ lên."></div>
+   <div class="card"><h3>Ví dụ: sắp xếp từ trẻ đến cổ</h3>
+    <p>Khối lập phương có: A – tầng đá uốn nếp; B – khối xâm nhập; C – đá trầm tích; D – đá mạch (dyke); E – đá trầm tích; F – đứt gãy thuận.</p>
+    <div data-w="timeline" data-items='[["Bước 1 – F trẻ nhất","Đứt gãy thuận F cắt qua A, B, C (và theo hình cả lớp trầm tích trên cùng E) ⇒ F trẻ hơn tất cả những gì nó cắt."],["Bước 2 – E","Lớp trầm tích E nằm phủ lên C và mạch D ⇒ E trẻ hơn C và D."],["Bước 3 – D","Mạch D cắt xuyên qua A, B và C ⇒ D trẻ hơn A, B, C, nhưng cổ hơn E."],["Bước 4 – C","Lớp trầm tích C nằm phủ trên mặt bào mòn cắt cụt A và B ⇒ C trẻ hơn A và B."],["Bước 5 – B","Khối xâm nhập B cắt qua tầng đá uốn nếp A ⇒ B trẻ hơn A."],["Đáp án: F, E, D, C, B, A","Thứ tự từ trẻ đến cổ. Tầng đá uốn nếp A cổ nhất."]]'></div></div>
+   <div class="note"><b>Xác định hướng dịch chuyển của đứt gãy trên ảnh mặt cắt</b>(1) Tìm một lớp chuẩn bị cắt; (2) xem khối nào đi xuống hoặc lên so với lớp chuẩn; (3) nếu vách treo trượt xuống thì là đứt gãy thuận, trượt lên là nghịch; nếu lớp chuẩn lệch ngang trên bình đồ thì là đứt gãy bằng.</div>` },
+
+  { id: 'bat-chinh-hop', title: '3. Bất chỉnh hợp', html: `
+   <p>Bất chỉnh hợp là “trang giấy bị xé” trong nhật ký địa chất: một khoảng thời gian không có ghi chép (không lắng đọng hoặc đã bị bào mòn).</p>
+   <div class="key"><b>Bất chỉnh hợp (unconformity)</b>Là bề mặt bào mòn hoặc gián đoạn trầm tích bị chôn vùi, ngăn cách hai khối đá hoặc hai tập lớp có tuổi khác nhau, chứng tỏ sự lắng đọng không liên tục. Có ba kiểu.</div>
+   <div class="tw"><table><tr><th>Kiểu</th><th>Đặc điểm</th><th>Hình thành</th></tr>
+    <tr><td><b>Bất chỉnh hợp góc</b><br>(angular unconformity)</td><td>Các lớp bên dưới nghiêng/uốn nếp và bị cắt cụt, các lớp phủ trên nằm ngang hoặc nghiêng khác góc</td><td>Lắng đọng A, B, C → nâng, nghiêng, uốn nếp và bào mòn → hạ thấp, lắng đọng F, G</td></tr>
+    <tr><td><b>Giả chỉnh hợp</b><br>(disconformity)</td><td>Các lớp trên và dưới song song nhau, nhưng ngăn cách bởi mặt bào mòn (thiếu lớp)</td><td>Lắng đọng 1–4 → nâng và bào mòn 3, 4 → hạ thấp, lắng đọng 6, 7</td></tr>
+    <tr><td><b>Không chỉnh hợp</b><br>(nonconformity)</td><td>Trầm tích phủ trực tiếp lên đá magma xâm nhập hoặc đá biến chất bị bào mòn</td><td>Đá magma/biến chất lộ ra, bị bào mòn → hạ thấp, lắng đọng trầm tích P, Q phủ lên</td></tr></table></div>
+   <div data-w="fig" data-name="unconform" data-cap="Ba kiểu bất chỉnh hợp và cuội kết cơ sở."></div>
+   <h3>Cuội kết cơ sở (basal conglomerate)</h3>
+   <p>Là tầng cuội kết nằm ngay trên mặt bất chỉnh hợp, gồm mảnh vụn của đá bên dưới bị bào mòn. Nó là dấu hiệu nhận ra bất chỉnh hợp ngoài thực địa; ví dụ lộ ở Phan Sơn, Bắc Bình, Bình Thuận.</p>
+   <div class="card"><h3>Ví dụ: cấu trúc bất chỉnh hợp góc hình thành thế nào?</h3>
+   <div data-w="timeline" data-items='[["A. Lắng đọng","Các lớp trầm tích 1, 2, 3, … lắng đọng nằm ngang dưới biển."],["B. Nâng lên và uốn nếp","Chịu ép, các lớp bị uốn nếp và nâng lên khỏi mực biển."],["C. Bào mòn","Phần đỉnh nếp uốn bị bào mòn, tạo mặt cắt cụt các lớp."],["D. Hạ thấp và lắng đọng lại","Vùng hạ thấp dưới mực biển, các lớp mới 6, 7… lắng đọng nằm ngang phủ lên mặt bào mòn. Kết quả là bất chỉnh hợp góc."]]'></div></div>
+   <div class="warn"><b>Ý nghĩa</b>Khi vẽ mặt cắt, không được “nối liền” các lớp qua bất chỉnh hợp: hai bên chênh nhau về tuổi và lịch sử biến dạng.</div>` },
+
+  { id: 'bat-tu-dong-vat', title: '4. Bắt tù & kế tục động vật', html: `
+   <h3>Quan hệ bắt tù (law of included fragments)</h3>
+   <p>Mảnh đá bị bao bọc trong đá khác thì <b>già hơn</b> đá bao quanh, vì chúng phải tồn tại trước khi bị bao lấy.</p>
+   <div class="card"><h3>Ví dụ: đá nào cổ hơn, granit hay cát kết?</h3>
+   <div data-w="timeline" data-items='[["Trường hợp A","Các mảnh granit nằm trong cát kết (trầm tích nằm ở trên, mảnh granit bị vùi trong đó) ⇒ <b>granit cổ hơn</b> cát kết."],["Trường hợp B","Các mảnh cát kết nằm trong granit ⇒ <b>cát kết cổ hơn</b>; granit xâm nhập sau, bao lấy mảnh cát kết."]]'></div></div>
+   <h3>Kế tục động vật (law of faunal succession)</h3>
+   <p>Các dạng hoá thạch cổ thường đơn giản hơn dạng trẻ, và dạng trẻ càng giống dạng hiện nay. Mỗi nhóm hoá thạch xuất hiện, tiến hoá rồi tuyệt chủng theo một trật tự nhất định, nên hoá thạch giống nhau chứng tỏ các lớp có cùng tuổi dù ở cách xa hàng dặm.</p>
+   <div class="key"><b>Đối sánh (liên kết) các cột địa tầng</b>Tìm các lớp chứa cùng hoá thạch chỉ thị ở hai cột, rồi nối chúng lại. Chỗ nào thiếu lớp nghĩa là có bất chỉnh hợp hoặc lớp bị bào mòn. Ví dụ điển hình: liên kết hai cột địa tầng ở hai nơi cách xa nhau bằng hoá thạch.</div>` },
+
+  { id: 'nien-dai', title: '5. Niên đại địa chất', html: `
+   <p>Tuổi Trái Đất khoảng 4567 triệu năm. Các nhà địa chất chia lịch sử này thành hệ thống đơn vị lồng nhau.</p>
+   <h3>Đơn vị địa tầng và đơn vị thời gian</h3>
+   <div class="tw"><table><tr><th>Địa tầng (chronostratigraphy)</th><th>Thời gian (geochronology)</th><th>Số lượng / độ dài</th></tr>
+    <tr><td>Liên giới (Eonothem)</td><td>Liên đại (Eon)</td><td>4 đơn vị; nửa tỉ năm trở lên</td></tr>
+    <tr><td>Giới (Erathem)</td><td>Đại (Era)</td><td>10 đơn vị; vài trăm triệu năm</td></tr>
+    <tr><td>Hệ (System)</td><td>Kỷ (Period)</td><td>22 đơn vị; hàng chục đến ~ một trăm triệu năm</td></tr>
+    <tr><td>Thống (Series)</td><td>Thế (Epoch)</td><td>hàng chục triệu năm</td></tr>
+    <tr><td>Bậc (Stage)</td><td>Kỳ (Age)</td><td>hàng triệu năm</td></tr>
+    <tr><td>Đới (Chronozone)</td><td>Thời (Chron)</td><td>phân chia của một kỳ; không dùng trong thang ISC</td></tr></table></div>
+   <div class="card"><h3>Khám phá thang thời gian (tỉ lệ đúng)</h3><p style="margin-top:0">Bấm vào Hadean, Archean, Proterozoic hoặc Phanerozoic để xem các kỷ bên trong.</p><div data-w="geotime"></div></div>
+   <div class="key"><b>Nhận xét</b>Phanerozoic (thời kỳ sự sống phức tạp, có hoá thạch phong phú) chỉ chiếm khoảng 12% lịch sử Trái Đất (541 / 4567); 88% còn lại là Tiền Cambri.</div>
+   <h3>Bảng niên đại Hiển sinh (Phanerozoic) – thời điểm bắt đầu (triệu năm trước, Ma)</h3>
+   <div class="tw"><table><tr><th>Đại</th><th>Kỷ</th><th>Thế (bắt đầu, Ma)</th></tr>
+    <tr><td rowspan="3">Cenozoic (Tân sinh)</td><td>Quaternary</td><td>Holocene 0,0117 · Pleistocene 2,58</td></tr>
+    <tr><td>Neogene</td><td>Pliocene 5,333 · Miocene 23,03</td></tr>
+    <tr><td>Paleogene</td><td>Oligocene 33,9 · Eocene 56,0 · Paleocene 66,0</td></tr>
+    <tr><td rowspan="3">Mesozoic (Trung sinh)</td><td>Cretaceous</td><td>Late 100,5 · Early ≈ 145,0</td></tr>
+    <tr><td>Jurassic</td><td>Late 163,5 · Middle 174,1 · Early 201,3</td></tr>
+    <tr><td>Triassic</td><td>Late ≈ 235 · Middle 247,2 · Early 252,2</td></tr>
+    <tr><td rowspan="6">Paleozoic (Cổ sinh)</td><td>Permian</td><td>Lopingian 259,9 · Guadalupian 272,3 · Cisuralian 298,9</td></tr>
+    <tr><td>Carboniferous</td><td>Pennsylvanian 323,2 · Mississippian 358,9</td></tr>
+    <tr><td>Devonian</td><td>Late 382,7 · Middle 393,3 · Early 419,2</td></tr>
+    <tr><td>Silurian</td><td>Pridoli 423,0 · Ludlow 427,4 · Wenlock 433,4 · Llandovery 443,8</td></tr>
+    <tr><td>Ordovician</td><td>Late 458,4 · Middle 470,0 · Early 485,4</td></tr>
+    <tr><td>Cambrian</td><td>Furongian ≈ 497 · Series 3 ≈ 509 · Series 2 ≈ 521 · Terreneuvian 541,0</td></tr></table></div>
+   <p><small>Số liệu theo thang ISC phiên bản trong bài; các phiên bản cập nhật của thang có thể chênh nhẹ ở một số mốc.</small></p>
+   <h3>Tiền Cambri (Precambrian) – thời điểm bắt đầu (Ma)</h3>
+   <div class="tw"><table><tr><th>Liên đại</th><th>Đại</th><th>Kỷ (bắt đầu, Ma)</th></tr>
+    <tr><td rowspan="3">Proterozoic (Nguyên sinh)</td><td>Neoproterozoic</td><td>Ediacaran 635 · Cryogenian 720 · Tonian 1000</td></tr>
+    <tr><td>Mesoproterozoic</td><td>Stenian 1200 · Ectasian 1400 · Calymmian 1600</td></tr>
+    <tr><td>Paleoproterozoic</td><td>Statherian 1800 · Orosirian 2050 · Rhyacian 2300 · Siderian 2500</td></tr>
+    <tr><td>Archean (Thái cổ)</td><td colspan="2">Chia thành bốn đại (bắt đầu, Ma): Neoarchean 2800 · Mesoarchean 3200 · Paleoarchean 3600 · Eoarchean 4000</td></tr>
+    <tr><td>Hadean (Minh cổ)</td><td colspan="2">Khoảng 4567–4000 Ma; các phân chia bên trong chỉ mang tính không chính thức</td></tr></table></div>
+   <h3>Sơ đồ tư duy thang thời gian</h3>
+   <div data-w="fig" data-name="mindmap" data-cap="Sơ đồ tư duy: Trái Đất → 4 liên đại → các đại → các kỷ, kèm thời điểm bắt đầu (Ma)."></div>` },
+
+  { id: 'tuoi-tuyet-doi', title: '6. Tuổi tuyệt đối', html: `
+   <p>Địa tầng chỉ cho tuổi <i>tương đối</i> (cái nào trẻ hơn). Để biết “bao nhiêu triệu năm”, ta dùng đồng vị phóng xạ.</p>
+   <div class="key"><b>Nguyên lý</b>Đồng vị mẹ (parent) phân rã thành đồng vị con (daughter) với tốc độ không đổi, đặc trưng bởi <b>chu kỳ bán rã T½</b> (thời gian để một nửa lượng mẹ phân rã). Đo tỷ lệ mẹ còn lại: tuổi = n × T½ với n = log₂(N₀/N).</div>
+   <div class="tw"><table><tr><th>Đồng vị mẹ</th><th>Đồng vị con</th><th>T½</th><th>Đối tượng đo</th></tr>
+    <tr><td>²³⁸U</td><td>²⁰⁶Pb</td><td>4,5 Ga</td><td rowspan="5">Đá magma và khoáng vật</td></tr>
+    <tr><td>²³⁵U</td><td>²⁰⁷Pb</td><td>704 Ma</td></tr>
+    <tr><td>²³²Th</td><td>²⁰⁸Pb</td><td>14 Ga</td></tr>
+    <tr><td>⁴⁰K</td><td>⁴⁰Ar & ⁴⁰Ca</td><td>1,25 Ga</td></tr>
+    <tr><td>⁸⁷Rb</td><td>⁸⁷Sr</td><td>49 Ga</td></tr>
+    <tr><td>¹⁴C</td><td>¹⁴N</td><td>5,73 ka (5730 năm)</td><td>Vật chất hữu cơ</td></tr></table></div>
+   <div class="card"><h3>Máy tính tuổi từ tỷ lệ đồng vị</h3><div data-w="decay"></div></div>
+   <h3>Carbon-14</h3>
+   <p>Định tuổi radiocarbon đo <b>thời điểm sinh vật chết</b> (từ đó nó không hấp thụ carbon mới). T½ = 5730 năm; chỉ tin cậy với mẫu trẻ hơn khoảng <b>50 ka</b>. Vì vậy nó dùng cho di chỉ khảo cổ và trầm tích Đệ Tứ, không dùng cho đá hàng triệu năm.</p>
+   <div class="warn"><b>Hay nhầm</b>Phương pháp U–Pb, K–Ar… đo tuổi <i>kết tinh/nguội</i> của khoáng vật trong đá magma, không phải tuổi “bắt đầu” của trầm tích. Tuổi trầm tích thường được giới hạn gián tiếp bằng các lớp tro núi lửa xen kẽ và các đá magma xuyên cắt.</div>` },
+
+  { id: 'lap-ban-do', title: '7. Lập bản đồ địa chất & cấu trúc', html: `
+   <p>Bản đồ địa chất là sản phẩm tổng hợp của các bài trước: thế nằm, nếp uốn, đứt gãy và tuổi địa tầng.</p>
+   <div class="key"><b>Nguyên tắc làm việc</b>Khi nghiên cứu một khu vực, cần xác định và mô tả các cấu trúc đá phổ biến, dựa vào các <b>điểm lộ (outcrops)</b> – nơi đá gốc lộ ra trên mặt. Lộ trình thực tập được bổ sung sau khi phân tích <b>ảnh hàng không</b>, <b>ảnh vệ tinh</b> và <b>GPS</b>.</div>
+   <h3>Đọc bản đồ và khối địa chất</h3>
+   <p>Trong ví dụ minh hoạ, bản đồ nhìn từ trên (map view) có các dải đá phiến sét đỏ (red shale), cát kết (sandstone) và đá vôi (limestone) lặp lại, kèm ký hiệu thế nằm 30°, 85°, 40°. Khối đá (block diagram) bên dưới cho thấy chúng tạo nên nếp uốn, trong đó dải cát kết là lớp chuẩn: hai cánh dốc khác nhau (30° và 40°) và một chỗ gần thẳng đứng (85°).</p>
+   <ol>
+    <li>Đọc ký hiệu thế nằm để biết hướng và góc dốc từng dải.</li>
+    <li>Xác định tuổi tương đối: lớp nằm dưới già hơn (kế tục địa tầng); lớp cắt qua lớp khác trẻ hơn (xuyên cắt).</li>
+    <li>Nhận ra nếp uốn (dải đối xứng qua trục, hướng dốc ngược chiều), đứt gãy (dải bị cắt và dịch), bất chỉnh hợp (dải bị cắt cụt bởi lớp phủ).</li>
+    <li>Vẽ mặt cắt (chương 3, 4) để kiểm tra tính hợp lý của cách hiểu.</li>
+   </ol>
+   <div class="check"><b>Tổng kết môn</b>Thế nằm (ch. 2–4) mô tả một mặt; nếp uốn và đứt gãy (ch. 5–6) mô tả các mặt bị biến dạng; địa tầng (ch. 7) gắn chúng vào thời gian. Ba thứ ghép lại cho phép khôi phục lịch sử địa chất của khu vực.</div>` }
+ ]
+});
+
+</script>
+<script>
+/* Thư viện hình tương tác dùng chung. Gắn vào trang bằng <div data-w="tên"></div>.
+   Thêm widget riêng cho từng môn: W.tenMoi = el => { ... }  (xem các mẫu bên dưới). */
+const W = {};
+const D2R = Math.PI / 180;
+function ink() { return getComputedStyle(document.body).color; }
+function mk(el, html) { el.innerHTML = html; return el; }
+function q(el, s) { return el.querySelector(s); }
+function qa(el, s) { return [...el.querySelectorAll(s)]; }
+function slider(id, label, min, max, step, val, unit) {
+  return `<label class="lab"><span style="min-width:120px">${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><span class="val" id="${id}v">${val}${unit || ''}</span></label>`;
+}
+function bindSlider(el, id, fn, unit) {
+  const s = q(el, '#' + id), v = q(el, '#' + id + 'v');
+  s.addEventListener('input', () => { v.textContent = s.value + (unit || ''); fn(+s.value); });
+  return s;
+}
+function mountWidgets(root) {
+  qa(root, '[data-w]').forEach(el => {
+    if (el.dataset.mounted) return; el.dataset.mounted = 1;
+    const f = W[el.dataset.w]; if (f) try { f(el); } catch (e) { el.textContent = 'Lỗi hình: ' + e.message; console.error(e); }
+  });
+}
+// Xoay 3D bằng chuột: rotXY(điểm,[rx],[ry]) + drag3(canvas, state, vẽLại)
+function rotXY(p, rx, ry) {
+  let [x, y, z] = p;
+  const cy = Math.cos(ry), sy = Math.sin(ry); [x, z] = [x * cy + z * sy, -x * sy + z * cy];
+  const cx = Math.cos(rx), sx = Math.sin(rx); [y, z] = [y * cx - z * sx, y * sx + z * cx];
+  return [x, y, z];
+}
+function drag3(c, st, redraw) {
+  let d = null;
+  c.addEventListener('pointerdown', e => { d = [e.clientX, e.clientY]; c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', e => { if (!d) return; st.ry += (e.clientX - d[0]) * .01; st.rx += (e.clientY - d[1]) * .01; d = [e.clientX, e.clientY]; redraw(); });
+  c.addEventListener('pointerup', () => d = null);
+  c.style.cursor = 'grab'; c.style.touchAction = 'none';
+}
+// Vòng lặp hoạt hình an toàn: tự dừng khi widget bị gỡ khỏi trang (đổi bài)
+function loop(el, fn) { const t = () => { if (!el.isConnected) return; fn(); requestAnimationFrame(t); }; t(); }
+
+/* ---- Mẫu 1: dòng thời gian / danh sách bấm để mở (dữ liệu trong thuộc tính data-items dạng JSON: [["Tiêu đề","Chi tiết"],...]) ---- */
+W.timeline = el => {
+  const items = JSON.parse(el.dataset.items || '[]');
+  mk(el, `<div class="tl">${items.map((x, i) => `<div class="ev ${i === 0 ? 'open' : ''}"><b>${x[0]}</b><div class="d">${x[1]}</div></div>`).join('')}</div>`);
+  qa(el, '.ev').forEach(e => e.onclick = () => e.classList.toggle('open'));
+};
+/* ---- Mẫu 2: thẻ có lọc theo nhóm: data-items = [["Tiêu đề","Mô tả","Nhóm"],...] ---- */
+W.filtercards = el => {
+  const A = JSON.parse(el.dataset.items || '[]'), tags = ['Tất cả', ...new Set(A.map(a => a[2]))];
+  mk(el, `<div class="mtab">${tags.map((t, i) => `<button class="${i ? '' : 'on'}" data-t="${t}">${t}</button>`).join('')}</div><div class="grid" id="fg"></div>`);
+  const draw = t => q(el, '#fg').innerHTML = A.filter(a => t === 'Tất cả' || a[2] === t).map(a => `<div class="mini"><h4>${a[0]}</h4><span style="font-size:14px">${a[1]}</span></div>`).join('');
+  draw('Tất cả');
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(b.dataset.t); });
+};
+/* ---- Mẫu 3: máy tính có thanh trượt + canvas (sao chép làm khuôn cho mô phỏng mới) ---- */
+W.demoSlider = el => {
+  mk(el, `<canvas width="560" height="200" style="width:100%"></canvas>` + slider('k', 'Giá trị', 0, 100, 1, 40, '') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = v => { g.clearRect(0, 0, 560, 200); g.fillStyle = '#1f5fbf'; g.fillRect(20, 80, v * 5, 40); q(el, '#out').textContent = 'Giá trị = ' + v; };
+  bindSlider(el, 'k', draw); draw(40);
+};
+
+</script>
+<script>
+/* Widget riêng cho môn Địa chất kiến trúc & Đo vẽ bản đồ địa chất */
+const COMPASS8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+const mod = (a, n) => ((a % n) + n) % n;
+const vec = az => [Math.sin(az * D2R), -Math.cos(az * D2R)]; // phương vị -> hướng trên canvas (bắc ở trên)
+function num(el, id) { return +q(el, '#' + id).value; }
+function arrow(g, x1, y1, x2, y2, col, w) {
+  g.strokeStyle = g.fillStyle = col; g.lineWidth = w || 2;
+  g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+  const a = Math.atan2(y2 - y1, x2 - x1), h = 9;
+  g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 - h * Math.cos(a - .4), y2 - h * Math.sin(a - .4)); g.lineTo(x2 - h * Math.cos(a + .4), y2 - h * Math.sin(a + .4)); g.closePath(); g.fill();
+}
+function txt(g, s, x, y, col, size, al) { g.fillStyle = col || ink(); g.font = (size || 13) + 'px Segoe UI,sans-serif'; g.textAlign = al || 'left'; g.fillText(s, x, y); }
+function quadName(dd) { dd = mod(Math.round(dd), 360); if (dd % 90 === 0) return ['N', 'E', 'S', 'W'][dd / 90]; return (dd < 90 || dd > 270 ? 'N' : 'S') + (dd < 180 ? 'E' : 'W'); }
+function strikeQuad(s) { s = mod(Math.round(s), 180); return s === 0 ? 'N–S' : s === 90 ? 'E–W' : (s < 90 ? 'N' + s + '°E' : 'N' + (180 - s) + '°W'); }
+function fmtAge(y) { return y >= 1e9 ? (y / 1e9).toFixed(2) + ' Ga (tỉ năm)' : y >= 1e6 ? (y / 1e6).toFixed(1) + ' Ma (triệu năm)' : y >= 1e3 ? (y / 1e3).toFixed(1) + ' ka (nghìn năm)' : y.toFixed(0) + ' năm'; }
+
+/* ---------- Ch1: ba kiểu ranh giới mảng ---------- */
+W.plates = el => {
+  const T = {
+    div: ['Tách giãn (phân kỳ)', 'Hai mảng tách xa nhau, magma (bazan) trồi lên lấp khe hở, tạo vỏ đại dương mới. Ví dụ: sống núi giữa đại dương; tách giãn trên lục địa (Đông Phi) có thể phát triển thành mở biển (Biển Đỏ, vịnh Aden). Ứng suất chủ đạo: kéo.'],
+    conv: ['Hội tụ (hút chìm)', 'Hai mảng tiến lại gần nhau. Thạch quyển đại dương nặng hơn bị hút chìm xuống dưới, sinh rãnh đại dương và cung núi lửa (Andes – hút chìm đại dương/lục địa; Ryukyu – đại dương/đại dương). Khi hai thạch quyển lục địa va nhau (Ấn Độ – Á-Âu) không bên nào chìm hẳn, đá bị ép nhăn thành dãy núi. Ứng suất chủ đạo: ép.'],
+    trans: ['Chuyển dạng (trượt bằng)', 'Hai mảng trượt ngang qua nhau, không tạo cũng không huỷ vỏ; hướng dịch chuyển bị đổi tại đứt gãy chuyển dạng (ví dụ đứt gãy San Andreas). Ứng suất chủ đạo: cắt.']
+  };
+  mk(el, `<div class="mtab">${Object.keys(T).map((k, i) => `<button data-k="${k}" class="${i ? '' : 'on'}">${T[k][0]}</button>`).join('')}</div><canvas width="600" height="230" style="width:100%"></canvas><div class="res" id="d"></div>`);
+  const c = q(el, 'canvas'), g = c.getContext('2d');
+  function draw(k) {
+    const I = ink(); g.clearRect(0, 0, 600, 230);
+    if (k === 'div') {
+      g.fillStyle = '#c9b48a'; g.fillRect(20, 60, 250, 40); g.fillRect(330, 60, 250, 40);
+      g.fillStyle = '#8a8f9c'; g.fillRect(20, 100, 250, 50); g.fillRect(330, 100, 250, 50);
+      g.fillStyle = '#e0651f'; g.beginPath(); g.moveTo(270, 60); g.lineTo(330, 60); g.lineTo(330, 175); g.lineTo(270, 175); g.fill();
+      arrow(g, 250, 40, 150, 40, I); arrow(g, 350, 40, 450, 40, I);
+      txt(g, 'Magma', 278, 125, '#fff', 13); txt(g, 'Thạch quyển', 90, 132, '#fff'); txt(g, 'Thạch quyển', 400, 132, '#fff'); txt(g, 'Quyển mềm', 250, 205, I);
+    } else if (k === 'conv') {
+      g.fillStyle = '#4b83c3'; g.fillRect(20, 60, 260, 22);
+      g.fillStyle = '#c9b48a'; g.fillRect(300, 45, 280, 37);
+      g.fillStyle = '#8a8f9c'; g.beginPath(); g.moveTo(20, 82); g.lineTo(280, 82); g.lineTo(440, 200); g.lineTo(400, 215); g.lineTo(280, 105); g.lineTo(20, 105); g.fill();
+      g.fillRect(300, 82, 280, 40);
+      g.fillStyle = '#d24545'; g.beginPath(); g.moveTo(450, 45); g.lineTo(470, 15); g.lineTo(490, 45); g.fill();
+      arrow(g, 60, 40, 160, 40, I); arrow(g, 560, 25, 480, 25, I);
+      txt(g, 'Vỏ đại dương', 40, 55, I, 12); txt(g, 'Cung núi lửa', 500, 15, I, 12, 'left'); txt(g, 'Rãnh', 262, 50, I, 12); txt(g, 'Mảng chìm', 330, 190, I, 12);
+    } else {
+      g.fillStyle = '#c9b48a'; g.fillRect(40, 30, 240, 90); g.fillRect(320, 110, 240, 90);
+      g.strokeStyle = '#d24545'; g.lineWidth = 3; g.beginPath(); g.moveTo(300, 15); g.lineTo(300, 215); g.stroke();
+      arrow(g, 160, 100, 160, 45, I, 3); arrow(g, 440, 130, 440, 185, I, 3);
+      txt(g, 'Nhìn từ trên xuống (bắc ở trên)', 40, 20, I, 12); txt(g, 'Đứt gãy chuyển dạng', 306, 30, '#d24545', 12);
+    }
+    q(el, '#d').innerHTML = '<b>' + T[k][0] + '.</b> ' + T[k][1];
+  }
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(b.dataset.k); });
+  draw('div');
+};
+
+/* ---------- Ch1: đường cong ứng suất – biến dạng ---------- */
+W.stressStrain = el => {
+  mk(el, `<canvas width="600" height="300" style="width:100%"></canvas>` + slider('e', 'Biến dạng (strain)', 0, 100, 1, 20, '%') +
+    `<label class="lab"><input type="checkbox" id="rel"> Thôi tác dụng lực (nhả tải)</label><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d'), EL = 30, FR = 100;
+  const S = e => e <= EL ? 2 * e : 60 + 25 * (1 - Math.exp(-(e - EL) / 25));
+  const X = e => 60 + e * 5, Y = s => 260 - s * 2.6;
+  function draw() {
+    const e = num(el, 'e'), rel = q(el, '#rel').checked, I = ink(); g.clearRect(0, 0, 600, 300);
+    g.strokeStyle = I; g.lineWidth = 1.5; g.beginPath(); g.moveTo(60, 20); g.lineTo(60, 260); g.lineTo(570, 260); g.stroke();
+    txt(g, 'Ứng suất', 8, 18, I, 12); txt(g, 'Biến dạng →', 500, 282, I, 12);
+    g.lineWidth = 3; g.strokeStyle = '#1b9a5b'; g.beginPath(); g.moveTo(X(0), Y(0)); g.lineTo(X(EL), Y(S(EL))); g.stroke();
+    g.strokeStyle = '#e8912d'; g.beginPath(); for (let k = EL; k <= FR; k++) g[k === EL ? 'moveTo' : 'lineTo'](X(k), Y(S(k))); g.stroke();
+    txt(g, 'Đàn hồi', 90, 190, '#1b9a5b', 13); txt(g, 'Dẻo', 320, Y(S(65)) - 12, '#e8912d', 13);
+    g.fillStyle = '#d24545'; g.beginPath(); g.arc(X(FR), Y(S(FR)), 5, 0, 7); g.fill(); txt(g, 'Phá huỷ', X(FR) - 55, Y(S(FR)) - 10, '#d24545', 13);
+    g.strokeStyle = I; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(X(EL), Y(S(EL))); g.lineTo(X(EL), 260); g.stroke(); g.setLineDash([]);
+    txt(g, 'giới hạn đàn hồi', X(EL) - 40, 276, I, 11);
+    let msg, perm = 0;
+    const s = S(e);
+    g.fillStyle = '#1f5fbf'; g.beginPath(); g.arc(X(e), Y(s), 6, 0, 7); g.fill();
+    if (rel) {
+      perm = e <= EL ? 0 : e - s / 2;
+      g.strokeStyle = '#1f5fbf'; g.setLineDash([5, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(X(e), Y(s)); g.lineTo(X(perm), Y(0)); g.stroke(); g.setLineDash([]);
+      g.fillStyle = '#1f5fbf'; g.beginPath(); g.arc(X(perm), Y(0), 5, 0, 7); g.fill();
+    }
+    if (e <= EL) msg = 'Vùng <b>đàn hồi</b>: bỏ lực đá trở về hình dạng, kích thước gần như ban đầu' + (rel ? ' (biến dạng dư = 0).' : '.');
+    else if (e < FR) msg = 'Đã vượt giới hạn đàn hồi: vùng <b>biến dạng dẻo</b> (ductile) – đá chảy/uốn nếp mà chưa nứt' + (rel ? '. Nhả tải chỉ hồi phục phần đàn hồi, còn lại <b>biến dạng dư ≈ ' + perm.toFixed(0) + '%</b> là vĩnh viễn.' : '.');
+    else msg = 'Đến điểm <b>phá huỷ</b> (brittle): đá nứt gãy – tạo khe nứt, đứt gãy.';
+    q(el, '#o').innerHTML = msg;
+  }
+  bindSlider(el, 'e', draw, '%'); q(el, '#rel').onchange = draw; draw();
+};
+
+/* ---------- Ch2: yếu tố thế nằm ---------- */
+W.dipDemo = el => {
+  mk(el, `<canvas width="640" height="290" style="width:100%"></canvas>` + slider('dd', 'Hướng dốc β', 0, 359, 1, 280, '°') + slider('da', 'Góc dốc α', 0, 90, 1, 45, '°') + `<div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const dd = num(el, 'dd'), da = num(el, 'da'), I = ink(); g.clearRect(0, 0, 640, 290);
+    const cx = 150, cy = 150, R = 105, s1 = mod(dd - 90, 360);
+    g.strokeStyle = I; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke();
+    txt(g, 'B', cx - 4, cy - R - 6, I, 13); txt(g, 'Đ', cx + R + 6, cy + 4, I, 13); txt(g, 'N', cx - 4, cy + R + 16, I, 13); txt(g, 'T', cx - R - 16, cy + 4, I, 13);
+    const [sx, sy] = vec(s1);
+    g.strokeStyle = '#1f5fbf'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - sx * R, cy - sy * R); g.lineTo(cx + sx * R, cy + sy * R); g.stroke();
+    txt(g, 'đường phương', cx + sx * R * .55 + 6, cy + sy * R * .55 - 6, '#1f5fbf', 12);
+    const [dx, dy] = vec(dd);
+    if (da > 0) arrow(g, cx, cy, cx + dx * 80, cy + dy * 80, '#e8912d', 3);
+    txt(g, 'hướng dốc β=' + dd + '°', cx + dx * 84 - 20, cy + dy * 84 + (dy > 0 ? 14 : -6), '#e8912d', 12);
+    // mặt cắt vuông góc đường phương
+    const ox = 330, oy = 110, L = 230;
+    g.strokeStyle = I; g.lineWidth = 1.5; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(ox, oy); g.lineTo(ox + L, oy); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = '#8a5a2b'; g.lineWidth = 4; g.beginPath(); g.moveTo(ox, oy); g.lineTo(ox + L * .8 * Math.cos(da * D2R), oy + L * .8 * Math.sin(da * D2R)); g.stroke();
+    g.strokeStyle = '#e8912d'; g.lineWidth = 2; g.beginPath(); g.arc(ox, oy, 60, 0, da * D2R); g.stroke();
+    txt(g, 'α = ' + da + '°', ox + 66, oy + 22, '#e8912d', 14);
+    txt(g, 'mặt phẳng nằm ngang', ox + 130, oy - 8, I, 12); txt(g, 'mặt lớp', ox + L * .4 * Math.cos(da * D2R) + 8, oy + L * .4 * Math.sin(da * D2R) + 16, '#8a5a2b', 12);
+    txt(g, 'Mặt cắt theo hướng dốc', ox, 40, I, 13); txt(g, 'Bình đồ (nhìn từ trên)', 40, 25, I, 13);
+    let s = 'Đường phương: <b>' + s1 + '° / ' + mod(s1 + 180, 360) + '°</b> (hai giá trị lệch nhau 180°) · dạng ghi: <b>' + strikeQuad(s1) + ', ' + da + quadName(dd) + '</b> · dạng phương vị: <b>' + dd + '∠' + da + '</b> (β∠α)';
+    if (da === 0) s += '<br>α = 0: lớp <b>nằm ngang</b> – không có hướng dốc, chỉ ký hiệu “+”.';
+    if (da === 90) s += '<br>α = 90°: lớp <b>thẳng đứng</b> – chỉ đo đường phương; ký hiệu là đường phương có gạch cắt hai phía.';
+    q(el, '#o').innerHTML = s;
+  }
+  bindSlider(el, 'dd', draw, '°'); bindSlider(el, 'da', draw, '°'); draw();
+};
+
+/* ---------- Ch3: nội suy đường đồng mức ---------- */
+W.contour = el => {
+  mk(el, `<div class="mtab"><button id="pre">Ví dụ: điểm 345 và 209, khoảng cao đều 50</button></div>` +
+    slider('za', 'Cao độ điểm A', 0, 500, 1, 345, ' m') + slider('zb', 'Cao độ điểm B', 0, 500, 1, 209, ' m') +
+    `<label class="lab"><span style="min-width:120px">Khoảng cao đều</span><select id="ci"><option>10</option><option>20</option><option selected>50</option><option>100</option></select></label>` +
+    slider('L', 'Khoảng cách A–B', 20, 100, 1, 100, ' mm') + `<canvas width="600" height="130" style="width:100%"></canvas><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const za = num(el, 'za'), zb = num(el, 'zb'), ci = +q(el, '#ci').value, L = num(el, 'L'), I = ink(); g.clearRect(0, 0, 600, 130);
+    const x0 = 50, x1 = 550, y = 70;
+    g.strokeStyle = I; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+    g.fillStyle = '#1f5fbf'; [x0, x1].forEach(x => { g.beginPath(); g.arc(x, y, 7, 0, 7); g.fill(); });
+    txt(g, 'A ' + za, x0 - 20, y + 28, I, 13); txt(g, 'B ' + zb, x1 - 20, y + 28, I, 13);
+    const lo = Math.min(za, zb), hi = Math.max(za, zb), rows = [];
+    for (let c = Math.ceil(lo / ci) * ci; c <= hi; c += ci) {
+      if (za === zb) break;
+      const t = (c - za) / (zb - za), x = x0 + t * (x1 - x0);
+      g.strokeStyle = '#e8912d'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y - 25); g.lineTo(x, y + 25); g.stroke();
+      txt(g, '' + c, x - 10, y - 32, '#e8912d', 13);
+      rows.push([c, (t * L).toFixed(1), (t * 100).toFixed(0) + '%']);
+    }
+    q(el, '#o').innerHTML = za === zb ? 'Hai điểm cùng cao độ: đường đồng mức nối thẳng hai điểm (nếu trùng giá trị đồng mức).' :
+      'Chênh cao Δz = <b>' + Math.abs(zb - za) + ' m</b>. Đường đồng mức cắt đoạn A–B (nội suy tuyến tính, độ dốc đều) tại:<div class="tw"><table><tr><th>Đồng mức (m)</th><th>Cách A (mm)</th><th>Tỉ lệ đoạn</th></tr>' +
+      (rows.length ? rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>').join('') : '<tr><td colspan="3">Không có đường đồng mức nào đi qua giữa hai điểm này.</td></tr>') + '</table></div>' +
+      '<small>Công thức: khoảng cách từ A = (z<sub>đồng mức</sub> − z<sub>A</sub>) / (z<sub>B</sub> − z<sub>A</sub>) × AB.</small>';
+  }
+  ['za', 'zb', 'L'].forEach(i => bindSlider(el, i, draw, i === 'L' ? ' mm' : ' m')); q(el, '#ci').onchange = draw;
+  q(el, '#pre').onclick = () => { [['za', 345], ['zb', 209], ['L', 100]].forEach(([i, v]) => { q(el, '#' + i).value = v; q(el, '#' + i + 'v').textContent = v + (i === 'L' ? ' mm' : ' m'); }); q(el, '#ci').value = 50; draw(); };
+  draw();
+};
+
+/* ---------- Ch3: bề dày lớp trên mặt cắt theo tỷ lệ ---------- */
+W.scaleCalc = el => {
+  mk(el, slider('h', 'Bề dày thật của lớp', 1, 200, 1, 10, ' m') +
+    `<label class="lab"><span style="min-width:120px">Tỷ lệ 1 :</span><select id="N"><option>1000</option><option>5000</option><option>10000</option><option>25000</option><option>50000</option><option selected>100000</option></select></label>` +
+    `<canvas width="600" height="90" style="width:100%"></canvas><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const h = num(el, 'h'), N = +q(el, '#N').value, mm = h * 1000 / N, I = ink(); g.clearRect(0, 0, 600, 90);
+    const px = Math.max(mm * 30, 1); // 1 mm = 30 px trong hình
+    g.fillStyle = mm < 0.5 ? '#d24545' : '#1b9a5b'; g.fillRect(40, 30, px, 30);
+    txt(g, 'Bề dày vẽ trên mặt cắt = ' + mm.toFixed(2) + ' mm (thanh vẽ 1 mm = 30 px)', 40, 20, I, 13);
+    const maxN = h * 1000, best = [1000, 5000, 10000, 25000, 50000, 100000].filter(n => n <= maxN).pop();
+    q(el, '#o').innerHTML = 'Bề dày vẽ = h × 1000 / N = ' + h + ' × 1000 / ' + N + ' = <b>' + mm.toFixed(2) + ' mm</b>. ' +
+      (mm < 0.5 ? '<b style="color:var(--bad)">Quá mỏng để vẽ</b> – cần nâng tỷ lệ (mẫu số nhỏ hơn). ' : 'Đủ rõ để vẽ. ') +
+      (best ? 'Để lớp dày ≥ 1 mm, dùng tỷ lệ 1 : ' + best + ' hoặc lớn hơn.' : 'Cần tỷ lệ lớn hơn 1 : 1000.');
+  }
+  bindSlider(el, 'h', draw, ' m'); q(el, '#N').onchange = draw; draw();
+};
+
+/* ---------- Ch4: thế nằm thật từ hai thế nằm biểu kiến ---------- */
+W.apparentDip = el => {
+  mk(el, `<div class="mtab"><button id="pre">Ví dụ 140∠35 và 230∠65</button></div>` +
+    slider('b1', 'Hướng dốc biểu kiến β₁', 0, 359, 1, 140, '°') + slider('a1', 'Góc dốc biểu kiến α₁', 1, 89, 1, 35, '°') +
+    slider('b2', 'Hướng dốc biểu kiến β₂', 0, 359, 1, 230, '°') + slider('a2', 'Góc dốc biểu kiến α₂', 1, 89, 1, 65, '°') +
+    `<canvas width="600" height="260" style="width:100%"></canvas><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const b1 = num(el, 'b1'), a1 = num(el, 'a1'), b2 = num(el, 'b2'), a2 = num(el, 'a2'), I = ink(); g.clearRect(0, 0, 600, 260);
+    const t1 = Math.tan(a1 * D2R), t2 = Math.tan(a2 * D2R), det = Math.sin((b2 - b1) * D2R);
+    const cx = 150, cy = 135, R = 110;
+    g.strokeStyle = I; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke(); txt(g, 'B', cx - 4, cy - R - 6, I, 13);
+    const o = q(el, '#o');
+    if (Math.abs(det) < 0.02) { o.innerHTML = '<span style="color:var(--bad)">Hai hướng biểu kiến gần trùng nhau hoặc ngược nhau (lệch ~0° hoặc ~180°) nên không đủ để xác định – cần hai phương khác nhau rõ rệt.</span>'; return; }
+    const a = (t1 * Math.sin(b2 * D2R) - t2 * Math.sin(b1 * D2R)) / det, b = (Math.cos(b1 * D2R) * t2 - Math.cos(b2 * D2R) * t1) / det;
+    const T = Math.hypot(a, b), al = Math.atan(T) / D2R, be = mod(Math.atan2(b, a) / D2R, 360), st = mod(be - 90, 180);
+    [[b1, '#1f5fbf', 'β₁'], [b2, '#7a3fb8', 'β₂']].forEach(([v, c, n]) => { const [x, y] = vec(v); arrow(g, cx, cy, cx + x * R, cy + y * R, c, 2); txt(g, n + '=' + v + '°', cx + x * (R + 6) - 14, cy + y * (R + 14), c, 12); });
+    const [tx, ty] = vec(be); arrow(g, cx, cy, cx + tx * R * .85, cy + ty * R * .85, '#e8912d', 4);
+    const [sx, sy] = vec(st); g.strokeStyle = '#1b9a5b'; g.lineWidth = 2; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(cx - sx * R, cy - sy * R); g.lineTo(cx + sx * R, cy + sy * R); g.stroke(); g.setLineDash([]);
+    txt(g, 'Cam: hướng dốc thật · xanh lá nét đứt: đường phương', 300, 40, I, 12);
+    txt(g, 'Xanh dương/tím: hướng biểu kiến', 300, 60, I, 12);
+    o.innerHTML = 'Thế nằm thật: hướng dốc <b>β = ' + be.toFixed(1) + '°</b>, góc dốc <b>α = ' + al.toFixed(1) + '°</b> (ghi ' + be.toFixed(0) + '∠' + al.toFixed(0) + '), đường phương ' + st.toFixed(0) + '° / ' + mod(st + 180, 360).toFixed(0) + '°.' +
+      '<br><small>Cơ sở: tanα<sub>bk</sub> = tanα · cos(β<sub>bk</sub> − β). Viết cho hai hướng ta được hệ hai phương trình tuyến tính, giải ra tanα·cosβ và tanα·sinβ. Góc dốc thật luôn lớn hơn mọi góc dốc biểu kiến (α<sub>bk</sub> &lt; α).</small>';
+  }
+  ['b1', 'a1', 'b2', 'a2'].forEach(i => bindSlider(el, i, draw, '°'));
+  q(el, '#pre').onclick = () => { [['b1', 140], ['a1', 35], ['b2', 230], ['a2', 65]].forEach(([i, v]) => { q(el, '#' + i).value = v; q(el, '#' + i + 'v').textContent = v + '°'; }); draw(); };
+  draw();
+};
+
+/* ---------- Ch4: bài toán ba lỗ khoan ---------- */
+W.threePoint = el => {
+  mk(el, `<div class="mtab"><button id="p1">Bài 1: 490/350 · 530/340 · 520/410</button><button id="p2">Bài 2: 350/100 · 300/100 · 450/100</button></div>` +
+    `<div class="lab">Cao độ miệng lỗ khoan (m): <input type="number" id="m1" value="490" style="width:74px"> <input type="number" id="m2" value="530" style="width:74px"> <input type="number" id="m3" value="520" style="width:74px"></div>` +
+    `<div class="lab">Độ sâu gặp nóc vỉa (m): <input type="number" id="d1" value="350" style="width:74px"> <input type="number" id="d2" value="340" style="width:74px"> <input type="number" id="d3" value="410" style="width:74px"></div>` +
+    `<canvas width="600" height="300" style="width:100%"></canvas><div class="res" id="o"></div><small>Kéo các điểm LK1, LK2, LK3 trên hình (đơn vị: mét ngoài thực địa, lưới 50 m). Kết quả phụ thuộc vị trí các lỗ khoan.</small>`);
+  const c = q(el, 'canvas'), g = c.getContext('2d'), P = [[80, 130], [290, 235], [430, 60]], SC = 1; // canvas px = mét
+  let drag = -1;
+  const val = id => +q(el, '#' + id).value;
+  function draw() {
+    const I = ink(); g.clearRect(0, 0, 600, 300);
+    g.strokeStyle = 'rgba(128,128,128,.25)'; g.lineWidth = 1; for (let x = 0; x <= 600; x += 50) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 300); g.stroke(); } for (let y = 0; y <= 300; y += 50) { g.beginPath(); g.moveTo(0, y); g.lineTo(600, y); g.stroke(); }
+    const z = [1, 2, 3].map(i => val('m' + i) - val('d' + i)), X = P.map(p => p[0] / SC), Y = P.map(p => (300 - p[1]) / SC), o = q(el, '#o');
+    const dx2 = X[1] - X[0], dy2 = Y[1] - Y[0], dx3 = X[2] - X[0], dy3 = Y[2] - Y[0], det = dx2 * dy3 - dx3 * dy2;
+    if (Math.abs(det) < 1) { o.innerHTML = '<span style="color:var(--bad)">Ba lỗ khoan thẳng hàng – không xác định được mặt phẳng (cần ba lỗ khoan không thẳng hàng).</span>'; }
+    else {
+      const A = ((z[1] - z[0]) * dy3 - (z[2] - z[0]) * dy2) / det, B = (dx2 * (z[2] - z[0]) - dx3 * (z[1] - z[0])) / det, gm = Math.hypot(A, B);
+      const dip = Math.atan(gm) / D2R, dd = gm < 1e-9 ? 0 : mod(Math.atan2(-A, -B) / D2R, 360);
+      if (gm > 1e-9) {
+        const ux = -B / gm, uy = A / gm; // hướng đường phương
+        const zmin = Math.min(...z) - 300, zmax = Math.max(...z) + 300;
+        for (let lv = Math.ceil(zmin / 10) * 10; lv <= zmax; lv += 10) {
+          const t = (lv - z[0]) / (gm * gm), px = X[0] + t * A, py = Y[0] + t * B;
+          g.strokeStyle = lv % 50 === 0 ? 'rgba(232,145,45,.9)' : 'rgba(232,145,45,.35)'; g.lineWidth = lv % 50 === 0 ? 1.6 : 1;
+          g.beginPath(); g.moveTo((px - ux * 900) * SC, 300 - (py - uy * 900) * SC); g.lineTo((px + ux * 900) * SC, 300 - (py + uy * 900) * SC); g.stroke();
+          const lx = (px * SC), ly = 300 - py * SC; if (lv % 50 === 0 && lx > 0 && lx < 600 && ly > 0 && ly < 300) txt(g, '' + lv, lx + 3, ly - 3, '#e8912d', 11);
+        }
+      }
+      g.strokeStyle = I; g.lineWidth = 1.2; g.beginPath(); P.forEach((p, i) => g[i ? 'lineTo' : 'moveTo'](p[0], p[1])); g.closePath(); g.stroke();
+      if (gm > 1e-9) { const [vx, vy] = vec(dd); const mx = (P[0][0] + P[1][0] + P[2][0]) / 3, my = (P[0][1] + P[1][1] + P[2][1]) / 3; arrow(g, mx, my, mx + vx * 60, my + vy * 60, '#d24545', 3); }
+      o.innerHTML = 'Cao độ nóc vỉa tại LK1, LK2, LK3 = ' + z.join(' ; ') + ' m (miệng lỗ khoan − độ sâu). Đường phương là đường nối các điểm cùng cao độ (đường cam, cách nhau 10 m).<br>' +
+        (gm < 1e-9 ? 'Ba điểm cùng cao độ: vỉa <b>nằm ngang</b>.' : 'Hướng dốc <b>β = ' + dd.toFixed(0) + '°</b> (mũi tên đỏ, hướng cao độ giảm nhanh nhất) · góc dốc <b>α = ' + dip.toFixed(1) + '°</b> · đường phương ' + mod(dd - 90, 180).toFixed(0) + '° / ' + (mod(dd - 90, 180) + 180).toFixed(0) + '° · tanα = h/a (h: chênh cao, a: khoảng cách ngang giữa hai đường phương).');
+    }
+    P.forEach((p, i) => { g.fillStyle = '#1f5fbf'; g.beginPath(); g.arc(p[0], p[1], 8, 0, 7); g.fill(); txt(g, 'LK' + (i + 1) + ' (' + z[i] + ')', p[0] + 11, p[1] - 8, I, 12); });
+  }
+  const pos = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * 600 / r.width, (e.clientY - r.top) * 300 / r.height]; };
+  c.style.touchAction = 'none';
+  c.addEventListener('pointerdown', e => { const [x, y] = pos(e); drag = P.findIndex(p => Math.hypot(p[0] - x, p[1] - y) < 18); if (drag >= 0) c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', e => { if (drag < 0) return; const [x, y] = pos(e); P[drag] = [Math.max(10, Math.min(590, x)), Math.max(10, Math.min(290, y))]; draw(); });
+  c.addEventListener('pointerup', () => drag = -1);
+  qa(el, 'input').forEach(i => i.oninput = draw);
+  const setv = a => { ['m1', 'm2', 'm3', 'd1', 'd2', 'd3'].forEach((id, k) => q(el, '#' + id).value = a[k]); draw(); };
+  q(el, '#p1').onclick = () => setv([490, 530, 520, 350, 340, 410]);
+  q(el, '#p2').onclick = () => setv([350, 300, 450, 100, 100, 100]);
+  draw();
+};
+
+/* ---------- Ch4: cự ly chiếu ---------- */
+W.projDist = el => {
+  mk(el, slider('h', 'Khoảng cao đều h', 1, 100, 1, 10, ' m') + slider('al', 'Góc dốc α', 1, 89, 1, 23, '°') +
+    `<label class="lab"><span style="min-width:120px">Tỷ lệ bản đồ 1 :</span><select id="N"><option>500</option><option selected>2000</option><option>5000</option><option>10000</option><option>25000</option></select></label>` +
+    `<canvas width="600" height="240" style="width:100%"></canvas><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const h = num(el, 'h'), al = num(el, 'al'), N = +q(el, '#N').value, I = ink(); g.clearRect(0, 0, 600, 240);
+    const f = a => h / Math.tan(a * D2R) * 1000 / N, cur = f(al);
+    let mx = 0; for (let a = 3; a <= 89; a++) mx = Math.max(mx, f(a)); mx = Math.max(mx, 1);
+    const X = a => 50 + (a - 1) / 88 * 520, Y = v => 210 - Math.min(v / mx, 1) * 180;
+    g.strokeStyle = I; g.lineWidth = 1.5; g.beginPath(); g.moveTo(50, 20); g.lineTo(50, 210); g.lineTo(580, 210); g.stroke();
+    txt(g, 'a (mm)', 6, 18, I, 12); txt(g, 'α (độ) →', 520, 232, I, 12);
+    g.strokeStyle = '#1f5fbf'; g.lineWidth = 3; g.beginPath(); for (let a = 3; a <= 89; a++) g[a === 3 ? 'moveTo' : 'lineTo'](X(a), Y(f(a))); g.stroke();
+    g.fillStyle = '#e8912d'; g.beginPath(); g.arc(X(al), Y(cur), 7, 0, 7); g.fill();
+    q(el, '#o').innerHTML = 'Cự ly chiếu <b>a = h · cotα / N</b> = ' + h + ' · cot ' + al + '° / ' + N + ' = <b>' + cur.toFixed(2) + ' mm</b> trên bản đồ (khoảng cách ngang thực = ' + (h / Math.tan(al * D2R)).toFixed(1) + ' m).<br>Dốc càng đứng, a càng nhỏ (các đường phương chiếu sít nhau); dốc càng thoải, a càng lớn. Tăng h hoặc tăng tỷ lệ (mẫu số N nhỏ đi) thì a tăng.';
+  }
+  ['h', 'al'].forEach((i, k) => bindSlider(el, i, draw, k ? '°' : ' m')); q(el, '#N').onchange = draw; draw();
+};
+
+/* ---------- Ch5: nếp uốn mặt cắt ---------- */
+W.foldExplorer = el => {
+  mk(el, `<div class="mtab"><button data-k="a" class="on">Nếp lồi (anticline)</button><button data-k="s">Nếp lõm (syncline)</button></div><canvas width="600" height="300" style="width:100%"></canvas>` +
+    slider('a1', 'Góc dốc cánh trái', 15, 85, 1, 45, '°') + slider('a2', 'Góc dốc cánh phải', 15, 120, 1, 45, '°') + `<div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d'); let kind = 'a';
+  function draw() {
+    const a1 = num(el, 'a1'); let a2 = num(el, 'a2'); const I = ink();
+    if (a1 + a2 > 175) { a2 = 175 - a1; q(el, '#a2').value = a2; q(el, '#a2v').textContent = a2 + '°'; }
+    g.clearRect(0, 0, 600, 300); g.save();
+    if (kind === 's') { g.translate(0, 300); g.scale(1, -1); }
+    const cols = ['#c9a86a', '#a7773f', '#d8c08e', '#8c5a2b', '#e0cfa2', '#b98d55'], hx = 300, hy = 55, L = 125, r = 22;
+    for (let k = 5; k >= 0; k--) {
+      const y = hy + k * 18, u1 = [-Math.cos(a1 * D2R), Math.sin(a1 * D2R)], u2 = [Math.cos(a2 * D2R), Math.sin(a2 * D2R)]; // y hướng xuống
+      g.strokeStyle = cols[k]; g.lineWidth = 15; g.lineJoin = 'round'; g.lineCap = 'butt';
+      g.beginPath(); g.moveTo(hx + u1[0] * L, y + u1[1] * L); g.lineTo(hx + u1[0] * r, y + u1[1] * r);
+      g.quadraticCurveTo(hx, y, hx + u2[0] * r, y + u2[1] * r); g.lineTo(hx + u2[0] * L, y + u2[1] * L); g.stroke();
+    }
+    const u1 = [-Math.cos(a1 * D2R), Math.sin(a1 * D2R)], u2 = [Math.cos(a2 * D2R), Math.sin(a2 * D2R)];
+    let bx = u1[0] + u2[0], by = u1[1] + u2[1], bl = Math.hypot(bx, by); bx /= bl; by /= bl;
+    g.strokeStyle = '#d24545'; g.lineWidth = 2; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(hx - bx * 40, hy - by * 40); g.lineTo(hx + bx * 150, hy + by * 150); g.stroke(); g.setLineDash([]);
+    g.restore();
+    const tilt = Math.atan2(bx, by) / D2R, inter = 180 - (a1 + a2);
+    const cls = a2 > 90 || a1 > 90 ? 'nếp uốn <b>đảo</b> (một cánh bị lộn ngược, cánh dốc quá 90°)' : (a1 === a2 ? 'nếp uốn <b>đối xứng</b> (mặt trục là mặt đối xứng, hai cánh dốc bằng nhau)' : 'nếp uốn <b>bất đối xứng</b> (hai cánh dốc khác nhau)');
+    const ia = inter > 120 ? 'thoải' : inter > 70 ? 'mở' : inter > 30 ? 'khép' : inter > 0 ? 'chặt' : 'đồng tà';
+    q(el, '#o').innerHTML = (kind === 'a' ? 'Nếp lồi' : 'Nếp lõm') + ': ' + cls + '.<br>Góc giữa hai cánh (interlimb angle) = 180° − (α₁ + α₂) = <b>' + inter + '°</b> → nếp uốn ' + ia + '. Mặt trục (đường đỏ nét đứt) nghiêng <b>' + Math.abs(tilt).toFixed(0) + '°</b> so với phương thẳng đứng.' +
+      (kind === 'a' ? '<br><small>Nếp lồi: đá cổ nằm ở nhân (giữa), hai cánh dốc ra xa trục.</small>' : '<br><small>Nếp lõm: đá trẻ nằm ở nhân, hai cánh dốc vào phía trục.</small>');
+  }
+  ['a1', 'a2'].forEach(i => bindSlider(el, i, draw, '°'));
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { kind = b.dataset.k; qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  draw();
+};
+
+/* ---------- Ch6: đứt gãy ---------- */
+W.faultDemo = el => {
+  mk(el, `<div class="mtab"><button data-k="n" class="on">Đứt gãy thuận</button><button data-k="r">Đứt gãy nghịch</button><button data-k="R">Bằng phải</button><button data-k="L">Bằng trái</button></div>` +
+    `<canvas width="600" height="280" style="width:100%"></canvas>` + slider('d', 'Độ dịch chuyển', 0, 100, 1, 60, '') + `<div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d'); let kind = 'n';
+  const cols = ['#e0cfa2', '#c9a86a', '#a7773f', '#d8c08e', '#8c5a2b', '#c9a86a', '#e0cfa2'];
+  function bands(x0, y0, x1, y1) { for (let k = 0; k < 8; k++) { g.fillStyle = cols[k % cols.length]; g.fillRect(x0, 80 + k * 28, x1 - x0, 28); } }
+  function draw() {
+    const d = num(el, 'd'), I = ink(); g.clearRect(0, 0, 600, 280); const o = q(el, '#o');
+    if (kind === 'n' || kind === 'r') {
+      const sgn = kind === 'n' ? 1 : -1, dl = Math.tan(30 * D2R), fx = y => 300 + (y - 80) / Math.tan(60 * D2R);
+      g.save(); g.beginPath(); g.rect(0, 0, 600, 260); g.clip();
+      g.fillStyle = '#7d8290'; g.fillRect(0, 0, 600, 260);
+      g.save(); g.beginPath(); g.moveTo(40, 80); g.lineTo(300, 80); g.lineTo(fx(400), 400); g.lineTo(40, 400); g.closePath(); g.clip(); bands(40, 80, 600, 400); g.restore();
+      g.save(); g.translate(sgn * d * .5, sgn * d * .866); g.beginPath(); g.moveTo(300, 80); g.lineTo(560, 80); g.lineTo(560, 400); g.lineTo(fx(400), 400); g.closePath(); g.clip(); bands(40, 80, 600, 400); g.restore();
+      g.strokeStyle = '#d24545'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(300, 80); g.lineTo(fx(260), 260); g.stroke(); g.restore();
+      txt(g, 'Vách nằm (footwall)', 60, 250, '#fff', 13); txt(g, 'Vách treo (hanging wall)', 400, 40, I, 13);
+      if (kind === 'n') { arrow(g, 330, 20, 390, 20, I); arrow(g, 60, 20, 10, 20, I); txt(g, 'Ứng suất kéo', 120, 20, I, 12); } else { arrow(g, 80, 30, 140, 30, I); arrow(g, 560, 30, 500, 30, I); txt(g, 'Ứng suất ép', 190, 30, I, 12); }
+      o.innerHTML = kind === 'n' ? '<b>Đứt gãy thuận</b>: vách treo trượt <b>xuống</b> so với vách nằm; kéo dãn vỏ (ứng suất kéo). Nhiều đứt gãy thuận tạo cặp địa luỹ (horst) – địa hào (graben) như vùng Basin and Range.' :
+        '<b>Đứt gãy nghịch</b>: vách treo bị đẩy <b>lên</b> trên vách nằm; rút ngắn vỏ (ứng suất ép). Khi mặt đứt gãy thoải (góc cắm &lt; 15° theo bài giảng) gọi là đứt gãy chờm nghịch (overthrust), đá cổ có thể chờm lên đá trẻ (Lewis Overthrust).';
+    } else {
+      const s = (kind === 'R' ? 1 : -1) * d * .8;
+      g.fillStyle = '#ddd2b3'; g.fillRect(40, 40, 260, 210); g.fillRect(300, 40 + s * 0, 260, 210);
+      g.fillStyle = '#7d8290'; g.fillRect(40, 130, 260, 16); g.fillRect(300, 130 + s, 260, 16);
+      g.strokeStyle = '#d24545'; g.lineWidth = 3; g.beginPath(); g.moveTo(300, 30); g.lineTo(300, 260); g.stroke();
+      arrow(g, 430, 190, 430, 190 + (kind === 'R' ? 50 : -50), I, 3); arrow(g, 170, 190, 170, 190 + (kind === 'R' ? -50 : 50), I, 3);
+      txt(g, 'Bình đồ (bắc ở trên) · lớp chuẩn: dải xám', 46, 30, I, 12);
+      o.innerHTML = kind === 'R' ? '<b>Đứt gãy bằng phải (right-lateral)</b>: đứng ở một bên nhìn sang khối đối diện, khối đó dịch chuyển về phía <b>bên phải</b> (ở đây khối phía đông dịch về phía nam). Dải xám bị lệch sang phải.' :
+        '<b>Đứt gãy bằng trái (left-lateral)</b>: khối đối diện dịch chuyển về phía <b>bên trái</b> (khối phía đông dịch về phía bắc). Kiểm tra bằng cách đứng phía đông nhìn sang: kết quả không đổi – đó là điểm hay của cách định nghĩa này.';
+    }
+  }
+  bindSlider(el, 'd', draw, '');
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { kind = b.dataset.k; qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  draw();
+};
+
+/* ---------- Ch7: thang thời gian địa chất ---------- */
+const GT = {
+  name: 'Toàn bộ lịch sử Trái Đất', a: 4567, b: 0, kids: [
+    { name: 'Hadean', a: 4567, b: 4000, c: '#8c4a3c', note: 'Thời kỳ sớm nhất, chưa có đá còn lưu giữ được; các phân chia bên trong chỉ mang tính không chính thức.' },
+    { name: 'Archean', a: 4000, b: 2500, c: '#b3562f', kids: [['Eoarchean', 4000, 3600], ['Paleoarchean', 3600, 3200], ['Mesoarchean', 3200, 2800], ['Neoarchean', 2800, 2500]] },
+    { name: 'Proterozoic', a: 2500, b: 541, c: '#3f7f6b', kids: [['Siderian', 2500, 2300], ['Rhyacian', 2300, 2050], ['Orosirian', 2050, 1800], ['Statherian', 1800, 1600], ['Calymmian', 1600, 1400], ['Ectasian', 1400, 1200], ['Stenian', 1200, 1000], ['Tonian', 1000, 720], ['Cryogenian', 720, 635], ['Ediacaran', 635, 541]] },
+    {
+      name: 'Phanerozoic', a: 541, b: 0, c: '#2a7bbf', kids: [['Cambrian', 541, 485.4], ['Ordovician', 485.4, 443.8], ['Silurian', 443.8, 419.2], ['Devonian', 419.2, 358.9], ['Carboniferous', 358.9, 298.9], ['Permian', 298.9, 252.2],
+        ['Triassic', 252.2, 201.3], ['Jurassic', 201.3, 145], ['Cretaceous', 145, 66], ['Paleogene', 66, 23.03], ['Neogene', 23.03, 2.58], ['Quaternary', 2.58, 0]]
+    }]
+};
+W.geotime = el => {
+  mk(el, `<div class="mtab"><button id="back" style="display:none">← Về toàn bộ lịch sử</button></div><div id="bar" style="display:flex;height:70px;border-radius:10px;overflow:hidden;border:1px solid var(--line)"></div><div class="res" id="o">Bấm vào một liên đại (Eon) để xem các kỷ bên trong. Chiều rộng tỉ lệ với thời gian thật.</div>`);
+  const bar = q(el, '#bar'), o = q(el, '#o'), back = q(el, '#back');
+  function show(items, a, b, isTop) {
+    const tot = a - b; bar.innerHTML = '';
+    items.forEach((it, i) => {
+      const [nm, s, e] = it, dv = document.createElement('div');
+      dv.style.cssText = 'flex:' + (s - e) + ' 1 0;min-width:0;background:' + (it[3] || `hsl(${(i * 47 + 200) % 360},45%,${isTop ? 45 : 55}%)`) + ';color:#fff;font-size:12px;display:grid;place-items:center;cursor:pointer;border-right:1px solid rgba(255,255,255,.5);overflow:hidden';
+      dv.innerHTML = '<span style="writing-mode:' + ((s - e) / tot < .07 ? 'vertical-rl' : 'horizontal-tb') + ';padding:2px">' + nm + '</span>';
+      dv.onclick = () => {
+        const pct = ((s - e) / 4567 * 100).toFixed(1);
+        o.innerHTML = '<b>' + nm + '</b>: từ ' + s + ' Ma đến ' + (e === 0 ? 'nay' : e + ' Ma') + ' · kéo dài ≈ ' + (s - e).toFixed(s - e < 10 ? 2 : 0) + ' triệu năm (' + pct + '% tuổi Trái Đất ≈ 4567 Ma).' + (it[4] ? '<br>' + it[4] : '');
+        const K = it[5]; if (K && isTop) { back.style.display = ''; show(K, s, e, false); }
+      };
+      bar.appendChild(dv);
+    });
+  }
+  const top = GT.kids.map(k => [k.name, k.a, k.b, k.c, k.note, k.kids]);
+  back.onclick = () => { back.style.display = 'none'; show(top, 4567, 0, true); o.textContent = 'Bấm vào một liên đại để xem các kỷ bên trong.'; };
+  show(top, 4567, 0, true);
+};
+
+/* ---------- Ch7: phân rã phóng xạ ---------- */
+W.decay = el => {
+  const ISO = [['²³⁸U → ²⁰⁶Pb', 4.5e9, 'đá magma, khoáng vật'], ['²³⁵U → ²⁰⁷Pb', 704e6, 'đá magma, khoáng vật'], ['²³²Th → ²⁰⁸Pb', 14e9, 'đá magma, khoáng vật'], ['⁴⁰K → ⁴⁰Ar & ⁴⁰Ca', 1.25e9, 'đá magma, khoáng vật'], ['⁸⁷Rb → ⁸⁷Sr', 49e9, 'đá magma, khoáng vật'], ['¹⁴C → ¹⁴N', 5730, 'vật chất hữu cơ']];
+  mk(el, `<label class="lab"><span style="min-width:120px">Cặp đồng vị</span><select id="iso">${ISO.map((x, i) => `<option value="${i}" ${i === 5 ? 'selected' : ''}>${x[0]} (T½ = ${fmtAge(x[1])})</option>`).join('')}</select></label>` +
+    slider('p', 'Đồng vị mẹ còn lại', 1, 100, 1, 25, '%') + `<canvas width="600" height="220" style="width:100%"></canvas><div class="res" id="o"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  function draw() {
+    const [nm, T, rk] = ISO[+q(el, '#iso').value], p = num(el, 'p'), n = Math.log2(100 / p), age = n * T, I = ink(); g.clearRect(0, 0, 600, 220);
+    const X = t => 50 + t / 6 * 520, Y = f => 190 - f * 170;
+    g.strokeStyle = I; g.lineWidth = 1.5; g.beginPath(); g.moveTo(50, 15); g.lineTo(50, 190); g.lineTo(580, 190); g.stroke();
+    txt(g, 'Số chu kỳ bán rã →', 450, 212, I, 12); txt(g, 'mẹ', 22, 30, '#1f5fbf', 12);
+    g.lineWidth = 3; g.strokeStyle = '#1f5fbf'; g.beginPath(); for (let t = 0; t <= 6; t += .05) g[t ? 'lineTo' : 'moveTo'](X(t), Y(Math.pow(2, -t))); g.stroke();
+    g.strokeStyle = '#e8912d'; g.beginPath(); for (let t = 0; t <= 6; t += .05) g[t ? 'lineTo' : 'moveTo'](X(t), Y(1 - Math.pow(2, -t))); g.stroke(); txt(g, 'con', 555, Y(.98) + 14, '#e8912d', 12);
+    for (let k = 1; k <= 6; k++) txt(g, '' + k, X(k) - 3, 205, I, 11);
+    g.fillStyle = '#d24545'; g.beginPath(); g.arc(X(Math.min(n, 6)), Y(p / 100), 6, 0, 7); g.fill();
+    q(el, '#o').innerHTML = 'Còn ' + p + '% đồng vị mẹ ⇒ đã trải qua <b>' + n.toFixed(2) + '</b> chu kỳ bán rã ⇒ tuổi = n × T½ = <b>' + fmtAge(age) + '</b> (con = ' + (100 - p) + '%). Áp dụng cho ' + rk + '.' +
+      (nm.startsWith('¹⁴C') && age > 5e4 ? '<br><b style="color:var(--bad)">C-14 chỉ tin cậy với mẫu trẻ hơn khoảng 50 ka</b> – lượng ¹⁴C còn lại quá nhỏ để đo chính xác.' : '');
+  }
+  bindSlider(el, 'p', draw, '%'); q(el, '#iso').onchange = draw; draw();
+};
+
+/* ---------- Ch7: sơ đồ tư duy thang thời gian ---------- */
+W.mindmap = el => {
+  const T = ['Trái Đất (≈ 4567)', [
+    ['Hadean – Minh cổ (4567–4000)', []],
+    ['Archean – Thái cổ (4000)', [['Eoarchean (4000)'], ['Paleoarchean (3600)'], ['Mesoarchean (3200)'], ['Neoarchean (2800)']]],
+    ['Proterozoic – Nguyên sinh (2500)', [
+      ['Paleoproterozoic (2500)', [['Siderian (2500)'], ['Rhyacian (2300)'], ['Orosirian (2050)'], ['Statherian (1800)']]],
+      ['Mesoproterozoic (1600)', [['Calymmian (1600)'], ['Ectasian (1400)'], ['Stenian (1200)']]],
+      ['Neoproterozoic (1000)', [['Tonian (1000)'], ['Cryogenian (720)'], ['Ediacaran (635)']]]]],
+    ['Phanerozoic – Hiển sinh (541)', [
+      ['Paleozoic – Cổ sinh (541)', [['Cambrian (541)'], ['Ordovician (485,4)'], ['Silurian (443,8)'], ['Devonian (419,2)'], ['Carboniferous (358,9)'], ['Permian (298,9)']]],
+      ['Mesozoic – Trung sinh (252,2)', [['Triassic (252,2)'], ['Jurassic (201,3)'], ['Cretaceous (145)']]],
+      ['Cenozoic – Tân sinh (66)', [['Paleogene (66)'], ['Neogene (23,03)'], ['Quaternary (2,58)']]]]]]];
+  const node = n => n[1] && n[1].length ? `<details ${n === T ? 'open' : ''}><summary>${n[0]}</summary><div style="margin-left:18px;border-left:2px solid var(--line);padding-left:10px">${n[1].map(node).join('')}</div></details>` : `<div style="padding:2px 0 2px 14px">${n[0]}</div>`;
+  mk(el, `<div class="card" style="font-size:15px"><details open><summary><b>${T[0]}</b></summary><div style="margin-left:18px;border-left:2px solid var(--line);padding-left:10px">${T[1].map(node).join('')}</div></details></div>`);
+};
+
+</script>
+<script>
+/* Bộ hình minh hoạ vẽ bằng SVG (vẽ riêng, không dùng ảnh ngoài). Dùng: <div data-w="fig" data-name="tên" data-cap="chú thích"></div> */
+let FIGU = 0;
+const FC = { o: '#e8912d', b: '#1f5fbf', r: '#d24545', k: '#333333', g: '#1b9a5b' };
+const STR = ['#efe0b0', '#e2c17c', '#cf9a58', '#b57444', '#96593a', '#7a4a34'];
+const PT = pts => pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+const F_defs = u => '<defs>' + Object.keys(FC).map(k => `<marker id="m${k}${u}" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0L10,5L0,10z" fill="${k === 'k' ? 'currentColor' : FC[k]}"/></marker>`).join('') +
+  `<pattern id="gr${u}" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#efb9b0"/><path d="M3 4h5M5.5 1.5v5M11 12h4M13 9.5v5" stroke="#b5655c" stroke-width="1.1" fill="none"/></pattern></defs>`;
+const F_ar = (u, x1, y1, x2, y2, k = 'k', w = 2.5) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${k === 'k' ? 'currentColor' : FC[k]}" stroke-width="${w}" marker-end="url(#m${k}${u})"/>`;
+const F_t = (x, y, s, o = '') => `<text x="${x}" y="${y}" ${o}>${s}</text>`;
+const F_tm = (x, y, s, o = '') => F_t(x, y, s, 'text-anchor="middle" ' + o);
+const F_ti = (x, y, s, o = '') => F_tm(x, y, s, 'font-weight="700" font-size="15" ' + o);
+const F_ex = (f, dm) => { const a = []; for (let x = dm[0]; x <= dm[1]; x += dm[2] || 4) a.push([x, f(x)]); return a; };
+const FIGS = {};
+
+/* ---- Ch1: ba kiểu ranh giới mảng ---- */
+FIGS.plates = u => {
+  let s = F_defs(u);
+  // tách giãn
+  s += `<g transform="translate(0,0)">${F_ti(115, 22, 'Tách giãn')}
+   <rect x="0" y="150" width="230" height="110" fill="#f4b06a"/><rect x="0" y="110" width="92" height="40" fill="#9aa3b2"/><rect x="138" y="110" width="92" height="40" fill="#9aa3b2"/>
+   <rect x="0" y="90" width="92" height="20" fill="#c9b48a"/><rect x="138" y="90" width="92" height="20" fill="#c9b48a"/>
+   <polygon points="92,90 138,90 152,175 78,175" fill="#e0501f"/><polygon points="88,90 115,66 142,90" fill="#7d6a4a"/>
+   ${F_ar(u, 80, 50, 25, 50)}${F_ar(u, 150, 50, 205, 50)}${F_tm(115, 245, 'Quyển mềm')}${F_tm(115, 130, 'Magma trồi lên', 'fill="#fff" font-size="12"')}${F_tm(115, 285, 'Kéo giãn – vỏ mới thành tạo', 'font-size="12" fill-opacity=".75"')}</g>`;
+  // hội tụ
+  s += `<g transform="translate(245,0)">${F_ti(115, 22, 'Hội tụ (hút chìm)')}
+   <rect x="0" y="150" width="230" height="110" fill="#f4b06a"/>
+   <rect x="0" y="88" width="108" height="16" fill="#5b9bd5" opacity=".85"/>
+   <polygon points="0,104 112,104 205,205 182,228 96,140 0,140" fill="#8b93a3"/>
+   <polygon points="118,84 230,84 230,112 118,112" fill="#c9b48a"/><polygon points="118,112 230,112 230,168 150,168" fill="#8b93a3"/>
+   <polygon points="168,84 188,50 208,84" fill="#c0392b"/><circle cx="192" cy="40" r="6" fill="#999" opacity=".5"/><circle cx="200" cy="30" r="8" fill="#999" opacity=".35"/>
+   <circle cx="150" cy="156" r="4" fill="#e0501f"/><circle cx="162" cy="134" r="4" fill="#e0501f"/><circle cx="176" cy="112" r="4" fill="#e0501f"/>
+   ${F_ar(u, 30, 70, 85, 70)}${F_ar(u, 225, 68, 195, 68, 'k', 0)}${F_tm(104, 80, 'Rãnh', 'font-size="12"')}${F_tm(190, 150, 'Cung núi lửa', 'font-size="11" fill="#c0392b" transform="rotate(0)" display="none"')}
+   ${F_t(126, 78, 'Cung núi lửa', 'font-size="11" fill="#c0392b" transform="translate(0,-2)" display="none"')}${F_tm(64, 125, 'Mảng chìm', 'fill="#fff" font-size="12"')}${F_tm(115, 285, 'Ép – một mảng chìm dưới mảng kia', 'font-size="12" fill-opacity=".75"')}</g>`;
+  // chuyển dạng
+  s += `<g transform="translate(490,0)">${F_ti(115, 22, 'Chuyển dạng')}
+   <rect x="0" y="40" width="230" height="220" rx="6" fill="#efe9d6"/><rect x="10" y="50" width="100" height="200" fill="#d8c8a0"/><rect x="122" y="50" width="98" height="200" fill="#d8c8a0"/>
+   <line x1="116" y1="40" x2="116" y2="260" stroke="#d24545" stroke-width="3"/>
+   <polyline points="10,120 110,120" stroke="#5b9bd5" stroke-width="4" fill="none"/><polyline points="122,160 220,160" stroke="#5b9bd5" stroke-width="4" fill="none"/><line x1="110" y1="120" x2="122" y2="160" stroke="#5b9bd5" stroke-width="4" stroke-dasharray="2 3"/>
+   ${F_ar(u, 60, 210, 60, 160, 'k', 3)}${F_ar(u, 170, 90, 170, 140, 'k', 3)}${F_tm(115, 285, 'Cắt – trượt ngang, suối bị lệch', 'font-size="12" fill-opacity=".75"')}</g>`;
+  return [720, 300, s];
+};
+
+/* ---- Ch1: ba kiểu ứng suất ---- */
+FIGS.stress3 = u => {
+  let s = F_defs(u); const dash = 'fill="none" stroke="currentColor" stroke-dasharray="5 4" stroke-opacity=".5"';
+  s += `<g>${F_ti(120, 20, 'Ứng suất ép')}<rect x="70" y="50" width="100" height="100" ${dash}/><rect x="86" y="36" width="68" height="128" rx="4" fill="#e2c17c" stroke="#96593a" stroke-width="2"/>${F_ar(u, 14, 100, 78, 100, 'r', 3.5)}${F_ar(u, 226, 100, 162, 100, 'r', 3.5)}${F_tm(120, 195, 'ngắn theo phương ép,', 'font-size="12"')}${F_tm(120, 211, 'dày lên theo phương đứng', 'font-size="12"')}</g>`;
+  s += `<g transform="translate(240,0)">${F_ti(120, 20, 'Ứng suất kéo')}<rect x="70" y="50" width="100" height="100" ${dash}/><rect x="52" y="68" width="136" height="64" rx="4" fill="#e2c17c" stroke="#96593a" stroke-width="2"/>${F_ar(u, 48, 100, 6, 100, 'b', 3.5)}${F_ar(u, 192, 100, 234, 100, 'b', 3.5)}${F_tm(120, 195, 'dài ra theo phương kéo,', 'font-size="12"')}${F_tm(120, 211, 'mỏng đi theo phương đứng', 'font-size="12"')}</g>`;
+  s += `<g transform="translate(480,0)">${F_ti(120, 20, 'Ứng suất cắt')}<rect x="70" y="50" width="100" height="100" ${dash}/><polygon points="98,50 198,50 142,150 42,150" fill="#e2c17c" stroke="#96593a" stroke-width="2"/>${F_ar(u, 70, 40, 140, 40, 'g', 3.5)}${F_ar(u, 170, 162, 100, 162, 'g', 3.5)}${F_tm(120, 195, 'hai mặt trượt song song,', 'font-size="12"')}${F_tm(120, 211, 'hình dạng đổi, thể tích giữ nguyên', 'font-size="12"')}</g>`;
+  return [720, 225, s];
+};
+
+/* ---- Ch2: các yếu tố thế nằm dạng khối ---- */
+FIGS.strikeDip = u => {
+  const A = [150, 120], B = [450, 120], Ah = [80, 180], Bh = [380, 180], Av = [80, 300], Bv = [380, 300], M = [300, 120], Mh = [230, 180], Mv = [230, 300];
+  let s = F_defs(u) + `<g transform="translate(0,-85)"><defs><linearGradient id="sg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2c17c"/><stop offset="1" stop-color="#96593a"/></linearGradient></defs>`;
+  s += `<polygon points="${PT([A, B, Bv, Av])}" fill="url(#sg${u})" stroke="#6b4226" stroke-width="1.5"/>`;
+  for (let i = 1; i < 6; i++) { const t = i / 6; s += `<line x1="${A[0] + (Av[0] - A[0]) * t}" y1="${A[1] + (Av[1] - A[1]) * t}" x2="${B[0] + (Bv[0] - B[0]) * t}" y2="${B[1] + (Bv[1] - B[1]) * t}" stroke="#6b4226" stroke-opacity=".35"/>`; }
+  s += `<polygon points="${PT([A, B, Bh, Ah])}" fill="#8fc3f0" fill-opacity=".45" stroke="#1f5fbf" stroke-width="1.2"/>`;
+  s += `<polygon points="${PT([A, Ah, Av])}" fill="#000" fill-opacity=".12" stroke="#555" stroke-dasharray="4 3"/>`;
+  s += `<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="#1f5fbf" stroke-width="5"/>`;
+  s += F_ar(u, M[0], M[1], Mh[0], Mh[1], 'o', 3.5) + F_ar(u, M[0], M[1], Mv[0] + 4, Mv[1] - 4, 'r', 3.5);
+  s += `<path d="M255.8,149.3 A45 45 0 0 0 273.7,161.9" fill="none" stroke="#e8912d" stroke-width="2.5"/>`;
+  s += F_t(452, 116, 'Đường phương (strike)', 'fill="#1f5fbf" font-weight="700" font-size="14"') + F_t(452, 134, 'giao tuyến của mặt lớp với mặt phẳng ngang', 'font-size="12" fill-opacity=".8"');
+  s += F_t(14, 224, 'Hướng dốc β', 'fill="#c46a00" font-weight="700" font-size="14"') + F_t(14, 240, '(hình chiếu đường dốc lên mặt ngang)', 'font-size="11" fill-opacity=".8"');
+  s += F_t(258, 288, 'Đường dốc nhất', 'fill="#fff" font-weight="700" font-size="13"');
+  s += F_t(255, 184, 'α', 'fill="#c46a00" font-weight="700" font-size="17"') + F_t(292, 214, 'α: góc dốc', 'font-size="13" fill="#3d1f00" font-weight="700"');
+  s += F_t(462, 214, 'Mặt phẳng nằm ngang', 'font-size="13" fill="#1f5fbf" font-weight="700"') + F_t(112, 268, 'Mặt lớp (nghiêng)', 'font-size="13" fill="#fff" font-weight="700"');
+  s += '</g>';
+  return [720, 240, s];
+};
+
+/* ---- Ch2: ký hiệu thế nằm trên bản đồ ---- */
+FIGS.symbols = u => {
+  let s = F_defs(u), pos = [95, 305, 515];
+  const box = (x, t) => `<rect x="${x - 90}" y="34" width="180" height="150" rx="10" fill="var(--bg)" stroke="var(--line)"/>` + F_ti(x, 22, t);
+  const v = az => [Math.sin(az * Math.PI / 180), -Math.cos(az * Math.PI / 180)];
+  // nghiêng
+  let x = pos[0], c = [x, 108], sv = v(50), dv = v(320);
+  s += box(x, 'Lớp nghiêng') + `<line x1="${c[0] - sv[0] * 45}" y1="${c[1] - sv[1] * 45}" x2="${c[0] + sv[0] * 45}" y2="${c[1] + sv[1] * 45}" stroke="currentColor" stroke-width="3"/><line x1="${c[0]}" y1="${c[1]}" x2="${c[0] + dv[0] * 20}" y2="${c[1] + dv[1] * 20}" stroke="currentColor" stroke-width="3"/>` + F_t(c[0] + dv[0] * 20 - 22, c[1] + dv[1] * 20 - 4, '40', 'font-size="15" font-weight="700"') + F_tm(x, 172, '320∠40 · α ≠ 0', 'font-size="12"');
+  // thẳng đứng
+  x = pos[1]; c = [x, 108]; sv = v(45);
+  s += box(x, 'Lớp thẳng đứng') + `<line x1="${c[0] - sv[0] * 45}" y1="${c[1] - sv[1] * 45}" x2="${c[0] + sv[0] * 45}" y2="${c[1] + sv[1] * 45}" stroke="currentColor" stroke-width="3"/><line x1="${c[0] - dv[0] * 0 - v(315)[0] * 16}" y1="${c[1] - v(315)[1] * 16}" x2="${c[0] + v(315)[0] * 16}" y2="${c[1] + v(315)[1] * 16}" stroke="currentColor" stroke-width="3"/>` + F_tm(x, 172, 'α = 90° · chỉ đo đường phương', 'font-size="12"');
+  // nằm ngang
+  x = pos[2]; c = [x, 108];
+  s += box(x, 'Lớp nằm ngang') + `<line x1="${x - 22}" y1="108" x2="${x + 22}" y2="108" stroke="currentColor" stroke-width="3.5"/><line x1="${x}" y1="86" x2="${x}" y2="130" stroke="currentColor" stroke-width="3.5"/>` + F_tm(x, 172, 'α ≈ 0° · ký hiệu “+”', 'font-size="12"');
+  return [610, 200, s];
+};
+
+/* ---- Ch3: thế nằm ngang – bình đồ và mặt cắt ---- */
+FIGS.horizMap = u => {
+  const cols = ['#96593a', '#b57444', '#cf9a58', '#e2c17c', '#f3e8bf'], R = [114.7, 83, 57, 25.7], lv = [100, 200, 300, 400], cx = 165, cy = 150;
+  let s = F_defs(u);
+  s += F_ti(165, 20, 'Bình đồ (nhìn từ trên xuống)') + F_ti(530, 20, 'Mặt cắt A–A′');
+  s += `<clipPath id="pc${u}"><rect x="30" y="30" width="270" height="240"/></clipPath><g clip-path="url(#pc${u})"><rect x="30" y="30" width="270" height="240" fill="${cols[0]}"/>`;
+  R.forEach((r, i) => { s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${cols[i + 1]}" stroke="#4a2f1c" stroke-width="1.2" stroke-dasharray="${i % 2 ? '' : ''}"/>`; });
+  s += '</g>';
+  R.forEach((r, i) => { s += F_t(cx + r * 0.72 + 2, cy - r * 0.72 - 2, lv[i], 'font-size="11" font-weight="700" fill="#3a2414"'); });
+  s += `<line x1="30" y1="${cy}" x2="300" y2="${cy}" stroke="#d24545" stroke-width="2"/>` + F_t(12, cy + 4, 'A', 'font-weight="700" fill="#d24545"') + F_t(304, cy + 4, 'A′', 'font-weight="700" fill="#d24545"');
+  // mặt cắt
+  const x0 = 350, x1 = 710, cm = 530, base = 262, zs = 0.56, g = x => 430 * Math.exp(-Math.pow((x - cm) / 95, 2));
+  const pts = F_ex(x => base - zs * g(x), [x0, x1, 4]);
+  s += `<clipPath id="gc${u}"><polygon points="${x0},${base} ${PT(pts)} ${x1},${base}"/></clipPath><g clip-path="url(#gc${u})">`;
+  const zz = [0, 100, 200, 300, 400, 460];
+  for (let i = 0; i < 5; i++) s += `<rect x="${x0}" y="${base - zs * zz[i + 1]}" width="${x1 - x0}" height="${zs * (zz[i + 1] - zz[i])}" fill="${cols[i]}"/>`;
+  s += '</g>';
+  s += `<polyline points="${PT(pts)}" fill="none" stroke="#3a2414" stroke-width="2"/>`;
+  lv.forEach(z => { s += `<line x1="${x0}" y1="${base - zs * z}" x2="${x1}" y2="${base - zs * z}" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 4"/>` + F_t(x0 - 30, base - zs * z + 4, z, 'font-size="11"'); });
+  s += F_t(x0 - 30, base + 4, '0', 'font-size="11"') + F_t(x0 - 32, 32, 'z (m)', 'font-size="11"');
+  s += `<line x1="${x0}" y1="${base}" x2="${x1}" y2="${base}" stroke="currentColor" stroke-width="1.5"/>`;
+  s += F_t(cm - 10, 26, 'A′', 'display="none"');
+  // chú giải
+  const names = ['1 – cổ nhất', '2', '3', '4', '5 – trẻ nhất'];
+  names.forEach((n, i) => { s += `<rect x="${60 + i * 118}" y="290" width="16" height="16" rx="3" fill="${cols[i]}" stroke="#4a2f1c"/>` + F_t(80 + i * 118, 303, 'Lớp ' + n, 'font-size="12"'); });
+  return [720, 316, s];
+};
+
+/* ---- Ch4: quy tắc chữ V ---- */
+FIGS.vRule = u => {
+  const sc = 0.72, py = y => 150 - y * sc, px = x => 6 + x * sc, cases = [[90, 'Dốc thẳng đứng', 'vết lộ là đường thẳng'], [40, 'Dốc nhiều (40°)', 'V góc tù'], [10, 'Dốc thoải (10°)', 'V góc nhọn']];
+  let s = F_defs(u);
+  cases.forEach((cs, i) => {
+    const ox = i * 240, t = cs[0] === 90 ? Infinity : Math.tan(cs[0] * Math.PI / 180);
+    s += `<g transform="translate(${ox},0)">${F_ti(115, 20, cs[1])}<clipPath id="vc${u}${i}"><rect x="2" y="34" width="226" height="230"/></clipPath><rect x="2" y="34" width="226" height="230" rx="8" fill="var(--bg)" stroke="var(--line)"/><g clip-path="url(#vc${u}${i})">`;
+    for (let L = 5; L <= 50; L += 5) {
+      const xa = Math.max(0, (L - 48) / 0.05), xb = Math.min(300, L / 0.05), tp = [], bt = [];
+      for (let x = xa; x <= xb; x += 5) { const y = (L - 0.05 * x) / 0.4; tp.push([px(x), py(y)]); bt.push([px(x), py(-y)]); }
+      if (xb < 300) { tp.push([px(xb), py(0)]); s += `<polyline points="${PT(tp.concat(bt.reverse()))}" fill="none" stroke="#8a8f9c" stroke-width="1"/>`; }
+      else s += `<polyline points="${PT(tp)}" fill="none" stroke="#8a8f9c" stroke-width="1"/><polyline points="${PT(bt)}" fill="none" stroke="#8a8f9c" stroke-width="1"/>`;
+    }
+    s += `<line x1="${px(300)}" y1="${py(0)}" x2="${px(0)}" y2="${py(0)}" stroke="#5b9bd5" stroke-width="2.5" stroke-dasharray="6 3"/>`;
+    let pts = [];
+    if (t === Infinity) pts = [[px(200), py(120)], [px(200), py(-120)]];
+    else { const k = (t + 0.05) / 0.4, xs = Math.max(0, 200 - 120 / k); pts = [[px(xs), py((200 - xs) * k)], [px(200), py(0)], [px(xs), py(-(200 - xs) * k)]]; }
+    s += `<polyline points="${PT(pts)}" fill="none" stroke="#e8912d" stroke-width="4" stroke-linejoin="round"/>`;
+    s += F_ar(u, px(205), py(32), px(250), py(32), 'r', 3) + `</g>` + F_t(px(212), py(46), 'dốc về đông', 'font-size="10.5" fill="#d24545"') + F_tm(115, 280, cs[2], 'font-size="13"') + '</g>';
+  });
+  s += F_t(20, 297, 'Đường xám: đồng mức địa hình (thung lũng, suối chảy về tây) · Đường cam: vết lộ của một mặt lớp · Cùng một địa hình', 'font-size="12" fill-opacity=".8"');
+  return [720, 304, s];
+};
+
+/* ---- Ch5: giải phẫu nếp uốn ---- */
+FIGS.foldAnatomy = u => {
+  let s = F_defs(u); const y = (x, k) => 118 + 24 * k - 55 * Math.cos(2 * Math.PI * (x - 100) / 280), n = 5;
+  for (let k = 0; k < n; k++) {
+    const top = F_ex(x => y(x, k), [30, 690, 5]), bot = F_ex(x => y(x, k + 1), [30, 690, 5]).reverse();
+    s += `<polygon points="${PT(top.concat(bot))}" fill="${STR[k % STR.length]}" stroke="#6b4226" stroke-opacity=".5"/>`;
+  }
+  s += `<polyline points="${PT(F_ex(x => y(x, 0), [30, 690, 5]))}" fill="none" stroke="#3a2414" stroke-width="2.2"/>`;
+  s += `<line x1="380" y1="34" x2="380" y2="270" stroke="#d24545" stroke-width="2" stroke-dasharray="7 5"/><line x1="240" y1="34" x2="240" y2="270" stroke="#d24545" stroke-width="2" stroke-dasharray="7 5" stroke-opacity=".55"/>`;
+  s += `<line x1="30" y1="118" x2="690" y2="118" stroke="currentColor" stroke-opacity=".4" stroke-dasharray="3 4"/>`;
+  const halo = 'style="paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round"';
+  s += F_ar(u, 380, 20, 660, 20, 'b', 2) + F_ar(u, 660, 20, 380, 20, 'b', 2) + F_tm(520, 14, 'Bước sóng (wavelength)', `font-weight="700" fill="#1f5fbf" ${halo}`);
+  s += F_ar(u, 412, 118, 412, 66, 'g', 2.5) + F_ar(u, 412, 66, 412, 118, 'g', 0) + F_t(420, 96, 'Biên độ', `font-weight="700" fill="#1b9a5b" ${halo}`);
+  s += `<circle cx="450" cy="118" r="6" fill="#fff" stroke="#000" stroke-width="2"/>` + F_t(462, 137, 'Điểm uốn (inflection)', `font-weight="700" ${halo}`);
+  s += F_t(268, 190, 'Cánh (limb)', `font-weight="700" font-size="14" ${halo}`);
+  s += `<circle cx="380" cy="63" r="6" fill="#fff" stroke="#c0392b" stroke-width="2.5"/>` + F_t(392, 50, 'Điểm bản lề (hinge point)', `font-weight="700" font-size="12" ${halo}`);
+  s += F_t(388, 300, 'Mặt trục (axial plane) đi qua các bản lề', `font-weight="700" fill="#d24545" ${halo}`);
+  s += F_tm(100, 46, 'Nếp lồi (anticline)', `font-size="13" font-weight="700" ${halo}`) + F_tm(240, 168, 'Nếp lõm', `font-size="13" font-weight="700" ${halo}`) + F_tm(520, 184, '(syncline)', `font-size="12" font-weight="700" ${halo}`);
+  return [720, 318, s];
+};
+
+/* ---- Ch5: các dạng nếp uốn ---- */
+FIGS.foldTypes = u => {
+  let s = F_defs(u); const A = 28, k = 2 * Math.PI / 180;
+  const panels = [['Đối xứng', 0], ['Bất đối xứng', 0.55], ['Đảo (overturned)', 1.25], ['Đơn nghiêng (monocline)', -1]];
+  panels.forEach((pn, i) => {
+    const ox = (i % 2) * 360, oy = Math.floor(i / 2) * 190, sh = pn[1], mono = sh < 0;
+    const h = t => mono ? 44 * (1 - Math.tanh((t - 150) / 26)) / 2 : A * Math.cos(k * (t - 150));
+    const pt = (t, l) => { const yy = 88 + 19 * l - h(t); return mono ? [t, yy] : [t - sh * (yy - 88), yy]; };
+    s += `<g transform="translate(${ox},${oy})">${F_ti(170, 18, pn[0])}<clipPath id="ft${u}${i}"><rect x="10" y="28" width="320" height="150" rx="8"/></clipPath><rect x="10" y="28" width="320" height="150" rx="8" fill="var(--bg)" stroke="var(--line)"/><g clip-path="url(#ft${u}${i})">`;
+    for (let l = 0; l < 9; l++) {
+      const a = [], b = []; for (let t = -60; t <= 420; t += 4) { a.push(pt(t, l)); b.push(pt(t, l + 1)); }
+      s += `<polygon points="${PT(a.concat(b.reverse()))}" fill="${STR[l % 5]}" stroke="#6b4226" stroke-opacity=".45"/>`;
+    }
+    if (!mono) { const c0 = pt(150, 0), c1 = pt(150, 5); s += `<line x1="${c0[0] + (c0[0] - c1[0]) * 0.35}" y1="${c0[1] - 20}" x2="${c1[0]}" y2="${c1[1]}" stroke="#d24545" stroke-width="2" stroke-dasharray="6 4"/>`; }
+    s += '</g></g>';
+  });
+  s += F_t(20, 388, 'Đường đỏ nét đứt: mặt trục. Đối xứng: mặt trục thẳng đứng, hai cánh dốc bằng nhau · Bất đối xứng: mặt trục nghiêng,', 'font-size="12" fill-opacity=".85"') + F_t(20, 406, 'hai cánh dốc khác nhau · Đảo: một cánh bị lộn ngược · Đơn nghiêng: lớp gần ngang hai bên, gấp dốc ở giữa.', 'font-size="12" fill-opacity=".85"');
+  return [720, 414, s];
+};
+
+/* ---- Ch5: cơ chế uốn gập ---- */
+FIGS.buckling = u => {
+  let s = F_defs(u); const st = [['Ban đầu', 0, 34, 196], ['Bắt đầu mất ổn định', 8, 42, 188], ['Nếp uốn phát triển', 21, 56, 174]];
+  st.forEach((c, i) => {
+    const a = c[1], xa = c[2], xb = c[3], L = 62, pts = [];
+    for (let x = xa; x <= xb; x += 2) pts.push([x, 98 + a * Math.sin(2 * Math.PI * (x - xa) / L)]);
+    s += `<g transform="translate(${i * 240},0)">${F_ti(120, 20, c[0])}<rect x="30" y="38" width="170" height="120" rx="8" fill="#e9e4d8" stroke="#bfb8a4"/><polyline points="${PT(pts)}" fill="none" stroke="#7a4a34" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>` +
+      (i ? F_ar(u, 2, 98, 27, 98, 'r', 4) + F_ar(u, 228, 98, 203, 98, 'r', 4) : '') + '</g>';
+  });
+  s += F_t(36, 182, 'Nền mềm (độ nhớt thấp, μM)', 'font-size="12"') + F_t(36, 198, 'Lớp cứng (độ nhớt cao, μL) – bị rút ngắn song song với lớp', 'font-size="12" fill="#7a4a34" font-weight="700"');
+  return [720, 210, s];
+};
+
+/* ---- Ch5: vòm và bồn trũng ---- */
+FIGS.domeBasin = u => {
+  const cols = ['#96593a', '#b57444', '#cf9a58', '#e2c17c'], names = ['A (cổ nhất)', 'B', 'C', 'D (trẻ nhất)'];
+  let s = F_defs(u);
+  [['Vòm (dome): cổ ở giữa', 175, 1], ['Bồn trũng (basin): trẻ ở giữa', 545, -1]].forEach(([t, cx, sg], p) => {
+    s += F_ti(cx, 20, t);
+    const rx = [130, 95, 60, 28], ry = [78, 57, 37, 16], cy = 105, order = sg > 0 ? [3, 2, 1, 0] : [0, 1, 2, 3];
+    rx.forEach((r, j) => { s += `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${ry[j]}" fill="${cols[order[j]]}" stroke="#4a2f1c"/>`; });
+    for (let a = 0; a < 8; a++) {
+      const ang = a * Math.PI / 4 + 0.4, r0 = [rx[1] * 1.0, ry[1]], x0 = cx + r0[0] * Math.cos(ang) * 0.92, y0 = cy + r0[1] * Math.sin(ang) * 0.92, dx = Math.cos(ang) * 16, dy = Math.sin(ang) * 16 * 0.7;
+      s += sg > 0 ? F_ar(u, x0, y0, x0 + dx, y0 + dy, 'k', 2) : F_ar(u, x0 + dx, y0 + dy, x0, y0, 'k', 2);
+    }
+    const g = x => 46 * Math.exp(-Math.pow((x - cx) / 78, 2));
+    for (let l = 0; l < 4; l++) {
+      const a = F_ex(x => 318 - 14 * l - sg * g(x), [cx - 150, cx + 150, 5]), b = F_ex(x => 318 - 14 * (l + 1) - sg * g(x), [cx - 150, cx + 150, 5]).reverse();
+      const colr = sg > 0 ? cols[l] : cols[3 - l];
+      s += `<polygon points="${PT(a.concat(b))}" fill="${cols[l]}" stroke="#4a2f1c" stroke-opacity=".5"/>`;
+    }
+    s += F_tm(cx, 386, sg > 0 ? 'Mặt cắt: các lớp cong lên, cổ ở lõi' : 'Mặt cắt: các lớp cong xuống, trẻ ở lõi', 'font-size="12"');
+  });
+  cols.forEach((c, i) => { s += `<rect x="${230 + i * 62}" y="398" width="14" height="14" rx="3" fill="${c}" stroke="#4a2f1c"/>` + F_t(248 + i * 62, 410, names[i].split(' ')[0], 'font-size="12"'); });
+  s += F_t(20, 410, 'Tuổi (A cổ → D trẻ):', 'font-size="12"') + F_t(500, 410, 'Mũi tên: hướng dốc của lớp', 'font-size="12"');
+  return [720, 420, s];
+};
+
+/* ---- Ch6: thuận – nghịch – bằng ---- */
+FIGS.faultTypes = u => {
+  let s = F_defs(u);
+  const band = (i, x0, x1, y0, n) => { let r = ''; for (let l = 0; l < n; l++) r += `<rect x="${x0}" y="${y0 + l * 24}" width="${x1 - x0}" height="24" fill="${STR[l % 4]}"/>`; return r; };
+  ['n', 'r'].forEach((k, i) => {
+    const ox = i * 240, sg = k === 'n' ? 1 : -1, dx = 15 * sg, dy = 26 * sg, fx = y => 95 + (y - 40) / 1.732;
+    s += `<g transform="translate(${ox},0)">${F_ti(115, 20, k === 'n' ? 'Đứt gãy thuận' : 'Đứt gãy nghịch')}<clipPath id="fw${u}${i}"><rect x="10" y="40" width="210" height="200"/></clipPath><clipPath id="fl${u}${i}"><polygon points="10,40 95,40 ${fx(400)},400 10,400"/></clipPath><clipPath id="fh${u}${i}"><polygon points="95,40 400,40 400,400 ${fx(400)},400"/></clipPath>
+     <g clip-path="url(#fw${u}${i})"><rect x="10" y="40" width="210" height="200" fill="#e3e6ee"/><g clip-path="url(#fl${u}${i})">${band(0, 0, 300, 40, 9)}</g><g transform="translate(${dx},${dy})"><g clip-path="url(#fh${u}${i})">${band(0, 0, 300, 40, 9)}</g></g>
+     <line x1="95" y1="40" x2="${fx(260)}" y2="260" stroke="#d24545" stroke-width="3"/></g>`;
+    const hx = 160, hy = 118;
+    s += F_ar(u, hx, hy, hx + 20 * sg * 0.5, hy + 20 * sg * 0.866, 'k', 3) + F_ar(u, 118, 140, 118 - 10 * sg, 140 - 17 * sg, 'k', 3);
+    s += F_t(150, 62, 'vách treo', 'font-size="12" font-weight="700" style="paint-order:stroke;stroke:#fff;stroke-width:3px"') + F_t(22, 228, 'vách nằm', 'font-size="12" font-weight="700" style="paint-order:stroke;stroke:#fff;stroke-width:3px"');
+    s += (k === 'n' ? F_ar(u, 60, 32, 20, 32, 'b', 3) + F_ar(u, 170, 32, 210, 32, 'b', 3) : F_ar(u, 20, 32, 60, 32, 'r', 3) + F_ar(u, 210, 32, 170, 32, 'r', 3));
+    s += F_tm(115, 262, k === 'n' ? 'vách treo trượt xuống · kéo giãn' : 'vách treo trượt lên · ép ngắn', 'font-size="12"') + '</g>';
+  });
+  s += `<g transform="translate(480,0)">${F_ti(115, 20, 'Đứt gãy bằng phải')}<rect x="10" y="40" width="210" height="200" rx="6" fill="#efe9d6"/>
+   <rect x="10" y="108" width="105" height="14" fill="#8b93a3"/><rect x="115" y="134" width="105" height="14" fill="#8b93a3"/>
+   <line x1="115" y1="40" x2="115" y2="240" stroke="#d24545" stroke-width="3"/>${F_ar(u, 62, 195, 62, 160, 'k', 3)}${F_ar(u, 168, 70, 168, 105, 'k', 3)}
+   ${F_tm(115, 262, 'nhìn sang khối đối diện: lệch về bên phải', 'font-size="12"')}</g>`;
+  return [720, 276, s];
+};
+
+/* ---- Ch6: địa luỹ – địa hào ---- */
+FIGS.horstGraben = u => {
+  let s = F_defs(u); const tn = Math.tan(70 * Math.PI / 180), U = y => (y - 40) / tn, X0 = [120, 280, 440, 600], sg = [1, -1, 1, -1], D = 38;
+  const fx = (i, y) => X0[i] + sg[i] * U(y);
+  const e = D / tn, regs = [[null, 0, [-2 * e, 0]], [0, 1, [-e, D]], [1, 2, [0, 0]], [2, 3, [e, D]], [3, null, [2 * e, 0]]];
+  s += `<clipPath id="hw${u}"><rect x="10" y="40" width="700" height="200"/></clipPath><g clip-path="url(#hw${u})"><rect x="10" y="40" width="700" height="200" fill="#e3e6ee"/>`;
+  regs.forEach((r, i) => {
+    const L = r[0] === null ? [[-200, 40], [-200, 400]] : [[fx(r[0], 40), 40], [fx(r[0], 400), 400]], Rr = r[1] === null ? [[900, 40], [900, 400]] : [[fx(r[1], 40), 40], [fx(r[1], 400), 400]];
+    let b = ''; for (let l = 0; l < 10; l++) b += `<rect x="-300" y="${40 + l * 26}" width="1400" height="26" fill="${STR[l % 4]}"/>`;
+    s += `<clipPath id="hr${u}${i}"><polygon points="${PT([L[0], Rr[0], Rr[1], L[1]])}"/></clipPath><g transform="translate(${r[2][0]},${r[2][1]})"><g clip-path="url(#hr${u}${i})">${b}</g></g>`;
+  });
+  for (let i = 0; i < 4; i++) { const o = [-2 * e, 0, 0, 2 * e][i]; s += `<line x1="${fx(i, 40) + o}" y1="40" x2="${fx(i, 240) + o}" y2="240" stroke="#d24545" stroke-width="3"/>`; }
+  s += '</g>';
+  s += F_ar(u, 205, 32, 205, 32, 'k', 0);
+  [[200, 'Địa hào (graben)'], [360, 'Địa luỹ (horst)'], [520, 'Địa hào (graben)']].forEach(([x, t]) => { s += F_tm(x, 34, t, 'font-weight="700" font-size="13"'); });
+  s += F_ar(u, 20, 20, 10, 20, 'b', 0) + F_ar(u, 640, 258, 700, 258, 'b', 3) + F_ar(u, 80, 258, 20, 258, 'b', 3) + F_tm(360, 262, 'Kéo giãn vỏ: nhiều đứt gãy thuận kề nhau tạo địa luỹ và địa hào xen kẽ', 'font-size="12"');
+  return [720, 272, s];
+};
+
+/* ---- Ch7: ba kiểu bất chỉnh hợp ---- */
+FIGS.unconform = u => {
+  let s = F_defs(u); const surf = (x, y0) => y0 + 5 * Math.sin(x / 9) + 3 * Math.sin(x / 3.3);
+  const tp = [['Bất chỉnh hợp góc', 132], ['Giả chỉnh hợp', 140], ['Không chỉnh hợp', 140]];
+  tp.forEach((c, i) => {
+    const ox = i * 240, y0 = c[1], sp = F_ex(x => surf(x, y0), [10, 220, 3]);
+    let low = '';
+    if (i === 0) { for (let l = -8; l < 10; l++) low += `<rect x="-120" y="${100 + l * 22}" width="460" height="22" fill="${['#9aa5b8', '#c8d0de'][((l % 2) + 2) % 2]}" transform="rotate(-28 115 150)"/>`; }
+    else if (i === 1) { for (let l = 0; l < 6; l++) low += `<rect x="0" y="${y0 - 10 + l * 24}" width="240" height="24" fill="${['#9aa5b8', '#c8d0de'][l % 2]}"/>`; }
+    else low = `<rect x="0" y="${y0 - 10}" width="240" height="130" fill="url(#gr${u})"/>`;
+    let up = ''; for (let l = 0; l < 6; l++) up += `<rect x="0" y="${y0 + 12 - (l + 1) * 22}" width="240" height="22" fill="${['#e2c17c', '#cf9a58'][l % 2]}"/>`;
+    s += `<g transform="translate(${ox},0)">${F_ti(115, 22, c[0])}<clipPath id="uw${u}${i}"><rect x="10" y="40" width="210" height="200" rx="6"/></clipPath><clipPath id="ul${u}${i}"><polygon points="${PT(sp.concat([[220, 260], [10, 260]]))}"/></clipPath><clipPath id="uu${u}${i}"><polygon points="${PT(sp.concat([[220, 0], [10, 0]]))}"/></clipPath>
+     <g clip-path="url(#uw${u}${i})"><rect x="10" y="40" width="210" height="200" fill="var(--bg)"/><g clip-path="url(#ul${u}${i})">${low}</g><g clip-path="url(#uu${u}${i})">${up}</g>
+     <polyline points="${PT(sp)}" fill="none" stroke="#d24545" stroke-width="3"/>`;
+    if (i !== 1) for (let p = 0; p < 9; p++) s += `<circle cx="${28 + p * 22}" cy="${surf(28 + p * 22, y0) - 4}" r="${3 + (p % 3)}" fill="#f6efe0" stroke="#6b4226"/>`;
+    s += '</g>' + F_t(100, y0 + 62, 'mặt bất chỉnh hợp', 'display="none"') + '</g>';
+  });
+  const cap = ['Lớp dưới nghiêng, bị cắt cụt|lớp trên nằm ngang', 'Lớp trên và dưới song song,|ngăn bởi mặt bào mòn', 'Trầm tích phủ lên đá|magma/biến chất bị bào mòn'];
+  cap.forEach((t, i) => t.split('|').forEach((ln, j) => { s += F_tm(i * 240 + 115, 260 + j * 16, ln, 'font-size="12"'); }));
+  s += F_t(20, 300, 'Đường đỏ: mặt bất chỉnh hợp · Các hạt tròn sáng: cuội kết cơ sở (basal conglomerate) nằm ngay trên mặt bào mòn', 'font-size="12" fill-opacity=".85"');
+  return [720, 310, s];
+};
+
+/* ---- Ch7: quan hệ xuyên cắt ---- */
+FIGS.crossCut = u => {
+  let s = F_defs(u); const sf = x => 165 + 5 * Math.sin(x / 40) + 3 * Math.sin(x / 13), sp = F_ex(sf, [10, 710, 5]);
+  let A = ''; for (let l = -20; l < 24; l++) A += `<rect x="-500" y="${l * 24}" width="1800" height="24" fill="${['#9aa5b8', '#c8d0de'][((l % 2) + 2) % 2]}" transform="rotate(-22 360 180)"/>`;
+  let C = '', E = ''; for (let l = 0; l < 4; l++) C += `<rect x="0" y="${105 + l * 20}" width="720" height="20" fill="${['#e2c17c', '#cf9a58'][l % 2]}"/>`; for (let l = 0; l < 3; l++) E += `<rect x="0" y="${30 + l * 25}" width="720" height="25" fill="${['#cfe6c6', '#a8cf9f'][l % 2]}"/>`;
+  s += `<clipPath id="cw${u}"><rect x="10" y="30" width="700" height="270" rx="8"/></clipPath><clipPath id="ccl${u}"><polygon points="${PT(sp.concat([[710, 300], [10, 300]]))}"/></clipPath><clipPath id="ccu${u}"><polygon points="${PT(sp.concat([[710, 105], [10, 105]]))}"/></clipPath>
+   <g clip-path="url(#cw${u})"><rect x="10" y="30" width="700" height="270" fill="var(--bg)"/>${A}
+   <g clip-path="url(#ccl${u})"><ellipse cx="230" cy="245" rx="135" ry="72" fill="url(#gr${u})" stroke="#8a4b45" stroke-width="2"/></g>
+   <g clip-path="url(#ccu${u})">${C}</g>
+   <polygon points="412,300 428,300 520,105 504,105" fill="#2f6b3f" stroke="#1d4527"/>
+   ${E}
+   <line x1="600" y1="30" x2="548" y2="300" stroke="#d24545" stroke-width="4"/></g>`;
+  const lab = (x, y, t, c = '#111') => `<circle cx="${x}" cy="${y}" r="13" fill="#fff" stroke="${c}" stroke-width="2"/>` + F_tm(x, y + 5, t, 'font-weight="700" font-size="14" fill="#111"');
+  s += lab(90, 238, 'A') + lab(240, 250, 'B') + lab(150, 145, 'C') + lab(470, 220, 'D', '#1d4527') + lab(300, 68, 'E') + lab(586, 220, 'F', '#d24545');
+  s += F_ar(u, 660, 190, 660, 220, 'k', 3) + F_ar(u, 640, 245, 640, 215, 'k', 3);
+  s += F_t(20, 318, 'Từ trẻ đến cổ: F → E → D → C → B → A  (F cắt tất cả; E phủ C và D; D cắt A, B, C; C phủ mặt bào mòn của A, B; B cắt A)', 'font-size="12" fill-opacity=".9"');
+  return [720, 326, s];
+};
+
+
+/* ---- Ch7: sơ đồ tư duy thang thời gian ---- */
+FIGS.mindmap = u => {
+  const T = ['Trái Đất', '≈ 4567 Ma', null, [
+    ['Hadean', 'Minh cổ · 4567–4000', '#8c4a3c', []],
+    ['Archean', 'Thái cổ · 4000', '#b3562f', [['Eoarchean', '4000'], ['Paleoarchean', '3600'], ['Mesoarchean', '3200'], ['Neoarchean', '2800']]],
+    ['Proterozoic', 'Nguyên sinh · 2500', '#3f7f6b', [
+      ['Paleoproterozoic', '2500', [['Siderian', '2500'], ['Rhyacian', '2300'], ['Orosirian', '2050'], ['Statherian', '1800']]],
+      ['Mesoproterozoic', '1600', [['Calymmian', '1600'], ['Ectasian', '1400'], ['Stenian', '1200']]],
+      ['Neoproterozoic', '1000', [['Tonian', '1000'], ['Cryogenian', '720'], ['Ediacaran', '635']]]]],
+    ['Phanerozoic', 'Hiển sinh · 541', '#2a7bbf', [
+      ['Paleozoic', 'Cổ sinh · 541', [['Cambrian', '541'], ['Ordovician', '485,4'], ['Silurian', '443,8'], ['Devonian', '419,2'], ['Carboniferous', '358,9'], ['Permian', '298,9']]],
+      ['Mesozoic', 'Trung sinh · 252,2', [['Triassic', '252,2'], ['Jurassic', '201,3'], ['Cretaceous', '145']]],
+      ['Cenozoic', 'Tân sinh · 66', [['Paleogene', '66'], ['Neogene', '23,03'], ['Quaternary', '2,58']]]]]]];
+  const RH = 27, X = [8, 178, 410, 650], Wd = [130, 196, 190, 190];
+  let row = 0, out = '', nodes = '';
+  const node = (lv, x, y, name, sub, col, fillMode) => {
+    const w = Wd[lv], h = 22, fill = fillMode ? col : col + '22';
+    return `<rect x="${x}" y="${y - h / 2}" width="${w}" height="${h}" rx="${h / 2}" fill="${fill}" stroke="${col}" stroke-width="1.6"/>` +
+      `<text x="${x + 10}" y="${y + 4.5}" font-size="${lv === 0 ? 14 : 12.5}" font-weight="${lv < 2 ? 700 : 600}" fill="${fillMode ? '#fff' : 'currentColor'}">${name}<tspan font-weight="400" font-size="11" dx="5" fill="${fillMode ? '#ffffffcc' : 'currentColor'}" fill-opacity="${fillMode ? 1 : .7}">${sub}</tspan></text>`;
+  };
+  const link = (x1, y1, x2, y2, col) => `<path d="M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}" fill="none" stroke="${col}" stroke-width="2.2" stroke-opacity=".75"/>`;
+  // bố cục: mỗi lá một hàng
+  const place = (n, lv, col) => { // trả về y
+    const kids = lv === 1 ? n[3] : lv === 2 ? (n[2] || []) : [];
+    if (!kids.length) { const y = 20 + (row++) * RH; return y; }
+    return null;
+  };
+  const eons = T[3], ys = { eon: [] };
+  const layout = [];
+  eons.forEach(eo => {
+    const eraKids = eo[3];
+    const e = { eo, eras: [] };
+    if (!eraKids.length) { e.y = 20 + (row++) * RH; }
+    else {
+      eraKids.forEach(er => {
+        const pk = er[2] || [], E = { er, per: [] };
+        if (!pk.length) E.y = 20 + (row++) * RH;
+        else { pk.forEach(p => E.per.push({ p, y: 20 + (row++) * RH })); E.y = (E.per[0].y + E.per[E.per.length - 1].y) / 2; }
+        e.eras.push(E);
+      });
+      e.y = (e.eras[0].y + e.eras[e.eras.length - 1].y) / 2;
+    }
+    layout.push(e);
+  });
+  const rootY = (layout[0].y + layout[layout.length - 1].y) / 2;
+  layout.forEach(e => {
+    const col = e.eo[2];
+    out += link(X[0] + Wd[0], rootY, X[1], e.y, col);
+    nodes += node(1, X[1], e.y, e.eo[0], e.eo[1], col, true);
+    e.eras.forEach(E => {
+      out += link(X[1] + Wd[1], e.y, X[2], E.y, col);
+      nodes += node(2, X[2], E.y, E.er[0], E.er[1], col, false);
+      E.per.forEach(P => { out += link(X[2] + Wd[2], E.y, X[3], P.y, col); nodes += node(3, X[3], P.y, P.p[0], P.p[1], col, false); });
+    });
+  });
+  nodes += node(0, X[0], rootY, T[0], T[1], '#444', true).replace('font-size="14"', 'font-size="13.5"');
+  const H = 20 + row * RH + 6;
+  return [860, H + 24, `<g transform="translate(0,4)">${out}${nodes}</g><text x="8" y="${H + 16}" font-size="12" fill-opacity=".75">Số cuối mỗi nút: thời điểm bắt đầu (triệu năm trước, Ma). Cột: liên đại → đại → kỷ.</text>`];
+};
+
+W.fig = el => {
+  const f = FIGS[el.dataset.name]; if (!f) throw new Error('không có hình ' + el.dataset.name);
+  const u = ++FIGU, [w, h, body] = f(u);
+  el.innerHTML = `<figure class="fig"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${el.dataset.cap || ''}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif">${body}</svg>${el.dataset.cap ? `<figcaption>${el.dataset.cap}</figcaption>` : ''}</figure>`;
+};
+
+</script>
+<script>
+/* Khung ứng dụng: mục lục, định tuyến theo hash, tiến độ học, giao diện sáng/tối.
+   Đổi SITE.title / SITE.sub cho từng môn. Không chứa câu hỏi kiểm tra (quiz làm ở web khác). */
+const SITE = { title: 'Địa chất kiến trúc & Đo vẽ bản đồ địa chất', sub: 'ĐCKT & ĐVBĐĐC · ĐH Bách khoa TP.HCM · Khoa Kỹ thuật Địa chất & Dầu khí' };
+const CH = window.CHAPTERS;
+const $ = (s, r = document) => r.querySelector(s);
+const side = $('#side'), main = $('#main');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let done = store.get('done', {});
+const colors = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--accent)'];
+const col = i => colors[i % colors.length];
+
+function buildSide() {
+  const total = CH.reduce((n, c) => n + c.sections.length, 0), got = Object.keys(done).length;
+  side.innerHTML = `<h1>${SITE.title}</h1><div class="sub">${SITE.sub}</div>
+  <div class="bar"><i style="width:${Math.round(got / total * 100)}%"></i></div>
+  <div class="sub" style="margin-top:4px">Đã học ${got}/${total} mục</div>
+  <div class="chap"><button data-go="home"><span class="num" style="background:var(--accent)">⌂</span>Trang chủ</button></div>` +
+    CH.map((c, i) => `<div class="chap" data-c="${c.id}"><button data-toggle="${c.id}"><span class="num" style="background:${col(i)}">${c.num}</span>${c.title}</button>
+    <div class="sec">${c.sections.map(s => `<a href="#${c.id}/${s.id}" data-s="${c.id}/${s.id}"><span>${s.title}</span><span class="tick">${done[c.id + '/' + s.id] ? '✓' : ''}</span></a>`).join('')}</div></div>`).join('') +
+    `<div class="tools"><button id="theme">🌓 Sáng/Tối</button><button id="reset">↺ Xoá tiến độ</button></div>`;
+}
+side.addEventListener('click', e => {
+  const t = e.target.closest('[data-toggle]');
+  if (t) { t.parentElement.classList.toggle('open'); return; }
+  const g = e.target.closest('[data-go]');
+  if (g) { location.hash = ''; side.classList.remove('on'); }
+  if (e.target.closest('a')) side.classList.remove('on');
+  if (e.target.id === 'theme') { const d = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = d ? '' : 'dark'; store.set('theme', d ? '' : 'dark'); }
+  if (e.target.id === 'reset' && confirm('Xoá toàn bộ tiến độ học?')) { done = {}; store.set('done', done); buildSide(); route(); }
+});
+$('#menuBtn').onclick = () => side.classList.toggle('on');
+document.documentElement.dataset.theme = store.get('theme', '');
+
+function mark(key) { if (!done[key]) { done[key] = 1; store.set('done', done); buildSide(); openActive(); } }
+function openActive() {
+  const h = location.hash.slice(1), cid = h.split('/')[0];
+  document.querySelectorAll('.chap').forEach(c => c.classList.toggle('open', c.dataset.c === cid));
+  document.querySelectorAll('.sec a').forEach(a => a.classList.toggle('active', a.dataset.s === h));
+}
+function home() {
+  main.innerHTML = `<div class="hero"><span class="pill">Web học tập tương tác</span><h2>${SITE.title}</h2><p>Bảy chương đi từ bối cảnh kiến tạo, biến dạng, thế nằm, nếp uốn – đứt gãy đến địa tầng học, với hình minh hoạ và công cụ tính tương tác.</p></div>
+  <div class="grid">${CH.map((c, i) => `<a class="mini click" style="text-decoration:none;color:inherit;border-top:5px solid ${col(i)}" href="#${c.id}/${c.sections[0].id}"><h4>Chương ${c.num}. ${c.title}</h4><div style="font-size:14px;color:var(--muted)">${c.blurb || ''}</div><div style="margin-top:8px;font-size:13px"><b>${c.sections.length}</b> bài</div></a>`).join('')}</div>`;
+  mountWidgets(main); openActive();
+}
+function chapterPage(c, s) {
+  const i = c.sections.indexOf(s), prev = c.sections[i - 1], next = c.sections[i + 1];
+  main.innerHTML = `<div class="crumb">Chương ${c.num} · ${c.title}</div><h2 class="st">${s.title}</h2>${s.html}
+  <div class="pager">${prev ? `<a class="btn" href="#${c.id}/${prev.id}">← ${prev.title}</a>` : '<span></span>'}${next ? `<a class="btn primary" href="#${c.id}/${next.id}">${next.title} →</a>` : '<span></span>'}</div>`;
+  mountWidgets(main); mark(c.id + '/' + s.id);
+}
+function route() {
+  const h = location.hash.slice(1); window.scrollTo(0, 0);
+  if (!h) home();
+  else {
+    const [cid, sid] = h.split('/'), c = CH.find(x => x.id === cid);
+    if (!c) home(); else chapterPage(c, c.sections.find(x => x.id === sid) || c.sections[0]);
+  }
+  openActive();
+}
+window.addEventListener('hashchange', route);
+buildSide(); route();
+
+</script>
+</body>
+</html>

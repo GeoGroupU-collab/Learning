@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trắc địa công trình – Học tương tác</title>
+<style>
+:root{
+  --bg:#f6f7fb;--panel:#fff;--ink:#1c2333;--muted:#5d6780;--line:#dfe3ee;
+  --brand:#1f5fbf;--brand2:#0f3d82;--accent:#e8912d;--ok:#1b9a5b;--bad:#d24545;
+  --c1:#1f5fbf;--c2:#7a3fb8;--c3:#0e8a7d;
+  --shadow:0 2px 10px rgba(20,30,60,.08);
+}
+:root[data-theme=dark]{
+  --bg:#12151e;--panel:#1b2030;--ink:#e6e9f2;--muted:#9aa4bd;--line:#2c3348;
+  --brand:#6ea3ff;--brand2:#9dc1ff;--accent:#f0a850;--shadow:0 2px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--brand)}
+#app{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto;padding:16px 14px}
+aside h1{font-size:18px;margin:0 0 2px;color:var(--brand2)}
+aside .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.chap{margin:6px 0}
+.chap>button{width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:8px;font:600 14px inherit;color:var(--ink);cursor:pointer;display:flex;gap:8px;align-items:center}
+.chap>button:hover{background:var(--bg)}
+.chap.open>button{background:var(--bg)}
+.chap .num{width:24px;height:24px;border-radius:50%;color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.sec{display:none;margin:2px 0 6px 18px;border-left:2px solid var(--line)}
+.chap.open .sec{display:block}
+.sec a{display:flex;justify-content:space-between;padding:4px 10px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:6px}
+.sec a:hover{background:var(--bg);color:var(--ink)}
+.sec a.active{color:var(--brand);font-weight:600;background:var(--bg)}
+.sec a .tick{color:var(--ok)}
+.tools{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tools button,.btn{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:6px 11px;border-radius:8px;cursor:pointer;font:13px inherit}
+.tools button:hover,.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+main{padding:28px min(5vw,56px) 80px;max-width:1080px;width:100%}
+.topbar{display:none}
+.hero{background:linear-gradient(135deg,var(--brand2),var(--brand));color:#fff;border-radius:16px;padding:28px;margin-bottom:22px}
+.hero h2{margin:0 0 6px;font-size:26px}
+.hero p{margin:0;opacity:.92}
+.hero .pill{display:inline-block;background:rgba(255,255,255,.18);padding:2px 10px;border-radius:99px;font-size:12px;margin-bottom:8px}
+h2.st{font-size:24px;margin:0 0 4px;color:var(--brand2)}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:17px}
+.card h4{margin:14px 0 6px;font-size:15px}
+.note,.warn,.key,.check{border-radius:12px;padding:12px 16px;margin:14px 0;font-size:15px;border-left:5px solid}
+.note{background:rgba(31,95,191,.08);border-color:var(--brand)}
+.key{background:rgba(232,145,45,.12);border-color:var(--accent)}
+.warn{background:rgba(210,69,69,.09);border-color:var(--bad)}
+.check{background:rgba(27,154,91,.1);border-color:var(--ok)}
+.note b:first-child,.key b:first-child,.warn b:first-child,.check b:first-child{display:block;margin-bottom:2px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:rgba(31,95,191,.1)}
+.tw{overflow-x:auto}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.mini{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.mini h4{margin:0 0 4px}
+.mini.click{cursor:pointer;transition:.15s}
+.mini.click:hover,.mini.sel{border-color:var(--brand);transform:translateY(-1px);box-shadow:var(--shadow)}
+.lab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;font-size:14px}
+.lab input[type=range]{flex:1;min-width:140px}
+.lab select,.lab input[type=number],.lab input[type=text]{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.val{font-weight:700;color:var(--brand);min-width:52px}
+canvas,svg.w{max-width:100%;background:var(--bg);border-radius:12px;border:1px solid var(--line)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tag{display:inline-block;font-size:12px;padding:1px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);margin:2px 3px 2px 0}
+.tag.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.bar{height:14px;background:var(--bg);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#6ea3ff)}
+.tl{position:relative;margin:14px 0 6px;padding-left:20px;border-left:3px solid var(--brand)}
+.tl .ev{position:relative;margin:0 0 12px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.tl .ev:before{content:"";position:absolute;left:-30px;top:14px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--brand)}
+.tl .ev.open{border-color:var(--brand)}
+.tl .ev .d{display:none;color:var(--muted);font-size:14px;margin-top:4px}
+.tl .ev.open .d{display:block}
+.tl .ev b{color:var(--brand2)}
+.pager{display:flex;justify-content:space-between;margin-top:30px;gap:10px}
+.mtab{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.mtab button{padding:5px 11px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;cursor:pointer;font:13px inherit}
+.mtab button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+sub,sup{line-height:0}
+.ov{text-decoration:overline}
+.res{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+.sw{display:inline-block;width:18px;height:18px;border-radius:4px;vertical-align:middle;border:1px solid var(--line)}
+@media(max-width:860px){
+  #app{grid-template-columns:1fr}
+  aside{position:fixed;left:-310px;width:290px;z-index:20;transition:.2s;box-shadow:var(--shadow)}
+  aside.on{left:0}
+  .topbar{display:flex;position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 14px;gap:10px;align-items:center}
+  .two{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar"><button class="btn" id="menuBtn">☰ Mục lục</button><b>Trắc địa công trình</b></div>
+<div id="app">
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+<!-- Thêm mỗi chương một file content: content1.js, content2.js, ... -->
+<script>
+/* Chương 1A: Các khái niệm cơ bản của trắc địa công trình */
+window.CHAPTERS = window.CHAPTERS || [];
+window.CHAPTERS.push({
+ id: 'c1', num: '1A', title: 'Các khái niệm cơ bản của trắc địa công trình',
+ blurb: 'Trắc địa là gì, các loại trắc địa, phép đo cơ bản, lưới khống chế, đơn vị, tỷ lệ, lý thuyết sai số và nguyên tắc làm việc.',
+ sections: [
+  { id: 'trac-dia-la-gi', title: '1. Trắc địa là gì?', html: `
+   <p>Trước khi đi vào các con số, ta cần biết nghề trắc địa làm gì và vì sao mọi công trình xây dựng đều bắt đầu từ nó.</p>
+   <div class="key"><b>Định nghĩa</b>Trắc địa là việc <b>quan sát tổng thể, bằng cách quan sát và đo đạc để xác định ranh giới, kích thước, vị trí, số lượng, tình trạng, giá trị…</b> của đất đai, bất động sản, công trình, trang trại, mỏ… và cuối cùng <b>trình bày dữ liệu khảo sát dưới một hình thức thích hợp</b>.</div>
+   <p>Một cách nói ngắn hơn: trắc địa là <b>nghệ thuật đo đạc các vị trí tương đối</b> của các đặc điểm tự nhiên và nhân tạo trên bề mặt Trái Đất, rồi <b>thể hiện thông tin đó dưới dạng đồ họa hoặc số liệu</b>. Vì vậy có thể tóm gọn: <b>trắc địa = khoa học đo đạc + nghệ thuật biểu diễn</b>.</p>
+   <p>Khái niệm này bao trùm nhiều nhóm nghề: trắc địa viên định giá, trắc địa viên khối lượng, trắc địa viên xây dựng, trắc địa viên mỏ và trắc địa viên đất đai.</p>
+   <h3>Vai trò của kỹ sư trắc địa trong xây dựng dân dụng</h3>
+   <div class="grid">
+    <div class="mini"><h4>① Giữ trật tự hình học</h4>Duy trì đúng vị trí, hướng, độ cao của các bộ phận trong suốt quá trình thi công.</div>
+    <div class="mini"><h4>② Cung cấp dữ liệu nền</h4>Số liệu cơ bản cho công tác thiết kế và lập kế hoạch.</div>
+    <div class="mini"><h4>③ Kiểm soát khối lượng</h4>Ví dụ khối lượng đào, đắp trong quá trình xây dựng.</div>
+    <div class="mini"><h4>④ Theo dõi sau thi công</h4>Quan trắc độ võng, biến dạng… của công trình đã hoàn thành.</div>
+   </div>
+   <h3>Trắc địa xuất hiện ở đâu?</h3>
+   <ul><li>Quy hoạch đô thị và phân lô đất đai.</li><li>Đường cao tốc, đường sắt và cầu.</li><li>Khai thác mỏ, đường ống dẫn và các dự án dầu khí.</li><li>Công trình thủy lợi như đập và kênh.</li></ul>
+   <div class="note"><b>Tóm tắt chương (bốn ý chính)</b>1) Trắc địa = khoa học đo đạc + nghệ thuật biểu diễn. 2) Các khái niệm chính: khảo sát sơ bộ, lưới khống chế, xác định vị trí, đo chi tiết. 3) Luôn cân bằng giữa độ chính xác và tính kinh tế. 4) Dụng cụ hiện đại: máy toàn đạc điện tử, GPS, mô hình số địa hình (DTM).</div>` },
+
+  { id: 'phan-loai', title: '2. Các loại trắc địa', html: `
+   <p>Trắc địa được chia theo nhiều tiêu chí. Ta xem ba lớp phân loại: theo <b>cách xét hình dạng Trái Đất</b>, theo <b>mục đích công việc</b> và theo <b>phương tiện đo</b>.</p>
+   <h3>Theo cách xét hình dạng Trái Đất</h3>
+   <div class="two">
+    <div class="card"><h3>Trắc địa trắc lượng <span class="tag">Geodetic</span></h3>Xét đến <b>hình dạng thật</b> của Trái Đất. Độ chính xác cao, bao quát <b>khu vực rộng lớn</b>.</div>
+    <div class="card"><h3>Trắc địa phẳng <span class="tag">Plane</span></h3>Coi bề mặt trung bình của Trái Đất là <b>mặt phẳng</b>, bỏ qua dạng cầu khi tính khoảng cách và phương ngang.</div>
+   </div>
+   <div class="key"><b>Ghi nhớ</b>Ngoại trừ trắc địa khống chế, hầu hết các loại trắc địa dưới đây thường làm theo phương pháp trắc địa phẳng. Tuy nhiên có thể dùng phương pháp trắc lượng nếu khảo sát phủ một khu vực rộng hoặc đòi hỏi độ chính xác cao.</div>
+   <h3>Theo mục đích: 10 loại trắc địa cụ thể</h3>
+   <p>Bấm vào thẻ hoặc dùng bộ lọc để xem từng loại.</p>
+   <div data-w="filtercards" data-items='[
+    ["1. Trắc địa khống chế (Control)","Thiết lập mạng lưới các mốc khống chế ngang và đứng làm khung tham chiếu để triển khai các khảo sát khác.","Nền tảng"],
+    ["2. Trắc địa địa hình (Topographic)","Xác định vị trí các yếu tố tự nhiên và nhân tạo cùng cao độ để lập bản đồ.","Nền tảng"],
+    ["3. Đất đai, ranh giới, địa chính","Xác định ranh giới đất đai và các mốc ranh giới. Thuật ngữ “địa chính” hiện nay thường dùng cho các khảo sát thuộc hệ thống đất công.","Đất đai"],
+    ["4. Trắc địa thủy văn (Hydrographic)","Xác định đường bờ và độ sâu của hồ, sông, biển, hồ chứa và các thủy vực khác.","Đặc thù"],
+    ["5. Trắc địa tuyến (Alignment)","Quy hoạch, thiết kế và xây dựng đường bộ, đường sắt, đường ống và các công trình tuyến khác.","Xây dựng"],
+    ["6. Trắc địa xây dựng (Construction)","Cung cấp tuyến, độ dốc, cao độ khống chế, vị trí ngang, kích thước và cấu hình cho thi công; đồng thời thu dữ liệu tính khối lượng thanh toán.","Xây dựng"],
+    ["7. Trắc địa hoàn công (As built)","Ghi nhận chính xác vị trí cuối cùng và bố cục của công trình, lưu lại những thay đổi thiết kế đã áp dụng trong thi công.","Xây dựng"],
+    ["8. Trắc địa mỏ (Mine)","Thực hiện trên mặt đất và dưới lòng đất để định hướng đào hầm và hoạt động khai thác; gồm cả khảo sát địa vật lý thăm dò khoáng sản, năng lượng.","Đặc thù"],
+    ["9. Trắc địa mặt trời (Solar)","Lập bản đồ ranh giới bất động sản, hành lang chiếu sáng mặt trời, các vật cản theo góc chiếu của mặt trời; đáp ứng yêu cầu của hội đồng quy hoạch và công ty bảo hiểm quyền sở hữu.","Đặc thù"],
+    ["10. Quang trắc (Optical tooling)","Còn gọi là trắc địa công nghiệp hay căn chỉnh quang học: đo cực kỳ chính xác cho các quy trình sản xuất có dung sai nhỏ.","Đặc thù"]
+   ]'></div>
+   <h3>Theo phương tiện đo</h3>
+   <div class="tw"><table><tr><th>Loại</th><th>Cách thực hiện</th></tr>
+   <tr><td><b>Trắc địa mặt đất</b> (Ground)</td><td>Dùng thiết bị đặt trên mặt đất: máy thủy bình tự động, máy toàn đạc điện tử…</td></tr>
+   <tr><td><b>Trắc địa hàng không</b> (Aerial)</td><td>Ảnh hàng không (máy ảnh gắn máy bay) hoặc viễn thám (máy ảnh và các cảm biến khác gắn trên máy bay hoặc vệ tinh).</td></tr>
+   <tr><td><b>Trắc địa vệ tinh</b> (Satellite)</td><td>Xác định vị trí mặt đất qua phép đo đến vệ tinh bằng máy thu GNSS, hoặc dùng ảnh vệ tinh để lập bản đồ và giám sát các khu vực rộng.</td></tr></table></div>
+   <div class="note"><b>Mở rộng</b>GNSS là tên chung của các hệ định vị vệ tinh toàn cầu (GPS của Mỹ chỉ là một trong số đó).</div>` },
+
+  { id: 'phep-do-co-ban', title: '3. Các phép đo cơ bản và dụng cụ', html: `
+   <p>Dù công nghệ thay đổi, mọi công việc đo đạc rốt cuộc chỉ xoay quanh <b>bốn loại đại lượng</b>: hai loại khoảng cách và hai loại góc.</p>
+   <div class="tw"><table><tr><th>Phép đo</th><th>Ý nghĩa</th><th>Dụng cụ thường dùng</th></tr>
+    <tr><td><b>1. Khoảng cách ngang</b></td><td>Chiều dài quy về mặt phẳng nằm ngang</td><td>thước dây, xích, máy đo cực (tacheometer), EDM (máy đo dài điện tử), bước chân, đồng hồ đo quãng đường…</td></tr>
+    <tr><td><b>2. Khoảng cách đứng</b></td><td>Chênh cao giữa các điểm</td><td>máy thủy chuẩn, máy đo cực</td></tr>
+    <tr><td><b>3. Góc ngang</b></td><td>Góc giữa hai hướng, đo trong mặt phẳng nằm ngang</td><td>kinh vĩ, la bàn</td></tr>
+    <tr><td><b>4. Góc đứng</b></td><td>Góc nghiêng của hướng ngắm so với phương ngang</td><td>kinh vĩ, máy đo độ dốc</td></tr></table></div>
+   <h3>Vì sao phải “chiếu lên mặt phẳng”?</h3>
+   <p>Địa hình gồ ghề, nhưng bản vẽ thì phẳng. Vì thế điều ta thể hiện trên bản vẽ là <b>hình chiếu</b> các điểm lên một mặt phẳng: khoảng cách đo dọc theo dốc (khoảng cách nghiêng) phải đổi thành khoảng cách ngang, và phần chênh lệch độ cao được tách riêng thành chênh cao. Đó chính là lý do tồn tại hai loại khoảng cách và hai loại góc.</p>
+   <div class="card"><h3>Thử ngay: nghiêng – ngang – đứng</h3><p style="margin-top:0">Điểm B nằm cao hơn A. Đổi <b>khoảng cách nghiêng S</b>, <b>góc đứng α</b> để xem khoảng cách ngang và chênh cao thay đổi thế nào; góc ngang θ nằm trong mặt bằng.</p><div data-w="basicMeas"></div></div>
+   <div class="key"><b>Công thức</b>Khoảng cách ngang D = S·cos α &nbsp;·&nbsp; Chênh cao ΔH = S·sin α (α là góc đứng so với phương ngang).</div>
+   <div class="note"><b>Mở rộng</b>Hai công thức trên là lượng giác của tam giác vuông tạo bởi S, D, ΔH; khi α nhỏ thì D ≈ S, nhưng khi dốc lớn thì chênh lệch giữa S và D không thể bỏ qua.</div>` },
+
+  { id: 'luoi-khong-che', title: '4. Lưới khống chế', html: `
+   <p>Lưới khống chế là <b>khung tham chiếu</b> gồm các điểm đã biết vị trí (và độ cao) rất chính xác, đặt rải khắp khu vực. Mọi phép đo chi tiết sau đó đều “bám” vào các điểm này.</p>
+   <h3>Vì sao phải có lưới khống chế? (6 vai trò)</h3>
+   <div class="grid">
+    <div class="mini"><h4>1. Khung tham chiếu ban đầu</h4>Cung cấp hệ tọa độ và độ cao chuẩn làm cơ sở cho đo chi tiết; bảo đảm thống nhất giữa các giai đoạn khảo sát – thiết kế – thi công – nghiệm thu.</div>
+    <div class="mini"><h4>2. Độ chính xác &amp; tin cậy</h4>Kiểm soát sai số toàn bộ quá trình đo; cho phép kiểm tra chéo độc lập để tăng độ tin cậy.</div>
+    <div class="mini"><h4>3. Phục vụ bố trí công trình</h4>Định vị chính xác các hạng mục trên thực địa; hỗ trợ chuyển thiết kế từ bản vẽ ra thực địa (setting-out).</div>
+    <div class="mini"><h4>4. Cơ sở đo vẽ chi tiết</h4>Trên nền lưới có thể đo chi tiết địa hình, địa vật; dễ cập nhật, bổ sung khi công trình mở rộng hay cải tạo.</div>
+    <div class="mini"><h4>5. Quan trắc biến dạng</h4>Là mốc chuẩn theo dõi dịch chuyển, biến dạng của đập, cầu, nhà cao tầng…; bảo đảm số liệu so sánh được qua thời gian.</div>
+    <div class="mini"><h4>6. Kinh tế – hiệu quả</h4>Lập lưới ban đầu tiết kiệm thời gian, chi phí cho nhiều hạng mục; giảm rủi ro sai số tích lũy và sự cố kỹ thuật.</div>
+   </div>
+   <div class="card"><h3>Vì sao lưới khống chế giữ sai số không tích lũy?</h3>
+   <p style="margin-top:0">So sánh hai cách xác định 10 điểm chi tiết: (đỏ) đo nối tiếp điểm này sang điểm khác; (xanh) mỗi điểm đo độc lập từ lưới khống chế đã có. Mỗi cột là sai số vị trí của điểm đó. Bấm “Mô phỏng lại” nhiều lần để thấy quy luật.</p><div data-w="ctrlnet"></div></div>
+   <div class="note"><b>Mở rộng</b>Hình trên là mô phỏng ngẫu nhiên nhằm minh hoạ ý tưởng “từ tổng thể đến chi tiết” (xem bài cuối chương), không phải số liệu của một loại lưới cụ thể. Lưới khống chế có hai loại theo bản chất: lưới <b>mặt bằng</b> (cho vị trí ngang) và lưới <b>độ cao</b> (cho cao độ, xem Chương 2).</div>` },
+
+  { id: 'don-vi', title: '5. Đơn vị đo lường', html: `
+   <p>Trắc địa chỉ có hai loại đại lượng đo chính: <b>chiều dài</b> và <b>góc</b>. Cần thuộc các đơn vị và hệ số quy đổi.</p>
+   <h3>Đo chiều dài</h3>
+   <ul><li>Đơn vị cơ bản là <b>mét (m)</b>; khi cần độ chính xác cao dùng các phân số thập phân của mét.</li><li>Cũng có thể gặp foot (bộ), inch, yard (thước Anh), mile (dặm)…</li></ul>
+   <h3>Đo góc</h3>
+   <p>Đơn vị cơ bản là <b>radian</b>, nhưng ngoài thực địa thường dùng <b>độ</b>; để chính xác, độ được chia nhỏ thành phút và giây.</p>
+   <div class="grid">
+    <div class="mini"><b>1° = 60′</b><br>1′ = 60″</div>
+    <div class="mini"><b>360° = 400 gon</b><br>1 gon = 100 “centecimal unit” (phút thập phân)</div>
+    <div class="mini"><b>2π rad = 360°</b></div>
+   </div>
+   <h3>Quy đổi giữa hệ Anh/Mỹ và hệ mét</h3>
+   <div class="tw"><table><tr><th>Đơn vị Anh/Mỹ</th><th>Giá trị hệ mét</th></tr><tr><td>1 inch</td><td>25,4 mm</td></tr><tr><td>1 foot</td><td>0,3048 m</td></tr><tr><td>1 yard</td><td>0,9144 m</td></tr><tr><td>1 mile</td><td>1,609344 km</td></tr><tr><td>1 acre</td><td>4046,8564224 m²</td></tr></table></div>
+   <div class="card"><h3>Bộ đổi đơn vị</h3><div data-w="unitConv"></div></div>
+   <div class="check"><b>Bài tập: đổi đơn vị diện tích</b>Muốn đổi m² sang ha, nhớ <b>1 ha = 10.000 m²</b> (hecta = 100 m × 100 m).<br>• 15.000 m² = 15.000 / 10.000 = <b>1,5 ha</b><br>• 3,5 ha = 3,5 × 10.000 = <b>35.000 m²</b><br>Thử nhập 15000 vào ô diện tích (đơn vị m²) ở bộ đổi trên để đối chiếu.</div>` },
+
+  { id: 'ty-le', title: '6. Tỷ lệ bản đồ, bản vẽ', html: `
+   <div class="key"><b>Tỷ lệ</b>Tỷ lệ của bản đồ (hay bản vẽ) là <b>tỷ số giữa khoảng cách đo được trên bản đồ/bản vẽ so với khoảng cách tương ứng ngoài thực địa</b>. Ví dụ 1:100, 1:10.000.</div>
+   <p>Tỷ lệ chủ yếu phụ thuộc <b>loại công việc</b>, tức mức chính xác cần có khi chuyển khoảng cách từ giấy ra thực địa (hoặc ngược lại).</p>
+   <h3>Phân loại thường gặp</h3>
+   <div class="tw"><table><tr><th>Nhóm</th><th>Khoảng tỷ lệ</th></tr>
+    <tr><td>Tỷ lệ lớn</td><td>mẫu số nhỏ hơn 200</td></tr>
+    <tr><td>Tỷ lệ trung bình</td><td>từ 1:2.000 đến 1:10.000</td></tr>
+    <tr><td>Tỷ lệ nhỏ</td><td>từ 1:10.000 đến 1:100.000.000</td></tr>
+    <tr><td>Bản vẽ mặt bằng công trình</td><td>từ 1:50 đến 1:500</td></tr>
+    <tr><td>Bản vẽ chi tiết</td><td>từ 1:1 đến 1:20</td></tr></table></div>
+   <div class="warn"><b>Lưu ý</b>Các khoảng này không liền nhau (khoảng 1:200–1:2.000 không thuộc nhóm nào, và 1:10.000 xuất hiện ở hai nhóm) nên hãy coi là mốc tương đối. Điều cần nhớ chắc: <b>mẫu số càng nhỏ thì tỷ lệ càng lớn</b> — 1:100 là tỷ lệ lớn hơn 1:10.000.</div>
+   <h3>Bản đồ khác bản vẽ (plan) thế nào?</h3>
+   <div class="two"><div class="card"><h3>Bản đồ (map)</h3>Tỷ lệ thường quá nhỏ để vẽ mọi chi tiết đúng theo tỷ lệ, nên dùng <b>ký hiệu quy ước</b> cho những đối tượng mà vẽ thật sẽ quá nhỏ để nhận ra.</div><div class="card"><h3>Bản vẽ (plan)</h3>Thể hiện <b>tất cả</b> đặc điểm ngoài thực địa <b>chính xác theo đúng tỷ lệ</b>.</div></div>
+   <div class="card"><h3>Máy tính tỷ lệ</h3><div data-w="scaleCalc"></div></div>` },
+
+  { id: 'sai-so', title: '7. Lý thuyết sai số', html: `
+   <p>Không có phép đo nào hoàn hảo. Lý thuyết sai số cho ta ngôn ngữ để nói về chất lượng phép đo, phân loại sai số theo nguồn gốc và theo tính chất, rồi biết cách giảm chúng.</p>
+   <h3>Hai chỉ số chất lượng: chính xác và tinh vi</h3>
+   <div class="two">
+    <div class="card"><h3>Độ chính xác <span class="tag">Accuracy</span></h3>Mức độ <b>gần nhau giữa giá trị đo được và giá trị “thật”</b>. Giá trị đo càng xa giá trị thật thì độ chính xác càng thấp.</div>
+    <div class="card"><h3>Độ tinh vi / lặp lại <span class="tag">Precision</span></h3>Mức độ <b>gần nhau giữa các lần đo lặp lại</b>, bất kể chúng có gần giá trị thật hay không.</div>
+   </div>
+   <div class="card"><h3>Trò bắn bia: chính xác ≠ tinh vi</h3><p style="margin-top:0">Chấm đỏ là giá trị thật, chấm xanh là các lần đo. Chọn ba trường hợp mẫu hoặc tự kéo hai thanh trượt: <b>độ lệch trung bình</b> (liên quan chính xác) và <b>độ phân tán</b> (liên quan tinh vi).</p><div data-w="accPrec"></div></div>
+   <ul><li><b>(a)</b> Tinh vi nhưng không chính xác: các điểm gần nhau nhưng lệch xa giá trị thật.</li><li><b>(b)</b> Vừa không chính xác vừa không tinh vi: các điểm phân tán, cũng không gần giá trị thật.</li><li><b>(c)</b> Vừa chính xác vừa tinh vi: các điểm tập trung sát nhau và gần giá trị thật.</li></ul>
+   <h3>Nguồn gốc sai số</h3>
+   <div class="tw"><table><tr><th>Nguồn</th><th>Là gì</th><th>Cách giảm</th></tr>
+   <tr><td><b>Cá nhân</b> (Personal)</td><td>Do hạn chế cảm giác của người đo (thị giác, xúc giác, thính giác…), kể cả lỗi do bất cẩn, mệt mỏi</td><td>Cẩn trọng, cảnh giác</td></tr>
+   <tr><td><b>Dụng cụ</b> (Instrumental)</td><td>Do dụng cụ không hoàn hảo khi chế tạo, điều chỉnh, hao mòn; kể cả hỏng hóc, sự cố thiết bị</td><td>Dùng, bảo quản, hiệu chuẩn, hiệu chỉnh thường xuyên</td></tr>
+   <tr><td><b>Tự nhiên</b> (Natural)</td><td>Do nhiệt độ, áp suất khí quyển, độ ẩm, biến thiên từ trường Trái Đất…</td><td>Đưa vào số hiệu chỉnh, hoặc đo khi các yếu tố này ít tác động nhất</td></tr></table></div>
+   <h3>Phân loại theo tính chất: ba loại sai số</h3>
+   <div class="grid">
+    <div class="mini"><h4 style="color:var(--bad)">Sai sót (Mistakes)</h4>Do lỗi chủ quan của người đo hoặc thiết bị, xảy ra ở bất kỳ giai đoạn nào (quan sát, ghi chép, tính, vẽ). Không thực sự là “sai số” vì <b>độ lớn rất lớn</b> so với hai loại kia. Nguyên nhân: bất cẩn, mệt mỏi, hỏng thiết bị.<br><i>Ví dụ:</i> đọc nhầm thang; ghi hoán vị 56 thay 65, 6 thay 9; bỏ sót chữ số (200 thay 2000); ngắm nhầm mục tiêu.</div>
+    <div class="mini"><h4 style="color:var(--accent)">Sai số hệ thống (Systematic)</h4>Nhỏ so với sai sót; do các yếu tố biểu diễn được bằng quan hệ toán học nên <b>xác định được độ lớn và dấu</b> → có thể <b>hiệu chỉnh</b>. Nguồn: người đo, dụng cụ (chế tạo, hiệu chỉnh), điều kiện vật lý–môi trường (nhiệt độ, áp suất, độ ẩm…) hoặc <b>lựa chọn mô hình hình học/toán học</b>.</div>
+    <div class="mini"><h4 style="color:var(--brand)">Sai số ngẫu nhiên (Random)</h4>Xuất hiện <b>không theo quy luật</b>, do nhiều yếu tố nhỏ tác động. Không loại bỏ hoàn toàn được, nhưng <b>giảm được bằng đo lặp và phương pháp thống kê</b>.</div>
+   </div>
+   <div class="key"><b>Sai số hệ thống còn gọi là sai số tích lũy</b>Trong cùng điều kiện, nó <b>giữ nguyên cả dấu và độ lớn</b>. Vì thế <b>đo lặp nhiều lần không giúp phát hiện hay loại bỏ nó</b>; ta chỉ xử lý được nhờ hiệu chỉnh (vì xác định được giá trị) và hiệu chuẩn, điều chỉnh thiết bị đúng cách.</div>
+   <div class="card"><h3>Đo nhiều lần giúp được gì?</h3><p style="margin-top:0">Mỗi chấm xám là một lần đo một đoạn (giá trị thật = 0). Đường xanh là trung bình cộng dồn. Kéo số lần đo để thấy phần ngẫu nhiên co lại, còn phần hệ thống (đường cam) vẫn còn. Thử bật “sai sót”.</p><div data-w="errSim"></div></div>
+   <div class="warn"><b>Hay nhầm</b>Đo lặp nhiều lần làm <b>tăng độ tinh vi</b> nhưng không làm <b>tăng độ chính xác</b> nếu còn sai số hệ thống. Muốn chính xác thì phải hiệu chỉnh/hiệu chuẩn.</div>` },
+
+  { id: 'quy-trinh-nguyen-tac', title: '8. Quy trình và nguyên tắc làm việc', html: `
+   <p>Bài cuối chương gom lại cách một công việc trắc địa được tổ chức từ đầu đến cuối và các nguyên tắc giúp nó vừa đúng, vừa kinh tế.</p>
+   <h3>Quy trình trắc địa</h3>
+   <div data-w="timeline" data-items='[["1. Lập kế hoạch","Xác định mục tiêu, phạm vi, độ chính xác cần có."],["2. Khảo sát sơ bộ (Reconnaissance)","Đi thực địa xem địa hình, chọn vị trí đặt điểm khống chế."],["3. Đo đạc","Thực hiện các phép đo."],["4. Tính toán","Xử lý số liệu đo."],["5. Lập bản đồ","Thể hiện kết quả dưới dạng bản đồ/bản vẽ."],["6. Bố trí công trình (Setting-out)","Chuyển thiết kế từ bản vẽ ra thực địa."],["7. Phản hồi và hiệu chỉnh sai số","Đối chiếu kết quả, phát hiện và xử lý sai số."]]'></div>
+   <h3>Bốn nguyên tắc của trắc địa tốt</h3>
+   <div class="grid">
+    <div class="mini"><h4>Từ tổng thể đến chi tiết</h4>Dựng <b>khung tham chiếu (lưới khống chế) trước</b>, sau đó mới đo các chi tiết nhỏ. Nhờ vậy không cho các sai số lớn tích lũy.</div>
+    <div class="mini"><h4>Kiểm tra độc lập</h4>Đo lại bằng một phương pháp khác; kiểm tra góc bằng dụng cụ khác. <b>Số liệu dư thừa</b> giúp bảo đảm độ tin cậy.</div>
+    <div class="mini"><h4>Độ chính xác phù hợp yêu cầu</h4>Đủ để đáp ứng mục đích công việc — không thiếu.</div>
+    <div class="mini"><h4>Nguyên tắc kinh tế</h4>Độ chính xác <b>không nên vượt nhu cầu thực tế</b> của dự án, vì chính xác hơn nghĩa là tốn kém hơn. Cần phán đoán kỹ thuật để chọn mức phù hợp.</div>
+   </div>
+   <div class="key"><b>Cân bằng</b>Độ chính xác cao hơn ⇒ chi phí cao hơn. Mục tiêu là <b>đủ chính xác với chi phí hợp lý</b>, chứ không phải chính xác tối đa.</div>
+   <h3>Thảo luận: vì sao sai số nhỏ trong trắc địa gây hậu quả lớn?</h3>
+   <p>Ví dụ 1: móng công trình bị lệch có thể dẫn đến hỏng kết cấu. Ví dụ 2: <i>sai số 2 cm ở phần móng sẽ ảnh hưởng thế nào ở độ cao cột 50 m?</i></p>
+   <p>Câu trả lời phụ thuộc <b>loại</b> sai số. Nếu cả cột bị dời song song thì đỉnh cột chỉ lệch đúng 2 cm. Nhưng nếu sai số làm <b>sai hướng</b> trục cột (ví dụ hướng chuẩn dài L chỉ 10 m mà đầu mút lệch 2 cm), thì góc lệch là e/L và lên đến độ cao H nó phóng đại thành e·H/L.</p>
+   <div class="card"><h3>Tính theo nhóm</h3><div data-w="tiltCalc"></div></div>
+   <div class="note"><b>Mở rộng</b>Công thức e·H/L là phép tính góc nhỏ (tan θ ≈ θ). Đây là lời giải phân tích cho một mô hình đơn giản để thấy: sai số hướng bị khuếch đại theo chiều cao, còn sai số tịnh tiến thì không — vì thế nguyên tắc “từ tổng thể đến chi tiết” và “kiểm tra độc lập” quan trọng.</div>` }
+ ]
+});
+
+</script>
+<script>
+/* Chương 1B: Trái Đất và cách biểu thị bề mặt Trái Đất */
+window.CHAPTERS = window.CHAPTERS || [];
+window.CHAPTERS.push({
+ id: 'c2', num: '1B', title: 'Trái Đất và cách biểu thị bề mặt Trái Đất',
+ blurb: 'Geoid, ellipsoid, tọa độ địa lý, phép chiếu Gauss – UTM, hệ độ cao, góc định hướng và các bài toán trắc địa cơ bản.',
+ sections: [
+  { id: 'geoid', title: '1. Hình dạng Trái Đất: mặt geoid', html: `
+   <p>Bề mặt thật của Trái Đất lồi lõm, gồ ghề và <b>không có phương trình toán học</b> đặc trưng. Muốn tính toán, ta cần thay nó bằng một mặt đại diện “dễ chịu” hơn. Bước đầu tiên là mặt geoid.</p>
+   <div class="grid">
+    <div class="mini" style="text-align:center"><div style="font-size:34px;font-weight:700;color:var(--c3)">29%</div>bề mặt là <b>mặt đất</b></div>
+    <div class="mini" style="text-align:center"><div style="font-size:34px;font-weight:700;color:var(--brand)">71%</div>bề mặt là <b>mặt nước biển</b></div>
+   </div>
+   <p>Vì biển chiếm phần lớn diện tích, người ta chọn <b>mặt nước biển trung bình</b> để biểu thị hình dạng Trái Đất. Mặt đó gọi là <b>mặt geoid</b>.</p>
+   <div class="key"><b>Định nghĩa mặt geoid</b>Là mặt nước biển trung bình, yên tĩnh, <b>xuyên qua các lục địa và hải đảo</b> tạo thành một mặt cong khép kín.</div>
+   <h3>Đặc điểm và công dụng</h3>
+   <div class="two"><div class="card"><h3>Đặc điểm</h3><ul><li>Là <b>mặt đẳng thế</b> (thế năng trọng trường bằng nhau tại mọi điểm).</li><li><b>Pháp tuyến trùng với phương dây dọi</b>: tại mỗi điểm, hướng vuông góc với geoid chính là hướng của dây dọi.</li><li><b>Không có phương trình toán học cụ thể.</b></li></ul></div>
+   <div class="card"><h3>Công dụng</h3><ul><li>Dùng để <b>xác định độ cao</b> của các điểm trên bề mặt đất.</li></ul></div></div>
+   <div class="note"><b>Mở rộng</b>Vì geoid là mặt đẳng thế nên nước “chảy” từ nơi có độ cao lớn hơn về nơi thấp hơn theo nghĩa của geoid; đây là lý do khi đo cao bằng máy thủy chuẩn ta dựa vào phương của trọng lực (bọt thủy, dây dọi) chứ không dựa vào một mặt phẳng tưởng tượng.</div>` },
+
+  { id: 'ellipsoid', title: '2. Kích thước Trái Đất: mặt ellipsoid', html: `
+   <p>Geoid không có phương trình nên ta <b>không thể xác định chính xác vị trí</b> các đối tượng trên mặt đất thông qua nó. Nhìn tổng quát, geoid có hình dạng <b>gần giống mặt ellipsoid</b>, và ellipsoid có phương trình toán học rõ ràng. Do đó ta chọn ellipsoid làm mặt đại diện khi biểu thị <b>vị trí và kích thước</b> các đối tượng.</p>
+   <div class="key"><b>Phương trình ellipsoid</b>x²/a² + y²/a² + z²/b² = 1<br>với <b>a</b> = bán trục lớn (bán kính xích đạo), <b>b</b> = bán trục nhỏ (nối hai cực).</div>
+   <div class="two"><div class="card"><h3>Đặc trưng cơ bản</h3><ul><li>Bán trục lớn a</li><li>Bán trục nhỏ b</li><li><b>Độ dẹt</b> α = (a − b)/a = 1/f</li></ul>Nếu coi Trái Đất là hình cầu thì bán kính trung bình <b>R ≈ 6371 km</b>.</div>
+   <div class="card"><h3>Công dụng</h3>Làm <b>cơ sở xác định các thành phần tọa độ</b> (kinh độ, vĩ độ…).</div></div>
+   <h3>Bốn điều kiện khi thành lập ellipsoid toàn cầu</h3>
+   <div class="grid"><div class="mini">① Vận tốc xoay của ellipsoid bằng vận tốc xoay của Trái Đất.</div><div class="mini">② Trọng tâm ellipsoid trùng với trọng tâm Trái Đất.</div><div class="mini">③ Khối lượng ellipsoid tương đương khối lượng Trái Đất.</div><div class="mini">④ Tổng bình phương độ lệch giữa ellipsoid và geoid là <b>cực tiểu</b> (Σζ² → min).</div></div>
+   <h3>Các ellipsoid đã và đang dùng ở Việt Nam</h3>
+   <div class="tw"><table><tr><th>Tên</th><th>Quốc gia</th><th>Năm</th><th>a (m)</th><th>b (m)</th><th>Độ dẹt</th></tr>
+   <tr><td>Everest</td><td>Anh</td><td>1830</td><td>6.377.276</td><td>6.356.075</td><td>1/300,8</td></tr>
+   <tr><td>Krasovski</td><td>Nga</td><td>1940</td><td>6.378.245</td><td>6.356.863</td><td>1/298,3</td></tr>
+   <tr><td>WGS 84</td><td>Mỹ</td><td>1984</td><td>6.378.137</td><td>6.356.752,3</td><td>1/298,257</td></tr></table></div>
+   <div class="card"><h3>Ellipsoid “dẹt” đến mức nào?</h3><p style="margin-top:0">Chọn ellipsoid rồi kéo thanh phóng đại. Ở tỷ lệ thật (×1) hình gần như tròn: a chỉ hơn b khoảng 21 km trên bán kính hơn 6350 km. Bảng bên phải tự tính độ dẹt từ a và b để bạn đối chiếu với bảng trên.</p><div data-w="ellipsoid"></div></div>
+   <div class="note"><b>Mở rộng</b>Ellipsoid không giống nhau: mỗi nước/thời kỳ chọn ellipsoid và vị trí đặt nó sao cho khớp nhất với geoid vùng mình (điều kiện Σζ² → min chỉ áp dụng “toàn cầu” cho ellipsoid toàn cầu). Nét đứt “geoid” trong hình chỉ minh hoạ, độ lượn sóng được vẽ phóng đại rất nhiều.</div>` },
+
+  { id: 'toa-do-dia-ly', title: '3. Hệ tọa độ địa lý (φ, λ)', html: `
+   <p>Trên ellipsoid, vị trí một điểm được cho bằng hai góc: <b>vĩ độ φ</b> và <b>kinh độ λ</b>. Để hiểu chúng, cần nhớ kinh tuyến và vĩ tuyến trước.</p>
+   <h3>Kinh tuyến, vĩ tuyến</h3>
+   <div class="two">
+    <div class="card"><h3>Kinh tuyến</h3>Giao tuyến của <b>mặt phẳng chứa trục quay</b> Trái Đất với mặt ellipsoid.<ul><li><b>Kinh tuyến gốc</b>: kinh tuyến qua đài thiên văn Greenwich (Anh).</li><li>Các kinh tuyến <b>hội tụ tại hai cực</b> Bắc và Nam.</li></ul></div>
+    <div class="card"><h3>Vĩ tuyến</h3>Giao tuyến của <b>mặt phẳng vuông góc với trục quay</b> với mặt ellipsoid.<ul><li><b>Vĩ tuyến gốc</b>: đường xích đạo.</li><li>Các vĩ tuyến là những <b>vòng tròn song song</b> nhau, tâm nằm trên trục quay.</li></ul></div>
+   </div>
+   <h3>Kinh độ, vĩ độ</h3>
+   <div class="key"><b>Kinh độ λ</b> của một điểm: góc giữa mặt phẳng chứa kinh tuyến gốc (Greenwich) và mặt phẳng chứa kinh tuyến qua điểm đó. Giá trị: 0° Đông → 180° Đông; 0° Tây → 180° Tây.<br><b>Vĩ độ φ</b> của một điểm: góc giữa phương dây dọi qua điểm đó và mặt phẳng xích đạo. Giá trị: 0° Bắc → 90° Bắc; 0° Nam → 90° Nam.</div>
+   <div class="card"><h3>Quả cầu tương tác</h3><p style="margin-top:0">Kéo chuột để xoay. Đổi φ, λ để thấy điểm M di chuyển và các đường qua nó (đỏ), so với xích đạo (cam) và kinh tuyến Greenwich (xanh).</p><div data-w="globe"></div></div>
+   <div class="warn"><b>Hay nhầm</b>Kinh độ đo <b>từ Greenwich</b> ra Đông/Tây (0–180°), vĩ độ đo <b>từ xích đạo</b> ra Bắc/Nam (0–90°). Vĩ độ lớn nhất chỉ là 90° (cực), còn kinh độ có thể đến 180°.</div>
+   <div class="note"><b>Mở rộng</b>Nói chặt chẽ, khi tính trên ellipsoid người ta dùng <b>pháp tuyến của ellipsoid</b> để định nghĩa vĩ độ trắc địa; phương dây dọi (thiên văn) chỉ lệch khỏi pháp tuyến đó một góc rất nhỏ (độ lệch dây dọi). Với mức chi tiết của môn học, hai cách nói coi như trùng nhau.</div>` },
+
+  { id: 'gauss', title: '4. Phép chiếu Gauss', html: `
+   <p>Ellipsoid là mặt cong, nhưng bản đồ và bản vẽ là mặt phẳng. Ta cần một cách “trải phẳng” mặt cong đó, gọi là <b>phép chiếu</b>. Mọi phép chiếu đều gây biến dạng; nhiệm vụ là chọn phép chiếu để biến dạng nhỏ và có quy luật. Phép chiếu Gauss chia Trái Đất thành nhiều múi để biến dạng trong mỗi múi nhỏ.</p>
+   <h3>Chia múi</h3>
+   <p>Trái Đất được chia thành <b>60 múi, mỗi múi 6° kinh độ</b>, đánh số 1–60 <b>bắt đầu từ kinh tuyến Greenwich về phía Đông</b>.</p>
+   <div class="tw"><table><tr><th>Múi</th><th>Phạm vi kinh độ</th></tr><tr><td>1</td><td>0° – 6° Đông</td></tr><tr><td>2</td><td>6° Đông – 12° Đông</td></tr><tr><td colspan="2" style="text-align:center">…</td></tr><tr><td>30</td><td>174° Đông – 180° Đông</td></tr><tr><td>31</td><td>180° Tây – 174° Tây</td></tr><tr><td colspan="2" style="text-align:center">…</td></tr><tr><td>60</td><td>6° Tây – 0°</td></tr></table></div>
+   <div class="key"><b>Kinh độ biên và kinh tuyến trục của múi n</b> (kinh tuyến giữa múi gọi là kinh tuyến trục, giữa hay trung ương)<br><b>Bán cầu Đông (n ≤ 30):</b> λ<sub>Đ</sub> = 6°·n (biên đông); λ<sub>T</sub> = 6°·(n − 1) (biên tây); <b>λ<sub>G</sub> = 6°·n − 3°</b> (kinh tuyến giữa).<br><b>Bán cầu Tây (n ≥ 31), kinh độ tính về phía Tây:</b> λ<sub>Đ</sub> = 6°·(60 − n); λ<sub>T</sub> = λ<sub>Đ</sub> + 6°; λ<sub>G</sub> = λ<sub>Đ</sub> + 3°.</div>
+   <div class="card"><h3>Tra múi theo kinh độ</h3><p style="margin-top:0">Chọn kinh độ hoặc bấm một địa danh. Bảng cho số hiệu múi và kinh tuyến trục theo cả Gauss lẫn UTM (bài UTM phía sau).</p><div data-w="zoneCalc"></div></div>
+   <h3>Cách chiếu</h3>
+   <ol><li>Cho ellipsoid Trái Đất <b>nội tiếp</b> (tiếp xúc) bên trong một <b>hình trụ ngang</b>; kinh tuyến trục của múi cần chiếu tiếp xúc với mặt trụ.</li><li>Lần lượt chiếu từng múi lên hình trụ.</li><li>Cắt hình trụ theo phương dọc để trải ra <b>mặt phẳng chiếu</b>.</li></ol>
+   <h3>Đặc điểm của phép chiếu</h3>
+   <ul><li>Là phép chiếu <b>hình trụ ngang, đồng góc</b> (bảo toàn góc, không bảo toàn diện tích/độ dài).</li><li>Trên mỗi múi, <b>kinh tuyến trục và xích đạo là hai đường thẳng vuông góc nhau</b>.</li><li>Đoạn thẳng nằm trên kinh tuyến trục <b>không bị biến dạng</b> khoảng cách (k = 1); <b>càng xa kinh tuyến trục thì biến dạng càng lớn</b>, đạt cỡ <b>k = 1,0014</b> ở biên múi.</li></ul>
+   <div class="key"><b>Số hiệu chỉnh độ dài do biến dạng của phép chiếu</b><br>ΔS = (y² / 2R²)·S<br>trong đó y là <b>tọa độ y trung bình</b> của hai đầu đoạn thẳng, R = 6371 km, S là chiều dài đoạn thẳng.</div>
+   <div class="warn"><b>Lưu ý quan trọng</b>Ở công thức này y là khoảng cách tới <b>kinh tuyến trục</b> (y “thực”), <b>không phải</b> y quy ước đã cộng 500 km (xem bài sau). Nếu quên trừ 500 km, kết quả sai rất lớn.</div>
+   <div class="note"><b>Mở rộng</b>ΔS dương: độ dài trên mặt phẳng chiếu = độ dài trên ellipsoid + ΔS, tức đoạn thẳng bị <b>kéo dài</b> khi chiếu. Kiểm tra: y ≈ 334 km (biên múi ở xích đạo) cho y²/2R² ≈ 0,00137 ≈ 0,0014, khớp với k = 1,0014. Xem đồ thị ở bài UTM.</div>` },
+
+  { id: 'toa-do-gauss', title: '5. Hệ tọa độ vuông góc phẳng Gauss – Krüger', html: `
+   <p>Sau khi chiếu, mỗi múi trở thành một mặt phẳng nhỏ; ta dựng cho <b>mỗi múi một hệ trục tọa độ vuông góc</b> riêng.</p>
+   <div class="key"><b>Cách chọn trục</b><ul><li>Trục <b>x</b> trùng với <b>kinh tuyến trục</b> của múi, chiều dương hướng <b>Bắc</b>.</li><li>Trục <b>y</b> trùng với <b>đường xích đạo</b>, chiều dương hướng <b>Đông</b>.</li></ul></div>
+   <div class="warn"><b>Khác với toán học</b>Trong trắc địa, <b>x hướng lên (Bắc), y hướng sang phải (Đông)</b>. Trục và chiều góc khác hẳn hệ Descartes quen thuộc (x ngang, y đứng) — hãy chú ý khi tính bài toán góc.</div>
+   <h3>Hai quy ước</h3>
+   <ol><li><b>Ghi số hiệu múi</b> ngay trước giá trị tọa độ y.</li><li><b>Dời trục x về bên trái 500 km</b> (tức cộng thêm 500 km vào y) để y luôn dương, nên mọi điểm trong múi (kể cả phía Tây kinh tuyến trục) đều có y dương.</li></ol>
+   <div class="note"><b>Ý nghĩa</b>Vì hai quy ước này: từ y quy ước ta biết ngay <b>điểm thuộc múi nào</b> và <b>nằm phía nào so với kinh tuyến trục</b> (y − 500 &gt; 0 là phía Đông, &lt; 0 là phía Tây).</div>
+   <div class="check"><b>Ví dụ:</b> điểm M có tọa độ quy ước x = 1220 km; y = 18.565 km. Hỏi M nằm trong múi nào và ở đâu trong múi?<br>Ở đây “18.565 km” là cách viết số hiệu múi + y: số hiệu múi <b>18</b>, y quy ước <b>565 km</b> (dấu chấm ngăn cách hàng nghìn). Múi 18 có kinh tuyến trục λ<sub>G</sub> = 6°·18 − 3° = <b>105° Đông</b>. Bỏ dời trục: y = 565 − 500 = <b>+65 km</b> ⇒ <b>M nằm ở múi 18, cách kinh tuyến trục 65 km về phía Đông</b>. (x = 1220 km ứng với khoảng 11° vĩ Bắc, một vị trí nằm trong vùng nhiệt đới.)</div>
+   <div class="card"><h3>Đổi tọa độ quy ước ↔ vị trí trong múi</h3><p style="margin-top:0">Ví dụ M đã điền sẵn. Đổi hệ Gauss/UTM để thấy kinh tuyến trục thay đổi theo cách đánh số múi. Nhập số hiệu múi và y quy ước (km).</p><div data-w="gaussCoord"></div></div>` },
+
+  { id: 'utm', title: '6. Phép chiếu UTM và hệ tọa độ UTM', html: `
+   <p>UTM (Universal Transverse Mercator) cũng là phép chiếu hình trụ ngang, đồng góc, chia múi 6° như Gauss, nhưng <b>hình trụ cắt ellipsoid</b> thay vì tiếp xúc, nhờ đó biến dạng phân bố đều hơn.</p>
+   <h3>Chia múi và đánh số</h3>
+   <p>Trái Đất chia thành <b>60 múi, mỗi múi 6°</b>, đánh số 1–60 nhưng <b>bắt đầu từ kinh tuyến 180° Tây về phía Đông</b>.</p>
+   <div class="tw"><table><tr><th>Múi</th><th>Phạm vi kinh độ</th></tr><tr><td>1</td><td>180° Tây – 174° Tây</td></tr><tr><td>2</td><td>174° Tây – 168° Tây</td></tr><tr><td colspan="2" style="text-align:center">…</td></tr><tr><td>30</td><td>6° Tây – 0°</td></tr><tr><td>31</td><td>0° – 6° Đông</td></tr><tr><td colspan="2" style="text-align:center">…</td></tr><tr><td>60</td><td>174° Đông – 180° Tây</td></tr></table></div>
+   <div class="key"><b>Kinh độ biên và kinh tuyến trục của múi n</b><br><b>Bán cầu Tây (n ≤ 30):</b> λ<sub>Đ</sub> = 6°·(30 − n); λ<sub>T</sub> = λ<sub>Đ</sub> + 6°; λ<sub>G</sub> = λ<sub>Đ</sub> + 3° (kinh độ Tây).<br><b>Bán cầu Đông (n ≥ 31):</b> λ<sub>Đ</sub> = 6°·(n − 30); λ<sub>T</sub> = λ<sub>Đ</sub> − 6°; λ<sub>G</sub> = λ<sub>Đ</sub> − 3° (kinh độ Đông; ở đây λ<sub>Đ</sub> chỉ biên phía Đông hơn của múi, λ<sub>T</sub> biên phía Tây hơn).</div>
+   <h3>Cách chiếu và đặc điểm</h3>
+   <ul><li>Ellipsoid <b>cắt qua hình trụ ngang tại hai cát tuyến</b>, hai cát tuyến cách kinh tuyến trục <b>180 km</b>.</li><li>Chiếu từng múi lên hình trụ rồi cắt trụ theo phương dọc thành mặt phẳng chiếu.</li><li>Phép chiếu hình trụ ngang, đồng góc; trên mỗi múi, kinh tuyến trục và xích đạo là hai đường thẳng vuông góc.</li><li>Tại <b>kinh tuyến trục</b>: hệ số biến dạng khoảng cách <b>k = 0,9996</b>. Tại <b>hai cát tuyến</b>: <b>k = 1</b>.</li><li>Độ biến dạng khoảng cách <b>phân bố đều hơn</b> so với phép chiếu Gauss.</li></ul>
+   <div class="card"><h3>So sánh biến dạng: Gauss và UTM</h3><p style="margin-top:0">Kéo y để xem hệ số biến dạng k của hai phép chiếu. Trên đồ thị, UTM cắt đường k = 1 tại y ≈ 180 km (cát tuyến), Gauss luôn ≥ 1.</p><div data-w="projDist"></div></div>
+   <h3>Hệ tọa độ vuông góc UTM</h3>
+   <p>Mỗi múi có một hệ tọa độ, cách chọn trục và hai quy ước <b>giống Gauss</b>: ghi số hiệu múi trước y, và dời trục x về bên trái 500 km. <b>Hệ tọa độ VN-2000 của Việt Nam hiện nay dùng phép chiếu UTM.</b></p>
+   <div class="warn"><b>Đừng nhầm</b>Gauss đánh số múi từ <b>Greenwich</b> (0°) còn UTM đánh số từ <b>180° Tây</b>. Với các múi ở bán cầu Đông: <b>số hiệu UTM = số hiệu Gauss + 30</b>. Ví dụ Hà Nội thuộc múi Gauss 18 và múi UTM 48, cùng kinh tuyến trục 105° Đông. Biên múi và kinh tuyến trục của hai hệ trùng nhau; chỉ khác cách đánh số và hệ số k.</div>
+   <div class="note"><b>Mở rộng</b>k(y) ≈ k₀(1 + y²/2R²) với k₀ = 0,9996 (UTM) hoặc 1 (Gauss). Giải k = 1 cho y = R·√(2·(1/0,9996 − 1)) ≈ 180 km, khớp vị trí hai cát tuyến. Khi thực hành, VN-2000 còn dùng múi 3° (hệ số k₀ = 0,9999) cho bản đồ tỷ lệ lớn và kinh tuyến trục theo từng tỉnh; hãy tra quy định hiện hành của công trình khi làm việc thật.</div>` },
+
+  { id: 'he-do-cao', title: '7. Hệ độ cao', html: `
+   <p>Tọa độ x, y cho vị trí trên mặt phẳng; để đủ ba chiều cần thêm <b>độ cao</b> của điểm.</p>
+   <div class="key"><b>Độ cao (H)</b>Độ cao của một điểm là <b>khoảng cách từ điểm đó đến mặt geoid tính theo phương dây dọi</b>.</div>
+   <div class="key"><b>Chênh cao (h)</b>Chênh cao giữa hai điểm là <b>hiệu độ cao</b> của điểm này so với điểm kia:<br>h<sub>AB</sub> = H<sub>B</sub> − H<sub>A</sub> &nbsp;·&nbsp; h<sub>BC</sub> = H<sub>C</sub> − H<sub>B</sub><br>⇒ H<sub>B</sub> = H<sub>A</sub> + h<sub>AB</sub> &nbsp;·&nbsp; H<sub>C</sub> = H<sub>B</sub> + h<sub>BC</sub></div>
+   <div class="key"><b>Độ cao giả định</b>Là khoảng cách từ điểm đó đến một <b>mặt geoid giả định</b> (một mặt chuẩn tự chọn) tính theo phương dây dọi. Khi khu vực chưa nối được với hệ độ cao quốc gia, ta có thể chọn mặt giả định cho tiện.</div>
+   <div class="card"><h3>Độ cao, chênh cao, mặt giả định</h3><p style="margin-top:0">Đổi H<sub>A</sub> và các chênh cao để tính H<sub>B</sub>, H<sub>C</sub>. Kéo “geoid giả định” lên: độ cao giả định đổi nhưng <b>chênh cao không đổi</b>.</p><div data-w="heights"></div></div>
+   <div class="note"><b>Mở rộng</b>Vì chênh cao không phụ thuộc mặt chuẩn nên đo cao (Chương 2) chỉ cần đo chênh cao rồi cộng vào một độ cao khởi tính. Ở Việt Nam, hệ độ cao quốc gia lấy mực nước biển trung bình tại Hòn Dấu (Hải Phòng) làm gốc. Lưu ý: độ cao đọc trực tiếp từ máy thu GNSS thường là độ cao so với ellipsoid, khác độ cao so với geoid một lượng N (độ cao geoid); phải quy đổi mới dùng như độ cao thủy chuẩn.</div>` },
+
+  { id: 'phuong-vi', title: '8. Góc phương vị và góc định hướng', html: `
+   <p>Để định hướng một đoạn thẳng trên mặt đất ta cần một <b>hướng gốc</b> (hướng Bắc) và đo góc <b>theo chiều kim đồng hồ</b> từ hướng gốc đến đoạn thẳng. Tuỳ chọn hướng Bắc nào mà có ba loại góc.</p>
+   <div class="grid">
+    <div class="mini"><h4 style="color:var(--brand)">Phương vị thật A<sub>th</sub></h4>Góc bằng hợp bởi <b>hướng Bắc thật</b> (kinh tuyến thật qua điểm đầu đoạn thẳng) đến hướng đoạn thẳng, theo chiều kim đồng hồ.</div>
+    <div class="mini"><h4 style="color:var(--bad)">Phương vị từ A<sub>t</sub></h4>Góc bằng hợp bởi <b>hướng Bắc từ</b> (hướng kim la bàn chỉ, qua điểm đầu) đến hướng đoạn thẳng, theo chiều kim đồng hồ.</div>
+    <div class="mini"><h4 style="color:var(--ok)">Góc định hướng α</h4>Góc bằng hợp bởi <b>hướng Bắc của đường song song với kinh tuyến trục</b> (giữa, trung ương) của múi đến hướng đoạn thẳng, theo chiều kim đồng hồ.</div>
+   </div>
+   <h3>Độ lệch từ</h3>
+   <p><b>Độ lệch từ δ</b> là góc lệch giữa hướng Bắc thật và Bắc từ tại một điểm. Quan hệ: <b>A<sub>th</sub> = A<sub>t</sub> ± δ</b>, lấy <b>dấu +</b> khi kinh tuyến từ lệch về phía <b>Đông</b> kinh tuyến thật, và <b>dấu −</b> khi lệch về phía <b>Tây</b>.</p>
+   <h3>Góc định hướng: đặc điểm</h3>
+   <ul><li>Góc định hướng của hai hướng ngược nhau trên cùng một đoạn thẳng chênh nhau <b>180°</b>: α<sub>NM</sub> = α<sub>MN</sub> + 180°.</li><li>Có giá trị từ <b>0° đến 360°</b>.</li><li>Giá trị góc định hướng <b>không đo được trực tiếp</b> (phải suy ra từ các góc đo và một góc định hướng gốc đã biết).</li></ul>
+   <h3>Quan hệ giữa góc định hướng và phương vị thật</h3>
+   <div class="key"><b>α<sub>MN</sub> = A<sup>th</sup><sub>MN</sub> ± γ</b> &nbsp;với&nbsp; <b>γ<sub>i</sub> = Δ<sub>λ</sub>·sin φ<sub>i</sub></b>, &nbsp;<b>Δ<sub>λ</sub> = λ<sub>i</sub> − λ₀</b><br>λ<sub>i</sub> là kinh độ địa lý của điểm i; λ₀ là kinh độ của kinh tuyến trục; φ<sub>i</sub> là vĩ độ địa lý của điểm i. γ gọi là <b>độ hội tụ kinh tuyến</b>.</div>
+   <div class="note"><b>Vì sao có γ? (Mở rộng)</b>Các kinh tuyến hội tụ về cực, còn “hướng Bắc” của lưới tọa độ phẳng lại là các đường <b>song song</b> với kinh tuyến trục. Ở điểm càng cách kinh tuyến trục, hướng Bắc thật càng lệch khỏi hướng Bắc lưới. Với điểm ở phía Đông kinh tuyến trục (Δλ &gt; 0) tại bán cầu Bắc, ta có α = A<sub>th</sub> − γ (γ &gt; 0); nếu dùng đúng dấu của Δλ và φ thì công thức α = A<sub>th</sub> − Δλ·sin φ dùng được cho cả các trường hợp khác.</div>
+   <div class="card"><h3>Ba hướng Bắc</h3><p style="margin-top:0">Xanh dương: Bắc thật. Đỏ: Bắc từ (lệch δ). Xanh lá: Bắc tọa độ (lệch γ). Đường cam là đoạn M→N. Đổi các thanh trượt để xem cùng một đoạn thẳng có ba số đo khác nhau.</p><div data-w="azimuth"></div></div>
+   <div class="warn"><b>Hay nhầm</b>Góc định hướng là góc <b>trong hệ tọa độ phẳng</b> nên dùng để tính tọa độ; phương vị thật/từ dùng khi đo trên thực địa bằng thiên văn/la bàn. Đừng dùng chúng thay nhau mà không đổi bằng δ hoặc γ.</div>` },
+
+  { id: 'bai-toan-goc', title: '9. Các bài toán về góc định hướng', html: `
+   <p>Vì góc định hướng không đo trực tiếp được, ta luôn tính nó từ <b>một góc định hướng gốc</b> đã biết cộng/trừ các <b>góc bằng</b> đo được. Có ba bài toán mẫu.</p>
+   <h3>BT1: Tính góc bằng từ góc định hướng</h3>
+   <p>Biết α<sub>OA</sub>, α<sub>OB</sub>; tìm góc bằng β tại O giữa hướng OA và OB (đo theo chiều kim đồng hồ từ OA đến OB).</p>
+   <div class="key">β = α<sub>OB</sub> − α<sub>OA</sub> &nbsp;(nếu âm thì cộng 360°)</div>
+   <h3>BT2: Tính góc định hướng từ góc bằng</h3>
+   <div class="key">α<sub>OB</sub> = α<sub>OA</sub> + β &nbsp;(nếu ≥ 360° thì trừ 360°)</div>
+   <div class="card"><h3>Thử BT1 và BT2</h3><div data-w="betaCalc"></div></div>
+   <h3>BT3: Tính chuyền góc định hướng dọc một đường chuyền</h3>
+   <p>Biết α<sub>AB</sub> và các góc bằng β₁ (tại B), β₂ (tại C); tìm α<sub>BC</sub>, α<sub>CD</sub>. Kết quả phụ thuộc <b>góc bằng nằm bên trái hay bên phải tuyến</b> (tuyến đi A → B → C → D).</p>
+   <div class="two">
+    <div class="card"><h3>TH1: góc bằng β ở bên <u>trái</u> tuyến</h3>α<sub>BC</sub> = α<sub>AB</sub> + β₁ − 180°<br>α<sub>CD</sub> = α<sub>BC</sub> + β₂ − 180°<br>= α<sub>AB</sub> + β₁ + β₂ − 2×180°</div>
+    <div class="card"><h3>TH2: góc bằng β ở bên <u>phải</u> tuyến</h3>α<sub>BC</sub> = α<sub>AB</sub> − β₁ + 180°<br>α<sub>CD</sub> = α<sub>BC</sub> − β₂ + 180°<br>= α<sub>AB</sub> − β₁ − β₂ + 2×180°</div>
+   </div>
+   <div class="note"><b>Vì sao có ±180°? (Mở rộng)</b>Tại B, hướng ngược lại BA có góc định hướng α<sub>AB</sub> + 180°. Góc bằng bên trái là góc quay theo chiều kim đồng hồ từ BA sang BC, nên α<sub>BC</sub> = (α<sub>AB</sub> + 180°) + β₁, trừ 360° cho gọn thành α<sub>AB</sub> + β₁ − 180°. Với góc bên phải, đi ngược chiều kim đồng hồ từ BA nên α<sub>BC</sub> = (α<sub>AB</sub> + 180°) − β₁.</div>
+   <div class="card"><h3>Chuyền góc định hướng và vẽ đường chuyền</h3><p style="margin-top:0">Đổi bên trái/phải, đổi α<sub>AB</sub>, β₁, β₂ và các cạnh; đường chuyền được vẽ theo tọa độ (giả sử A có x = y = 1000 m).</p><div data-w="azchain"></div></div>
+   <div class="warn"><b>Nhớ chuẩn hóa</b>Kết quả góc định hướng luôn đưa về khoảng 0°–360°: nếu &lt; 0 thì cộng 360°, nếu ≥ 360° thì trừ 360°. Đây là chỗ sinh viên dễ quên.</div>` },
+
+  { id: 'bai-toan-co-ban', title: '10. Bài toán trắc địa cơ bản', html: `
+   <p>Hai bài toán nền tảng nối <b>tọa độ</b> với <b>góc định hướng</b> và <b>khoảng cách</b>. Hầu như mọi phép tính đường chuyền sau này đều là chuỗi các bài toán này.</p>
+   <h3>Bài toán thuận</h3>
+   <p><b>Biết</b> tọa độ B (x<sub>B</sub>, y<sub>B</sub>), góc định hướng α<sub>BC</sub> và khoảng cách S<sub>BC</sub>. <b>Tìm</b> tọa độ điểm C.</p>
+   <div class="key">Δx<sub>BC</sub> = S<sub>BC</sub>·cos α<sub>BC</sub> &nbsp;·&nbsp; Δy<sub>BC</sub> = S<sub>BC</sub>·sin α<sub>BC</sub><br>x<sub>C</sub> = x<sub>B</sub> + Δx<sub>BC</sub> &nbsp;·&nbsp; y<sub>C</sub> = y<sub>B</sub> + Δy<sub>BC</sub></div>
+   <p>Chú ý: cos đi với x (vì góc đo từ trục x, hướng Bắc) và sin đi với y — ngược với thói quen của hệ Descartes.</p>
+   <h3>Bài toán nghịch</h3>
+   <p><b>Biết</b> tọa độ A (x<sub>A</sub>, y<sub>A</sub>) và B (x<sub>B</sub>, y<sub>B</sub>). <b>Tìm</b> góc định hướng α<sub>AB</sub> và khoảng cách S<sub>AB</sub>.</p>
+   <ol><li>Tính Δx<sub>AB</sub> = x<sub>B</sub> − x<sub>A</sub>; Δy<sub>AB</sub> = y<sub>B</sub> − y<sub>A</sub>.</li><li>S<sub>AB</sub> = √(Δx<sub>AB</sub>² + Δy<sub>AB</sub>²).</li><li>Tính góc phụ α₀ = arctg(|Δy<sub>AB</sub>| / |Δx<sub>AB</sub>|).</li><li>Xét dấu (Δx, Δy) để biết đoạn AB thuộc góc phần tư nào rồi suy ra α<sub>AB</sub>:</li></ol>
+   <div class="tw"><table><tr><th>Dấu</th><th>Góc phần tư</th><th>α<sub>AB</sub></th></tr>
+   <tr><td>Δx &gt; 0; Δy &gt; 0</td><td>I</td><td>α₀</td></tr><tr><td>Δx &lt; 0; Δy &gt; 0</td><td>II</td><td>180° − α₀</td></tr><tr><td>Δx &lt; 0; Δy &lt; 0</td><td>III</td><td>180° + α₀</td></tr><tr><td>Δx &gt; 0; Δy &lt; 0</td><td>IV</td><td>360° − α₀</td></tr></table></div>
+   <div class="card"><h3>Bài toán thuận – nghịch tương tác</h3><p style="margin-top:0">Ví dụ nghịch đã điền: A (1000; 500), B (950; 620) cho Δx = −50, Δy = +120 ⇒ góc phần tư II, S = 130 m. Ví dụ thuận: 3–4–5 (α ≈ 53,13°) cho C (1060; 580).</p><div data-w="fwdInv"></div></div>
+   <div class="warn"><b>Hay nhầm</b>α₀ luôn là góc nhọn tính từ trị tuyệt đối; <b>không dùng α₀ làm kết quả</b> khi đoạn thẳng không thuộc góc phần tư I. Kiểm tra bằng hình vẽ nhanh: B ở phía Nam của A thì α trong khoảng 90°–270°; B ở phía Tây thì α trong khoảng 180°–360°.</div>
+   <div class="note"><b>Mở rộng</b>Trường hợp đặc biệt Δx = 0 hoặc Δy = 0 (đoạn thẳng nằm đúng trục) không dùng được công thức chia; khi đó α là 0°, 90°, 180° hoặc 270° tuỳ chiều. Máy tính hay phần mềm thường có hàm atan2(Δy, Δx) tự xử lý dấu, nhưng cần chú ý thứ tự đối số theo quy ước x hướng Bắc.</div>` }
+ ]
+});
+
+</script>
+<script>
+/* Chương 2: Khống chế cao độ */
+window.CHAPTERS = window.CHAPTERS || [];
+window.CHAPTERS.push({
+ id: 'c3', num: 2, title: 'Khống chế cao độ',
+ blurb: 'Đo cao: khái niệm, thiết bị, hiệu chỉnh máy thủy chuẩn (thử nghiệm hai mốc), nguyên lý và sổ đo cao (Rise & Fall, HPC).',
+ sections: [
+  { id: 'khai-niem', title: '1. Quy chuẩn và khái niệm khống chế cao độ', html: `
+   <p>Chương 1 cho ta vị trí mặt bằng (x, y). Chương này giải quyết chiều thứ ba: <b>cao độ</b> của các điểm — và làm sao để thiết lập một “khung cao độ” đủ tin cậy cho cả công trình.</p>
+   <h3>Các quy chuẩn liên quan</h3>
+   <div class="tw"><table><tr><th>Văn bản</th><th>Nội dung</th></tr>
+    <tr><td><b>TCVN 9398:2012</b></td><td>Yêu cầu kỹ thuật chung cho công tác trắc địa trong xây dựng công trình. Tiêu chuẩn quốc gia này được chuyển đổi từ TCXDVN 309:2004; quy định các yêu cầu kỹ thuật về đo vẽ bản đồ địa hình tỷ lệ lớn và trắc địa công trình, cung cấp dữ liệu chuẩn xác dùng trong thiết kế, thi công xây lắp, kiểm định và giám sát chất lượng công trình xây dựng.</td></tr>
+    <tr><td><b>QCVN 11:2008/BTNMT</b></td><td>Quy chuẩn kỹ thuật quốc gia về xây dựng lưới độ cao.</td></tr>
+    <tr><td><b>TCVN 9401:2012</b></td><td>Tiêu chuẩn về đo và xử lý số liệu GPS trong trắc địa công trình.</td></tr></table></div>
+   <h3>Khống chế độ cao là gì?</h3>
+   <p><b>Khống chế độ cao</b> gồm các quy trình đo cao khác nhau dùng để xác định cao độ của các điểm quan tâm <b>so với (hoặc thấp hơn) một mốc chuẩn</b> (reference datum).</p>
+   <div class="key"><b>Mốc chuẩn thường dùng nhất: mực nước biển trung bình (MSL)</b><br>Không tồn tại một MSL toàn cầu chung, vì nó thay đổi từ nơi này sang nơi khác theo điều kiện địa phương. Do đó điều quan trọng là <b>MSL phải được xác định rõ ràng ở bất cứ nơi nào nó được sử dụng</b>.</div>
+   <p>Cao độ của điểm so với mốc chuẩn gọi là <b>cao độ quy chiếu</b> (reduced level, RL), hoặc đơn giản là <b>cao độ</b> của điểm.</p>
+   <h3>Cao độ dùng vào việc gì?</h3>
+   <div class="grid"><div class="mini">Vẽ <b>đường đồng mức</b> trên bản đồ.</div><div class="mini">Thiết kế tối ưu <b>độ dốc</b> của đường bộ, đường sắt hoặc kênh.</div><div class="mini">Mô hình hóa địa hình cho <b>tính khối lượng chính xác</b>.</div></div>
+   <p>Nói cách khác, hầu như không có lĩnh vực nào trong xây dựng mà không phụ thuộc vào cao độ tương đối của các điểm trên mặt đất.</p>` },
+
+  { id: 'do-cao-dinh-nghia', title: '2. Khái niệm đo cao và một số định nghĩa', html: `
+   <div class="key"><b>Đo cao</b>là phương pháp phổ biến nhất để xác định cao độ của các điểm trên mặt đất so với một mốc chuẩn, và thường được thực hiện <b>như một quy trình riêng</b>, tách khỏi các phương pháp xác định vị trí mặt bằng (planimetric position).</div>
+   <p>Bản chất của đo cao: <b>đo khoảng cách theo phương thẳng đứng so với một đường ngắm ngang</b>. Vì thế cần hai thứ: <b>mia chia vạch</b> để đo thẳng đứng, và <b>một thiết bị có khả năng tạo ra đường ngắm ngang</b> (máy thủy chuẩn).</p>
+   <h3>Ba định nghĩa cần phân biệt</h3>
+   <div class="grid">
+    <div class="mini"><h4 style="color:var(--ok)">Đường/mặt thủy chuẩn (Level line)</h4>Mặt mà tại mọi điểm của nó đều <b>vuông góc với phương của lực hấp dẫn</b> (xác định bằng dây dọi treo tự do). Như đã nói ở Chương 1 về geoid, các mặt này có dạng ellipsoid (cong).</div>
+    <div class="mini"><h4 style="color:var(--brand)">Đường nằm ngang (Horizontal line)</h4>Đường/mặt phẳng <b>vuông góc với phương của lực hấp dẫn tại một điểm xác định</b> — là <b>tiếp tuyến</b> với mặt thủy chuẩn tại điểm đó.</div>
+    <div class="mini"><h4 style="color:var(--accent)">Mốc chuẩn (Datum)</h4>Bất kỳ mặt tham chiếu nào dùng để quy chiếu cao độ các điểm. Phổ biến nhất là mực nước biển trung bình (MSL).</div>
+   </div>
+   <div class="note"><b>Hình 2.1 đọc thế nào?</b>Trong hình: đường thủy chuẩn qua A và đường thủy chuẩn qua B là hai mặt cong; một đường nằm ngang đi qua điểm C cắt các mặt đó. Vì B nằm trên mặt thủy chuẩn của nó, <b>sự chênh lệch cao độ giữa A và B chính là khoảng cách A′B</b> (đo theo phương lực hấp dẫn, từ mặt qua A đến mặt qua B), chứ không phải khoảng cách tới đường nằm ngang.</div>
+   <div class="note"><b>Mở rộng</b>Hai mặt này lệch nhau rất ít trong tầm ngắm ngắn: chênh lệch giữa mặt phẳng ngang và mặt thủy chuẩn ở khoảng cách d xấp xỉ d²/(2R), với R = 6371 km. Ở d = 100 m chỉ khoảng 0,8 mm; ở d = 1 km khoảng 78 mm. Đó là lý do khi đo cao ta giữ tầm ngắm ngắn và đặt máy giữa hai mia.</div>` },
+
+  { id: 'thiet-bi', title: '3. Thiết bị đo cao', html: `
+   <p>Hai dụng cụ chính: <b>máy thủy chuẩn</b> tạo đường ngắm ngang và <b>mia đo cao</b> để đọc số. Ta xem từng bộ phận và cách đọc.</p>
+   <h3>1. Máy thủy chuẩn quang học (Optical levels)</h3>
+   <p>Cấu tạo cơ bản gồm một ống ngắm (vật kính – thấu kính lấy nét – dây chữ thập – thị kính), một ống thủy để đưa trục ngắm về nằm ngang, và phần đế có vít cân bằng. Bấm vào từng bộ phận để xem vai trò.</p>
+   <div class="card"><h3>Sơ đồ máy thủy chuẩn</h3><div data-w="levelParts"></div></div>
+   <div class="note"><b>Mở rộng</b>Máy trong sơ đồ có <b>vít nghiêng</b> và ống thủy dài: người đo phải đưa bọt về giữa trước mỗi lần đọc số. Máy thủy chuẩn <b>tự động</b> thay bước này bằng cơ cấu tự cân bằng; người đo chỉ cần cân bằng sơ bộ bằng ống thủy tròn.</div>
+   <h3>2. Mia đo cao (Levelling staff)</h3>
+   <p>Mia được chế tạo bằng <b>gỗ, kim loại hoặc sợi thủy tinh</b>, chia vạch theo đơn vị mét và thập phân. Các đoạn mét <b>xen kẽ màu đen và đỏ</b> trên nền trắng. Phần lớn mia là loại rút gọn (telescopic) hoặc ghép nối ba đoạn để dễ mang theo. Khi đo, mia được giữ <b>thẳng đứng</b> trên đế/đĩa đo cao (levelling plate).</p>
+   <div class="card"><h3>Đọc số trên mia</h3><p style="margin-top:0">Kéo thanh trượt để dịch mia lên xuống sau dây ngang (đường xanh). Bấm “Số đọc 1,045 m” để xem ví dụ. Hình mia trong sơ đồ này là minh hoạ đơn giản (vạch 1 cm xen kẽ đen/trắng, số ghi đề-xi-mét).</p><div data-w="staff"></div></div>
+   <div class="key"><b>Cách đọc</b>Số đọc = mét + đề-xi-mét + xentimét + milimét. Ví dụ <b>1,045 m</b>: 1 m, 0 dm, 4 cm, 5 mm — hai chữ số đầu đọc thẳng trên mia, chữ số milimét cuối cùng được <b>ước lượng</b> bằng mắt.</div>
+   <h3>3. Ống thủy dài (Tubular bubble) và hệ ghép bọt</h3>
+   <p>Ống thủy dài là ống thủy tinh chứa chất lỏng và một bọt khí, mặt trong cong theo bán kính R. Khi bọt nằm giữa, <b>trục của ống thủy nằm ngang</b>. Người ta khắc vạch cách nhau <b>2 mm</b>; bọt dịch một vạch thì trục ống nghiêng một góc θ″ phụ thuộc R (R lớn ⇒ nhạy).</p>
+   <div class="card"><h3>Độ nhạy của ống thủy</h3><div data-w="bubbleSens"></div></div>
+   <p><b>Hệ ghép bọt (bubble coincidence reading system):</b> nhờ hệ lăng kính, hai đầu bọt được đưa vào thị kính và hiện thành hai nửa hình ảnh; khi hai nửa này <b>khớp nhau thành một cung liền</b> thì bọt đã ở giữa. Cách này cho phép đưa bọt vào giữa chính xác hơn so với nhìn thẳng vạch.</p>` },
+
+  { id: 'nguyen-ly-do-cao', title: '4. Quy trình và nguyên lý đo cao', html: `
+   <p>Quy trình đo cao: đặt máy thủy chuẩn (ví dụ loại tự động), <b>ngắm ngang</b> vào mia đo cao được người phụ giữ thẳng đứng trên đế mia.</p>
+   <h3>Nguyên lý</h3>
+   <p>Máy được đặt <b>xấp xỉ ở giữa</b> hai điểm A và B. Giả sử cao độ quy chiếu của A đã biết (ví dụ RL<sub>A</sub> = 100,000 m so với mốc chuẩn OD). Số đọc trên mia đặt tại A gọi là <b>số đọc sau (backsight, BS)</b>; số đọc trên mia tại B gọi là <b>số đọc trước (foresight, FS)</b>.</p>
+   <div class="key"><b>Mặt phẳng ngắm (HPC – Height of Plane of Collimation)</b><br>HPC = RL<sub>A</sub> + BS. Ví dụ RL<sub>A</sub> = 100,000; BS = 3,000 ⇒ HPC = 103,000 m.<br>RL<sub>B</sub> = HPC − FS. Nếu FS = 1,000 thì RL<sub>B</sub> = 102,000 m.<br><b>BS − FS</b>: nếu dương ⇒ có <b>độ dâng (rise)</b> từ A đến B; nếu âm ⇒ có <b>độ hạ (fall)</b>.</div>
+   <div class="card"><h3>Mô phỏng một trạm đo</h3><p style="margin-top:0">Đổi RL của A, BS và FS. Mặt phẳng ngắm (đường xanh) nằm ngang; RL của B tính bằng hai cách: HPC − FS và RL<sub>A</sub> + (BS − FS) — luôn ra cùng một kết quả.</p><div data-w="hpcDemo"></div></div>
+   <div class="check"><b>Với các số trong ví dụ</b>BS = 3,000; FS = 1,000 ⇒ BS − FS = +2,000 (độ dâng). RL<sub>B</sub> = 100,000 + 2,000 = 102,000 m = HPC − FS = 103,000 − 1,000 ✓.</div>
+   <div class="note"><b>Mở rộng</b>Máy đặt giữa hai điểm là có chủ đích: khi cự ly ngắm sau và ngắm trước bằng nhau, ảnh hưởng của lỗi chuẩn trực (bài sau) và độ cong Trái Đất lên BS và FS <b>bằng nhau</b> và triệt tiêu trong hiệu BS − FS.</div>` },
+
+  { id: 'hieu-chinh-may', title: '5. Hiệu chỉnh máy: lỗi chuẩn trực', html: `
+   <p>Một máy thủy chuẩn “tốt” phải cho <b>đường ngắm nằm ngang khi bọt ở giữa</b>. Nếu trục ngắm không song song với trục ống thủy, máy có <b>lỗi chuẩn trực</b> (collimation error) — một trong những nguồn sai số chính trong đo cao. Bài này trình bày chi tiết cách phát hiện và hiệu chỉnh bằng <b>thử nghiệm hai mốc (two-peg test)</b>.</p>
+   <h3>Quy trình 5 bước</h3>
+   <div data-w="timeline" data-items='[
+   ["B1 — Đặt máy giữa A và B","Đặt máy ở giữa hai mốc A, B cách nhau khoảng 20 m; đọc mia: tại A = a₁ = 1,500 m, tại B = b₁ = 0,500 m. Vì máy đặt giữa nên lỗi chuẩn trực triệt tiêu: chênh cao thật ΔH<sub>TRUE</sub> = a₁ − b₁ = 1,500 − 0,500 = 1,000 m."],
+   ["B2 — Dời máy ra C","Dời máy đến C, cách B 10 m và nằm trên đường thẳng AB (kéo dài); đọc: tại A a₂ = 3,500 m, tại B b₂ = 2,000 m ⇒ ΔH<sub>FALSE</sub> = a₂ − b₂ = 1,500 m. Vì 1,500 ≠ 1,000 nên kết quả sai: máy có lỗi chuẩn trực."],
+   ["B3 — Xác định độ lớn và hướng lỗi","Kẻ đường nằm ngang từ b₂ (2,000): nó cắt mia A tại a₃. Vì A thấp hơn B thật 1,000 m nên a₃ phải bằng 2,000 + 1,000 = 3,000 m. Nhưng số đọc thực là 3,500 m: đường ngắm máy cao hơn 0,500 m trong khoảng 20 m (khoảng cách giữa hai mốc). Đó là độ lớn và hướng của lỗi."],
+   ["B4 — Tính số đọc đúng a₄","Không dời máy khỏi C. Cần tính số đọc a₄ trên mia A khi tia ngắm nằm ngang từ C (cách A 30 m). Theo tỉ lệ: sai số trong 20 m là 0,500 nên trong 30 m là 0,500×30/20 = 0,750 m. Số đọc cần có: a₄ = 3,500 − 0,750 = 2,750 m."],
+   ["B5 — Chỉnh máy","(i) Dùng ốc nghiêng nghiêng kính thiên văn cho đến khi mia A đọc 2,750 m. (ii) Việc này làm ống thủy dài lệch khỏi giữa, nên chỉnh lại bằng các ốc chỉnh bọt thủy (nâng hoặc hạ một đầu ống thủy). Có thể lặp lại toàn bộ quá trình nếu cần."]
+   ]'></div>
+   <div class="key"><b>Ghi nhớ đơn giản</b>(1) <b>ΔH<sub>FALSE</sub> − ΔH<sub>TRUE</sub> = độ lớn của sai số ngắm chuẩn</b> (trên khoảng cách AB).<br>(2) Nếu <b>ΔH<sub>FALSE</sub> &gt; ΔH<sub>TRUE</sub></b> thì đường ngắm <b>nghiêng lên</b>, và ngược lại.<br>Từ đó: số đọc đúng a₄ = a₂ − (sai số) × (AC / AB), với AC = AB + BC.</div>
+   <div class="card"><h3>Thử nghiệm hai mốc tương tác</h3><p style="margin-top:0">Hai bộ số mẫu có sẵn: ví dụ trong bài và Ví dụ 1. Bạn cũng sửa số và khoảng cách để tự thử. Hình vẽ (tỷ lệ đứng phóng đại) cho thấy đường ngắm sai (đỏ) và đường ngắm ngang đúng (xanh) từ máy đặt ở C.</p><div data-w="twoPeg"></div></div>
+   <h3>Ví dụ 1 — lời giải</h3>
+   <p><i>Đề:</i> cùng khoảng cách A, B, C (AB = 20 m, BC = 10 m). Máy giữa A và B: A = 3,458; B = 2,116. Máy tại C: A = 4,244; B = 2,914. Tính sai số và hiệu chỉnh máy.</p>
+   <div class="check"><b>Giải</b>ΔH<sub>TRUE</sub> = 3,458 − 2,116 = <b>1,342 m</b><br>ΔH<sub>FALSE</sub> = 4,244 − 2,914 = <b>1,330 m</b><br>ΔH<sub>FALSE</sub> − ΔH<sub>TRUE</sub> = <b>−0,012 m</b> trong 20 m ⇒ ΔH<sub>FALSE</sub> &lt; ΔH<sub>TRUE</sub> ⇒ đường ngắm <b>nghiêng xuống</b>.<br>Trong 30 m (C → A): −0,012×30/20 = −0,018 m.<br>Số đọc cần có trên mia A: a₄ = 4,244 − (−0,018) = <b>4,262 m</b> (nâng số đọc lên 18 mm).<br><i>Kiểm tra chéo:</i> b₄ = 2,914 + 0,006 = 2,920 m và a₄ − b₄ = 4,262 − 2,920 = 1,342 = ΔH<sub>TRUE</sub> ✓.</div>
+   <div class="warn"><b>Hay nhầm</b>Dấu của sai số quyết định hướng chỉnh. Ở ví dụ trong bài, sai số +0,500 nên số đọc phải <b>giảm</b> (3,500 → 2,750); ở Ví dụ 1 sai số −0,012 nên số đọc phải <b>tăng</b> (4,244 → 4,262). Luôn dùng “a₂ trừ sai số (có dấu) × AC/AB”.</div>
+   <div class="note"><b>Mở rộng</b>Các số trong ví dụ trong bài (sai 0,5 m trên 20 m) cố ý phóng đại để dễ tính; lỗi thực tế của máy nhỏ hơn nhiều (vài mm trên khoảng cách vài chục mét trở xuống).</div>` },
+
+  { id: 'so-do-cao', title: '6. Sổ đo cao: Rise & Fall và HPC', html: `
+   <p>Khi đo một tuyến dài, máy phải dời nhiều trạm; ta cần một cách ghi và tính có hệ thống. Có hai phương pháp tính cho cùng một sổ đo, cho cùng kết quả.</p>
+   <h3>Các loại số đọc</h3>
+   <div class="grid">
+    <div class="mini"><h4>BS — số đọc sau</h4>Số đọc đầu tiên tại mỗi trạm máy, trên mia đặt ở điểm đã biết RL.</div>
+    <div class="mini"><h4>IS — số đọc giữa</h4>Số đọc ở các điểm trung gian trong cùng trạm (điểm chi tiết).</div>
+    <div class="mini"><h4>FS — số đọc trước</h4>Số đọc cuối cùng tại trạm, trước khi dời máy.</div>
+    <div class="mini"><h4>CP — điểm chuyển (change point)</h4>Điểm nối hai trạm máy: là FS của trạm trước và BS của trạm sau.</div>
+   </div>
+   <div class="key"><b>Ghi nhớ</b>Mọi phép đo cao đều <b>bắt đầu bằng BS và kết thúc bằng FS</b>, với số lượng IS ở giữa tuỳ yêu cầu. Các điểm CP luôn là FS/BS.<br>Tuyến đo phải được <b>khép về một mốc chuẩn đã biết</b> để kiểm tra sai số khép (misclosure error).</div>
+   <h3>Phương pháp 1: Rise & Fall (độ dâng – độ hạ)</h3>
+   <ol><li>So sánh mỗi số đọc với số đọc <b>liền trước</b> nó trong cùng trạm: hiệu = số đọc trước − số đọc sau. Dương ⇒ <b>Rise</b>, âm ⇒ <b>Fall</b>.</li><li>RL điểm sau = RL điểm trước + Rise (hoặc − Fall).</li><li>Tại CP, hiệu tính giữa FS của trạm cũ, rồi BS mới bắt đầu trạm mới.</li></ol>
+   <h3>Phương pháp 2: HPC</h3>
+   <ol><li>Cộng BS vào RL để được HPC, ví dụ 1,5 + 60,5 = <b>62,0</b>.</li><li>Các số đọc còn lại (IS, FS) <b>trừ khỏi HPC</b> để ra RL.</li><li>Lặp lại cho trạm kế tiếp tại điểm chuyển: ví dụ 3,0 + 60,0 = <b>63,0</b>.</li></ol>
+   <h3>Ví dụ 2 — hoàn thiện sổ đo cao</h3>
+   <p>Dữ liệu đo (điểm đầu là TBM cao 60,5 m; điểm cuối 2C trùng mốc có RL đã biết 65,1 m): BS 1,5 · IS 2,5 · IS 4,0 · FS 2,0/BS 3,0 · IS 5,5 · FS 1,0/BS 6,0 · FS 3,0.</p>
+   <div class="tw"><table><tr><th>Điểm</th><th>BS</th><th>IS</th><th>FS</th><th>Rise</th><th>Fall</th><th>HPC</th><th>RL</th><th>Cự ly (m)</th></tr>
+    <tr><td>1A (TBM)</td><td>1,5</td><td></td><td></td><td></td><td></td><td>62,0</td><td>60,5</td><td>0</td></tr>
+    <tr><td>2A</td><td></td><td>2,5</td><td></td><td></td><td>1,0</td><td></td><td>59,5</td><td>30</td></tr>
+    <tr><td>3A</td><td></td><td>4,0</td><td></td><td></td><td>1,5</td><td></td><td>58,0</td><td>50</td></tr>
+    <tr><td>4A / 1B (CP)</td><td>3,0</td><td></td><td>2,0</td><td>2,0</td><td></td><td>63,0</td><td>60,0</td><td>70</td></tr>
+    <tr><td>2B</td><td></td><td>5,5</td><td></td><td></td><td>2,5</td><td></td><td>57,5</td><td>95</td></tr>
+    <tr><td>3B / 1C (CP)</td><td>6,0</td><td></td><td>1,0</td><td>4,5</td><td></td><td>68,0</td><td>62,0</td><td>120</td></tr>
+    <tr><td>2C (TBM 65,1)</td><td></td><td></td><td>3,0</td><td>3,0</td><td></td><td></td><td>65,0</td><td>160</td></tr>
+    <tr><th>Tổng</th><th>10,5</th><th>12,0</th><th>6,0</th><th>9,5</th><th>5,0</th><th></th><th></th><th></th></tr></table></div>
+   <h3>Các phép kiểm tra</h3>
+   <div class="check"><b>Kiểm tra 1:</b> ΣBS − ΣFS = 10,5 − 6,0 = <b>4,5</b> = RL cuối − RL đầu = 65,0 − 60,5 = <b>4,5</b> ✓<br><b>Kiểm tra 2 (Rise & Fall):</b> ΣRise − ΣFall = 9,5 − 5,0 = <b>4,5</b> ✓<br><b>Kiểm tra 3 (HPC):</b> Tổng mọi RL (trừ RL đầu tiên) = 59,5 + 58,0 + 60,0 + 57,5 + 62,0 + 65,0 = <b>362,0</b>; và Σ(HPC × số IS/FS lấy từ HPC đó) − Σ(IS + FS) = (62,0×3 + 63,0×2 + 68,0×1) − (12,0 + 6,0) = 380 − 18 = <b>362,0</b> ✓<br><b>Sai số khép độ cao (misclosure):</b> RL tính ở 2C = 65,0 m so với RL đã biết 65,1 m ⇒ lệch <b>0,1 m</b>.</div>
+   <div class="card"><h3>Sổ đo cao tương tác</h3><p style="margin-top:0">Đã điền sẵn Ví dụ 2. Sửa số đọc bất kỳ, thêm/bớt hàng, đổi phương pháp Rise & Fall ↔ HPC; bảng và các phép kiểm tra tự cập nhật. Thử sửa một số đọc để thấy phép kiểm tra nào báo lỗi. (Ô nhập dùng dấu chấm cho số thập phân.)</p><div data-w="levelBook"></div></div>
+   <div class="warn"><b>Lưu ý</b>Phép kiểm tra 1 chỉ kiểm tra được số học ở các BS/FS, không phát hiện lỗi ở số đọc <b>IS</b> (vì IS không xuất hiện trong ΣBS − ΣFS). Vì thế phải làm thêm phép kiểm tra thứ hai (Σrise − Σfall hoặc phép kiểm tra HPC) để bao gồm cả IS. Ngoài ra, các kiểm tra chỉ chứng minh <b>tính toán</b> đúng; sai số đo (số đọc sai) được phát hiện qua sai số khép.</div>
+   <div class="note"><b>Mở rộng</b>Sai số khép cho phép tuỳ theo cấp hạng của lưới độ cao và chiều dài tuyến đo; giá trị cụ thể tra theo quy chuẩn (như QCVN 11:2008/BTNMT). Ở ví dụ này 0,1 m chỉ dùng để tập tính toán và chưa nói lên mức chính xác của lưới thực tế.</div>` }
+ ]
+});
+
+</script>
+<script>
+/* Thư viện hình tương tác dùng chung. Gắn vào trang bằng <div data-w="tên"></div>.
+   Thêm widget riêng cho từng môn: W.tenMoi = el => { ... }  (xem các mẫu bên dưới). */
+const W = {};
+const D2R = Math.PI / 180;
+function ink() { return getComputedStyle(document.body).color; }
+function mk(el, html) { el.innerHTML = html; return el; }
+function q(el, s) { return el.querySelector(s); }
+function qa(el, s) { return [...el.querySelectorAll(s)]; }
+function slider(id, label, min, max, step, val, unit) {
+  return `<label class="lab"><span style="min-width:120px">${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><span class="val" id="${id}v">${val}${unit || ''}</span></label>`;
+}
+function bindSlider(el, id, fn, unit) {
+  const s = q(el, '#' + id), v = q(el, '#' + id + 'v');
+  s.addEventListener('input', () => { v.textContent = s.value + (unit || ''); fn(+s.value); });
+  return s;
+}
+function mountWidgets(root) {
+  qa(root, '[data-w]').forEach(el => {
+    if (el.dataset.mounted) return; el.dataset.mounted = 1;
+    const f = W[el.dataset.w]; if (f) try { f(el); } catch (e) { el.textContent = 'Lỗi hình: ' + e.message; console.error(e); }
+  });
+}
+// Xoay 3D bằng chuột: rotXY(điểm,[rx],[ry]) + drag3(canvas, state, vẽLại)
+function rotXY(p, rx, ry) {
+  let [x, y, z] = p;
+  const cy = Math.cos(ry), sy = Math.sin(ry); [x, z] = [x * cy + z * sy, -x * sy + z * cy];
+  const cx = Math.cos(rx), sx = Math.sin(rx); [y, z] = [y * cx - z * sx, y * sx + z * cx];
+  return [x, y, z];
+}
+function drag3(c, st, redraw) {
+  let d = null;
+  c.addEventListener('pointerdown', e => { d = [e.clientX, e.clientY]; c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', e => { if (!d) return; st.ry += (e.clientX - d[0]) * .01; st.rx += (e.clientY - d[1]) * .01; d = [e.clientX, e.clientY]; redraw(); });
+  c.addEventListener('pointerup', () => d = null);
+  c.style.cursor = 'grab'; c.style.touchAction = 'none';
+}
+// Vòng lặp hoạt hình an toàn: tự dừng khi widget bị gỡ khỏi trang (đổi bài)
+function loop(el, fn) { const t = () => { if (!el.isConnected) return; fn(); requestAnimationFrame(t); }; t(); }
+
+/* ---- Mẫu 1: dòng thời gian / danh sách bấm để mở (dữ liệu trong thuộc tính data-items dạng JSON: [["Tiêu đề","Chi tiết"],...]) ---- */
+W.timeline = el => {
+  const items = JSON.parse(el.dataset.items || '[]');
+  mk(el, `<div class="tl">${items.map((x, i) => `<div class="ev ${i === 0 ? 'open' : ''}"><b>${x[0]}</b><div class="d">${x[1]}</div></div>`).join('')}</div>`);
+  qa(el, '.ev').forEach(e => e.onclick = () => e.classList.toggle('open'));
+};
+/* ---- Mẫu 2: thẻ có lọc theo nhóm: data-items = [["Tiêu đề","Mô tả","Nhóm"],...] ---- */
+W.filtercards = el => {
+  const A = JSON.parse(el.dataset.items || '[]'), tags = ['Tất cả', ...new Set(A.map(a => a[2]))];
+  mk(el, `<div class="mtab">${tags.map((t, i) => `<button class="${i ? '' : 'on'}" data-t="${t}">${t}</button>`).join('')}</div><div class="grid" id="fg"></div>`);
+  const draw = t => q(el, '#fg').innerHTML = A.filter(a => t === 'Tất cả' || a[2] === t).map(a => `<div class="mini"><h4>${a[0]}</h4><span style="font-size:14px">${a[1]}</span></div>`).join('');
+  draw('Tất cả');
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(b.dataset.t); });
+};
+/* ---- Mẫu 3: máy tính có thanh trượt + canvas (sao chép làm khuôn cho mô phỏng mới) ---- */
+W.demoSlider = el => {
+  mk(el, `<canvas width="560" height="200" style="width:100%"></canvas>` + slider('k', 'Giá trị', 0, 100, 1, 40, '') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = v => { g.clearRect(0, 0, 560, 200); g.fillStyle = '#1f5fbf'; g.fillRect(20, 80, v * 5, 40); q(el, '#out').textContent = 'Giá trị = ' + v; };
+  bindSlider(el, 'k', draw); draw(40);
+};
+
+</script>
+<script>
+/* Widget riêng cho môn Trắc địa công trình. Dùng các tiện ích chung trong widgets.js (W, q, qa, mk, slider, bindSlider, ink, rotXY, drag3, loop). */
+const CL = { blue: '#3b7de0', red: '#e05252', green: '#1fa56a', orange: '#e8912d', grey: '#8a94ab', purple: '#8e5bd0' };
+const RHO = 206265; // giây cung trong 1 radian
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r) { let u = 0, v = 0; while (!u) u = r(); v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const fmt = (x, d = 3) => (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d).replace('.', ',');
+const norm360 = a => ((a % 360) + 360) % 360;
+function num(el, id, def) { const v = parseFloat(String(q(el, '#' + id).value).replace(',', '.')); return isNaN(v) ? def : v; }
+function field(id, label, val, step) { return `<label class="lab"><span style="min-width:150px">${label}</span><input type="number" id="${id}" value="${val}" step="${step || 'any'}" style="width:130px"></label>`; }
+function arrow(g, x0, y0, x1, y1, col, w) {
+  g.strokeStyle = col; g.fillStyle = col; g.lineWidth = w || 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+  const a = Math.atan2(y1 - y0, x1 - x0); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x1 - 9 * Math.cos(a - .4), y1 - 9 * Math.sin(a - .4)); g.lineTo(x1 - 9 * Math.cos(a + .4), y1 - 9 * Math.sin(a + .4)); g.closePath(); g.fill();
+}
+function txt(g, s, x, y, col, size, al) { g.fillStyle = col || ink(); g.font = (size || 13) + 'px Segoe UI, sans-serif'; g.textAlign = al || 'left'; g.fillText(s, x, y); }
+
+/* ================= CHƯƠNG 1A ================= */
+
+// Khoảng cách nghiêng, góc đứng, khoảng cách ngang, chênh cao
+W.basicMeas = el => {
+  mk(el, `<canvas width="600" height="270" style="width:100%"></canvas>` + slider('S', 'Khoảng cách nghiêng S', 20, 200, 1, 100, ' m') + slider('al', 'Góc đứng α', 0, 60, 1, 25, '°') + slider('th', 'Góc ngang θ', 0, 180, 1, 40, '°') + `<div class="res" id="out"></div>`);
+  const c = q(el, 'canvas'), g = c.getContext('2d');
+  const draw = () => {
+    const S = +q(el, '#S').value, al = +q(el, '#al').value * D2R, th = +q(el, '#th').value * D2R;
+    const HD = S * Math.cos(al), dH = S * Math.sin(al);
+    g.clearRect(0, 0, 600, 270);
+    const L = 230, A = [40, 220], B = [A[0] + L * Math.cos(al), A[1] - L * Math.sin(al)], A1 = [B[0], A[1]];
+    g.strokeStyle = CL.grey; g.lineWidth = 1.5; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(...A); g.lineTo(...A1); g.lineTo(...B); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = CL.blue; g.lineWidth = 3; g.beginPath(); g.moveTo(...A); g.lineTo(...B); g.stroke();
+    [['A', A, -12, 18], ['B', B, 6, -8], ["A'", A1, 6, 18]].forEach(([n, p, dx, dy]) => { g.fillStyle = ink(); g.beginPath(); g.arc(p[0], p[1], 4, 0, 7); g.fill(); txt(g, n, p[0] + dx, p[1] + dy, ink(), 14); });
+    g.strokeStyle = CL.orange; g.lineWidth = 1.5; g.beginPath(); g.arc(A[0], A[1], 46, -al, 0); g.stroke(); txt(g, 'α', A[0] + 52, A[1] - 8, CL.orange, 14);
+    txt(g, 'S', (A[0] + B[0]) / 2 - 16, (A[1] + B[1]) / 2 - 6, CL.blue, 14);
+    txt(g, 'D (ngang) = ' + fmt(HD, 2) + ' m', (A[0] + A1[0]) / 2 - 50, A[1] + 22, ink(), 13);
+    txt(g, 'ΔH = ' + fmt(dH, 2) + ' m', A1[0] + 8, (A[1] + B[1]) / 2, ink(), 13);
+    // mặt bằng
+    const cx = 480, cy = 190, R = 70;
+    g.strokeStyle = CL.grey; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, R + 8, 0, 7); g.stroke();
+    arrow(g, cx, cy, cx, cy - R, CL.blue, 2.5); txt(g, "A→A'", cx + 6, cy - R + 4, CL.blue, 12);
+    arrow(g, cx, cy, cx + R * Math.sin(th), cy - R * Math.cos(th), CL.red, 2.5); txt(g, 'A→C', cx + R * Math.sin(th) + 6, cy - R * Math.cos(th) - 4, CL.red, 12);
+    g.strokeStyle = CL.orange; g.beginPath(); g.arc(cx, cy, 30, -Math.PI / 2, -Math.PI / 2 + th); g.stroke(); txt(g, 'θ', cx + 34 * Math.sin(th / 2) + 2, cy - 34 * Math.cos(th / 2), CL.orange, 14);
+    txt(g, 'Nhìn từ trên xuống (mặt bằng)', cx, 262, CL.grey, 12, 'center');
+    txt(g, 'Nhìn ngang (mặt đứng)', 150, 262, CL.grey, 12, 'center');
+    q(el, '#out').innerHTML = `Khoảng cách ngang D = S·cos α = <b>${fmt(HD, 2)} m</b> &nbsp;·&nbsp; Chênh cao ΔH = S·sin α = <b>${fmt(dH, 2)} m</b> &nbsp;·&nbsp; kiểm tra: √(D²+ΔH²) = ${fmt(Math.hypot(HD, dH), 2)} m`;
+  };
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + (i.id === 'S' ? ' m' : '°'); draw(); })); draw();
+};
+
+// Lưới khống chế: đo nối tiếp (tích luỹ sai số) so với từ tổng thể đến chi tiết
+W.ctrlnet = el => {
+  mk(el, `<canvas width="600" height="260" style="width:100%"></canvas>` + slider('sg', 'Sai số ngẫu nhiên mỗi lần đo', 1, 20, 1, 8, ' mm') + `<button class="btn" id="re">🎲 Mô phỏng lại</button><div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d'); let seed = 7;
+  const draw = () => {
+    const sg = +q(el, '#sg').value, r = rng(seed), N = 10, e1 = [], e2 = []; let s = 0;
+    for (let i = 0; i < N; i++) { s += gauss(r) * sg; e1.push(s); e2.push(gauss(r) * sg); }
+    const M = Math.max(30, ...e1.map(Math.abs), ...e2.map(Math.abs)) * 1.15;
+    g.clearRect(0, 0, 600, 260); const y0 = 130, k = 105 / M;
+    g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(40, y0); g.lineTo(590, y0); g.stroke();
+    for (let i = 0; i < N; i++) {
+      const x = 60 + i * 53;
+      g.fillStyle = CL.red; g.fillRect(x, e1[i] >= 0 ? y0 - e1[i] * k : y0, 20, Math.abs(e1[i]) * k);
+      g.fillStyle = CL.green; g.fillRect(x + 22, e2[i] >= 0 ? y0 - e2[i] * k : y0, 20, Math.abs(e2[i]) * k);
+      txt(g, 'P' + (i + 1), x + 21, 250, ink(), 12, 'center');
+    }
+    g.fillStyle = CL.red; g.fillRect(50, 8, 12, 12); txt(g, 'Đo nối tiếp từ điểm này sang điểm khác (sai số cộng dồn)', 68, 19, ink(), 12);
+    g.fillStyle = CL.green; g.fillRect(50, 26, 12, 12); txt(g, 'Đo từ lưới khống chế (mỗi điểm chi tiết đo độc lập)', 68, 37, ink(), 12);
+    txt(g, 'sai số vị trí (mm)', 6, 60, CL.grey, 11);
+    q(el, '#out').innerHTML = `Điểm cuối: đo nối tiếp lệch <b>${fmt(Math.abs(e1[N - 1]), 1)} mm</b>, đo từ khống chế lệch <b>${fmt(Math.abs(e2[N - 1]), 1)} mm</b>. Đo nối tiếp thì sai số điểm sau chứa cả sai số các điểm trước; đo từ lưới khống chế thì sai số không bị cộng dồn.`;
+  };
+  q(el, '#sg').addEventListener('input', e => { q(el, '#sgv').textContent = e.target.value + ' mm'; draw(); });
+  q(el, '#re').onclick = () => { seed = (seed * 31 + 11) % 100000; draw(); }; draw();
+};
+
+// Đổi đơn vị
+W.unitConv = el => {
+  const LEN = { 'mét (m)': 1, 'kilômét (km)': 1000, 'milimét (mm)': .001, 'inch': .0254, 'foot (bộ)': .3048, 'yard': .9144, 'mile (dặm)': 1609.344 };
+  const AREA = { 'm²': 1, 'ha (hecta)': 1e4, 'km²': 1e6, 'acre': 4046.8564224 };
+  const opt = o => Object.keys(o).map(k => `<option>${k}</option>`).join('');
+  mk(el, `<div class="two"><div class="mini"><h4>Chiều dài</h4><label class="lab"><input type="number" id="lv" value="1" step="any" style="width:110px"><select id="lu">${opt(LEN)}</select></label><div id="lo" style="font-size:14px"></div></div>
+  <div class="mini"><h4>Diện tích</h4><label class="lab"><input type="number" id="av" value="15000" step="any" style="width:110px"><select id="au">${opt(AREA)}</select></label><div id="ao" style="font-size:14px"></div></div></div>
+  <div class="mini" style="margin-top:12px"><h4>Góc (nhập một ô, các ô khác tự đổi)</h4><div class="lab"><span>độ (thập phân)</span><input type="number" id="d" value="90" step="any" style="width:120px"><span>gon</span><input type="number" id="gn" value="100" step="any" style="width:120px"><span>rad</span><input type="number" id="rd" value="1.570796" step="any" style="width:130px"></div><div id="dms" style="font-size:14px"></div></div>`);
+  q(el, '#au').value = 'm²'; q(el, '#lu').value = 'mét (m)';
+  const L = () => { const m = +q(el, '#lv').value * LEN[q(el, '#lu').value]; q(el, '#lo').innerHTML = Object.keys(LEN).map(k => `${k}: <b>${+(m / LEN[k]).toPrecision(9)}</b>`).join('<br>'); };
+  const A = () => { const m = +q(el, '#av').value * AREA[q(el, '#au').value]; q(el, '#ao').innerHTML = Object.keys(AREA).map(k => `${k}: <b>${+(m / AREA[k]).toPrecision(10)}</b>`).join('<br>'); };
+  const set = (deg, from) => {
+    if (from !== 'd') q(el, '#d').value = +deg.toPrecision(10); if (from !== 'gn') q(el, '#gn').value = +(deg * 400 / 360).toPrecision(10); if (from !== 'rd') q(el, '#rd').value = +(deg * D2R).toPrecision(9);
+    let s = Math.abs(deg), d = Math.floor(s + 1e-12), m = Math.floor((s - d) * 60 + 1e-9), sec = ((s - d) * 60 - m) * 60; if (sec > 59.9995) { sec = 0; m++; } if (m == 60) { m = 0; d++; }
+    q(el, '#dms').innerHTML = `Dạng độ–phút–giây: <b>${deg < 0 ? '−' : ''}${d}° ${m}′ ${sec.toFixed(2).replace('.', ',')}″</b>`;
+  };
+  qa(el, '#lv,#lu').forEach(x => x.oninput = L); qa(el, '#av,#au').forEach(x => x.oninput = A);
+  q(el, '#d').oninput = e => set(+e.target.value, 'd'); q(el, '#gn').oninput = e => set(+e.target.value * .9, 'gn'); q(el, '#rd').oninput = e => set(+e.target.value / D2R, 'rd');
+  L(); A(); set(90, '');
+};
+
+// Tỷ lệ bản đồ
+W.scaleCalc = el => {
+  mk(el, `<div class="lab"><span>Tỷ lệ 1 :</span><input type="number" id="M" value="500" min="1" style="width:130px"><span class="tag" id="cls"></span></div>` +
+    field('mm', 'Chiều dài trên bản vẽ (mm)', 20) + `<div class="res" id="r1"></div>` + field('gm', 'Chiều dài ngoài thực địa (m)', 25) + `<div class="res" id="r2"></div><div class="res" id="r3"></div>`);
+  const f = () => {
+    const M = Math.max(1, num(el, 'M', 500)), mm = num(el, 'mm', 0), gm = num(el, 'gm', 0);
+    q(el, '#r1').innerHTML = `${fmt(mm, 1)} mm trên bản vẽ ứng với <b>${fmt(mm * M / 1000, 3)} m</b> ngoài thực địa`;
+    q(el, '#r2').innerHTML = `${fmt(gm, 2)} m ngoài thực địa vẽ ra bản vẽ dài <b>${fmt(gm * 1000 / M, 2)} mm</b>`;
+    q(el, '#r3').innerHTML = `Mở rộng: một nét vẽ/điểm chấm 0,2 mm trên giấy ứng với <b>${fmt(0.2 * M / 1000, 3)} m</b> ngoài thực địa — đó là lý do tỷ lệ càng nhỏ thì độ chi tiết càng thấp.`;
+    const c = M <= 20 ? 'bản vẽ chi tiết (1:1 – 1:20)' : (M >= 50 && M <= 500) ? 'bản vẽ mặt bằng công trình (1:50 – 1:500)' : (M >= 2000 && M <= 10000) ? 'tỷ lệ trung bình (1:2.000 – 1:10.000)' : M > 10000 ? 'tỷ lệ nhỏ (trên 1:10.000)' : 'nằm giữa các khoảng đã nêu trong bài';
+    q(el, '#cls').textContent = c;
+  };
+  qa(el, 'input').forEach(i => i.oninput = f); f();
+};
+
+// Độ chính xác (accuracy) và độ tinh vi (precision)
+W.accPrec = el => {
+  mk(el, `<div class="two"><div><canvas width="300" height="300" style="width:100%"></canvas></div><div>` +
+    `<div class="mtab"><button data-p="a">(a) Tinh vi nhưng lệch</button><button data-p="b">(b) Không chính xác, không tinh vi</button><button data-p="c" class="on">(c) Chính xác và tinh vi</button></div>` +
+    slider('bi', 'Độ lệch trung bình (sai số hệ thống)', 0, 100, 1, 5, '') + slider('sp', 'Độ phân tán (sai số ngẫu nhiên)', 3, 60, 1, 8, '') + `<button class="btn" id="re">🎲 Bắn lại</button><div class="res" id="out"></div></div></div>`);
+  const g = q(el, 'canvas').getContext('2d'); let seed = 3;
+  const draw = () => {
+    const bi = +q(el, '#bi').value, sp = +q(el, '#sp').value, r = rng(seed), pts = [];
+    for (let i = 0; i < 10; i++) pts.push([150 + bi * .78 + gauss(r) * sp, 150 - bi * .62 + gauss(r) * sp]);
+    g.clearRect(0, 0, 300, 300);
+    [130, 90, 50, 14].forEach((rr, i) => { g.beginPath(); g.arc(150, 150, rr, 0, 7); g.strokeStyle = CL.grey; g.stroke(); });
+    g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(10, 150); g.lineTo(290, 150); g.moveTo(150, 10); g.lineTo(150, 290); g.stroke();
+    g.fillStyle = CL.red; g.beginPath(); g.arc(150, 150, 3, 0, 7); g.fill();
+    pts.forEach(p => { g.fillStyle = CL.blue; g.beginPath(); g.arc(p[0], p[1], 5, 0, 7); g.fill(); });
+    const mx = pts.reduce((s, p) => s + p[0], 0) / 10, my = pts.reduce((s, p) => s + p[1], 0) / 10;
+    g.strokeStyle = CL.orange; g.lineWidth = 2; g.beginPath(); g.moveTo(mx - 7, my - 7); g.lineTo(mx + 7, my + 7); g.moveTo(mx + 7, my - 7); g.lineTo(mx - 7, my + 7); g.stroke(); g.lineWidth = 1;
+    const off = Math.hypot(mx - 150, my - 150), sd = Math.sqrt(pts.reduce((s, p) => s + (p[0] - mx) ** 2 + (p[1] - my) ** 2, 0) / 10);
+    const acc = off < 25, pre = sd < 22;
+    q(el, '#out').innerHTML = `<span style="color:${CL.red}">●</span> giá trị thật &nbsp; <span style="color:${CL.blue}">●</span> các lần đo &nbsp; <span style="color:${CL.orange}">✕</span> trung bình<br>Trung bình lệch giá trị thật: <b>${fmt(off, 0)}</b> · độ phân tán quanh trung bình: <b>${fmt(sd, 0)}</b><br><b>${acc ? 'Chính xác (accurate)' : 'Không chính xác'}</b> và <b>${pre ? 'tinh vi (precise)' : 'không tinh vi'}</b>`;
+  };
+  const P = { a: [70, 8], b: [60, 45], c: [4, 8] };
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); const [bi, sp] = P[b.dataset.p]; q(el, '#bi').value = bi; q(el, '#sp').value = sp; q(el, '#biv').textContent = bi; q(el, '#spv').textContent = sp; draw(); });
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value; qa(el, '.mtab button').forEach(x => x.classList.remove('on')); draw(); }));
+  q(el, '#re').onclick = () => { seed = (seed * 17 + 5) % 100000; draw(); }; draw();
+};
+
+// Sai số hệ thống không giảm khi đo nhiều lần, sai số ngẫu nhiên thì giảm dần trong trung bình
+W.errSim = el => {
+  mk(el, `<canvas width="600" height="260" style="width:100%"></canvas>` + slider('bs', 'Sai số hệ thống (ví dụ thước dài/ngắn)', -20, 20, 1, 6, ' mm') + slider('sg', 'Sai số ngẫu nhiên σ', 0, 20, 1, 8, ' mm') + slider('nn', 'Số lần đo n', 5, 100, 1, 40, '') +
+    `<label class="lab"><input type="checkbox" id="bl"> Thêm một sai sót (ghi nhầm số): lần đo thứ 6 lệch +150 mm</label><button class="btn" id="re">🎲 Đo lại</button><div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d'); let seed = 5;
+  const draw = () => {
+    const bs = +q(el, '#bs').value, sg = +q(el, '#sg').value, n = +q(el, '#nn').value, bl = q(el, '#bl').checked, r = rng(seed), v = [];
+    for (let i = 0; i < 100; i++) v.push(bs + sg * gauss(r) + (bl && i === 5 ? 150 : 0));
+    g.clearRect(0, 0, 600, 260); const X0 = 40, Y0 = 130, kx = 550 / n, ky = 100 / 40;
+    g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(X0, Y0); g.lineTo(590, Y0); g.stroke(); txt(g, 'giá trị thật (0)', 44, Y0 - 4, CL.grey, 11);
+    g.setLineDash([4, 4]); g.strokeStyle = CL.orange; g.beginPath(); g.moveTo(X0, Y0 - bs * ky); g.lineTo(590, Y0 - bs * ky); g.stroke(); g.setLineDash([]); txt(g, 'sai số hệ thống', 480, Y0 - bs * ky - 5, CL.orange, 11);
+    let s = 0; g.strokeStyle = CL.blue; g.lineWidth = 2; g.beginPath();
+    for (let i = 0; i < n; i++) { const y = Math.max(-118, Math.min(118, v[i])); g.fillStyle = 'rgba(120,130,150,.65)'; g.beginPath(); g.arc(X0 + (i + .5) * kx, Y0 - y * ky, 3, 0, 7); g.fill(); }
+    g.beginPath(); for (let i = 0; i < n; i++) { s += v[i]; const y = Y0 - Math.max(-118, Math.min(118, s / (i + 1))) * ky; i ? g.lineTo(X0 + (i + .5) * kx, y) : g.moveTo(X0 + (i + .5) * kx, y); } g.stroke(); g.lineWidth = 1;
+    txt(g, '● từng lần đo   ━ trung bình cộng dồn', 44, 250, ink(), 12); txt(g, 'số lần đo →', 590, 250, CL.grey, 11, 'right');
+    const mean = v.slice(0, n).reduce((a, b) => a + b, 0) / n;
+    q(el, '#out').innerHTML = `Sau n = ${n} lần: trung bình lệch thật <b>${fmt(mean, 1)} mm</b>. Phần ngẫu nhiên co lại khi n tăng (độ lệch chuẩn của trung bình ≈ σ/√n = ${fmt(sg / Math.sqrt(n), 1)} mm); phần hệ thống (${bs} mm) vẫn còn nguyên${bl ? '; sai sót +150 mm kéo cả trung bình lệch — phải phát hiện và loại bỏ, không thể "trung bình hoá" nó' : ''}.`;
+  };
+  qa(el, 'input[type=range]').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + (i.id === 'nn' ? '' : ' mm'); draw(); }));
+  q(el, '#bl').onchange = draw; q(el, '#re').onclick = () => { seed = (seed * 13 + 7) % 100000; draw(); }; draw();
+};
+
+// Bài thảo luận: sai số nhỏ ở móng, đo lên cao
+W.tiltCalc = el => {
+  mk(el, `<canvas width="600" height="260" style="width:100%"></canvas>` + slider('e', 'Sai số tại móng e', 5, 50, 1, 20, ' mm') + slider('L', 'Chiều dài đoạn chuẩn dùng để định hướng L', 2, 30, 1, 10, ' m') + slider('H', 'Chiều cao cột H', 5, 100, 1, 50, ' m') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const e = +q(el, '#e').value, L = +q(el, '#L').value, H = +q(el, '#H').value, top = e * H / L;
+    g.clearRect(0, 0, 600, 260); g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(10, 230); g.lineTo(590, 230); g.stroke();
+    const hpx = 190, off = e / 50 * 26, lean = Math.min(top / (50 * 100 / 2) * 90, 120);
+    g.fillStyle = 'rgba(120,130,150,.5)'; g.fillRect(90, 30, 18, hpx); g.fillStyle = CL.red; g.fillRect(90 + off, 30, 18, hpx);
+    txt(g, 'Cột lệch song song', 60, 250, ink(), 12); txt(g, 'đỉnh lệch = e = ' + e + ' mm', 60, 22, CL.red, 12);
+    g.fillStyle = 'rgba(120,130,150,.5)'; g.fillRect(360, 30, 18, hpx);
+    g.strokeStyle = CL.red; g.lineWidth = 18; g.beginPath(); g.moveTo(369 + off, 230); g.lineTo(369 + off + lean, 40); g.stroke(); g.lineWidth = 1;
+    txt(g, 'Trục cột bị xoay quanh chân (sai hướng)', 290, 250, ink(), 12); txt(g, 'đỉnh lệch ≈ e·H/L = ' + fmt(top, 0) + ' mm', 300, 22, CL.red, 12);
+    q(el, '#out').innerHTML = `Nếu chỉ dời song song thì đỉnh cột cao ${H} m vẫn lệch <b>${e} mm</b> (chỉ bằng sai số móng). Nhưng nếu sai số làm <b>sai hướng</b> (góc lệch ≈ e/L = ${fmt(e / L * 1000, 2)} mm/m) thì lên cao ${H} m nó phóng đại thành <b>${fmt(top, 0)} mm = ${fmt(top / 10, 1)} cm</b> (gấp ${fmt(H / L, 1)} lần).`;
+  };
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + (i.id === 'e' ? ' mm' : ' m'); draw(); })); draw();
+};
+
+/* ================= CHƯƠNG 1B ================= */
+
+const ELL = { 'Everest (Anh, 1830)': [6377276, 6356075], 'Krasovski (Nga, 1940)': [6378245, 6356863], 'WGS 84 (Mỹ, 1984)': [6378137, 6356752.3] };
+W.ellipsoid = el => {
+  mk(el, `<div class="two"><div><canvas width="300" height="300" style="width:100%"></canvas></div><div>` + slider('ex', 'Phóng đại độ dẹt ×', 1, 100, 1, 1, '') +
+    `<label class="lab"><span>Ellipsoid</span><select id="sel">${Object.keys(ELL).map(k => `<option>${k}</option>`).join('')}</select></label><div class="res" id="out"></div></div></div>`);
+  q(el, '#sel').value = 'WGS 84 (Mỹ, 1984)';
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const ex = +q(el, '#ex').value, [a, b] = ELL[q(el, '#sel').value], f = (a - b) / a;
+    const fd = Math.min(f * ex, .6), A = 130, B = A * (1 - fd);
+    g.clearRect(0, 0, 300, 300); g.strokeStyle = CL.blue; g.lineWidth = 2.5; g.beginPath(); g.ellipse(150, 150, A, B, 0, 0, 7); g.stroke();
+    g.strokeStyle = CL.orange; g.lineWidth = 1.5; g.setLineDash([5, 4]); g.beginPath(); for (let i = 0; i <= 200; i++) { const t = i / 200 * 2 * Math.PI, w = 1 + .05 * Math.sin(6 * t) * Math.min(1, ex / 20 + .1); const x = 150 + A * w * Math.cos(t), y = 150 - B * w * Math.sin(t); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); g.setLineDash([]); g.lineWidth = 1;
+    g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(150, 150); g.lineTo(150 + A, 150); g.moveTo(150, 150); g.lineTo(150, 150 - B); g.stroke();
+    txt(g, 'a', 150 + A / 2, 143, ink(), 14); txt(g, 'b', 156, 150 - B / 2, ink(), 14); txt(g, 'ellipsoid (nét liền)', 10, 292, CL.blue, 12); txt(g, 'geoid (nét đứt, minh hoạ)', 150, 292, CL.orange, 12);
+    q(el, '#out').innerHTML = `a = <b>${a.toLocaleString('vi-VN')} m</b> &nbsp; b = <b>${b.toLocaleString('vi-VN')} m</b><br>a − b = <b>${fmt(a - b, 1)} m</b> (≈ ${fmt((a - b) / 1000, 1)} km)<br>Độ dẹt f = (a − b)/a = ${(f).toFixed(7).replace('.', ',')} = 1/<b>${fmt(1 / f, 1)}</b><br>Hình vẽ đang phóng đại độ dẹt <b>×${ex}</b>${ex === 1 ? ' — ở tỷ lệ thật, ellipsoid trông gần như hình cầu' : ''}.`;
+  };
+  qa(el, '#ex').forEach(i => i.addEventListener('input', () => { q(el, '#exv').textContent = i.value; draw(); })); q(el, '#sel').onchange = draw; draw();
+};
+
+// Quả cầu có lưới kinh–vĩ tuyến
+W.globe = el => {
+  mk(el, `<div class="two"><div><canvas width="340" height="340" style="width:100%"></canvas><div style="font-size:12px;color:var(--muted)">Kéo chuột để xoay quả cầu.</div></div><div>` +
+    slider('la', 'Vĩ độ φ', -90, 90, 1, 21, '°') + slider('lo', 'Kinh độ λ (âm = Tây)', -180, 180, 1, 105, '°') + `<div class="res" id="out"></div>
+    <div style="font-size:14px"><span class="sw" style="background:${CL.orange}"></span> xích đạo (vĩ tuyến gốc, φ = 0°) &nbsp; <span class="sw" style="background:${CL.green}"></span> kinh tuyến gốc Greenwich (λ = 0°) &nbsp; <span class="sw" style="background:${CL.red}"></span> kinh tuyến/vĩ tuyến qua điểm</div></div></div>`);
+  const c = q(el, 'canvas'), g = c.getContext('2d'), st = { rx: .4, ry: -1.0 };
+  const P = (phi, lam) => [Math.cos(phi) * Math.sin(lam), Math.sin(phi), Math.cos(phi) * Math.cos(lam)];
+  const draw = () => {
+    const R = 140, cx = 170, cy = 170; g.clearRect(0, 0, 340, 340);
+    g.strokeStyle = CL.grey; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke();
+    const line = (fn, col, w) => { let p0 = null; for (let i = 0; i <= 90; i++) { const p = rotXY(fn(i / 90), st.rx, st.ry), fr = p[2] >= 0; if (p0) { g.strokeStyle = col; g.globalAlpha = (fr || p0[2] >= 0) ? 1 : .13; g.lineWidth = w; g.beginPath(); g.moveTo(cx + R * p0[0], cy - R * p0[1]); g.lineTo(cx + R * p[0], cy - R * p[1]); g.stroke(); } p0 = p; } g.globalAlpha = 1; };
+    for (let d = -180; d < 180; d += 30) line(t => P((t * 180 - 90) * D2R, d * D2R), CL.grey, 1);
+    for (let d = -60; d <= 60; d += 30) if (d) line(t => P(d * D2R, (t * 360 - 180) * D2R), CL.grey, 1);
+    line(t => P(0, (t * 360 - 180) * D2R), CL.orange, 2.5); line(t => P((t * 180 - 90) * D2R, 0), CL.green, 2.5);
+    const phi = +q(el, '#la').value * D2R, lam = +q(el, '#lo').value * D2R;
+    line(t => P((t * 180 - 90) * D2R, lam), CL.red, 2); line(t => P(phi, (t * 360 - 180) * D2R), CL.red, 2);
+    const p = rotXY(P(phi, lam), st.rx, st.ry); if (p[2] >= 0) { g.fillStyle = CL.red; g.beginPath(); g.arc(cx + R * p[0], cy - R * p[1], 6, 0, 7); g.fill(); txt(g, 'M', cx + R * p[0] + 9, cy - R * p[1] - 8, ink(), 14); }
+    const n = rotXY([0, 1, 0], st.rx, st.ry); if (n[2] >= 0) txt(g, 'B', cx + R * n[0] + 4, cy - R * n[1] - 6, ink(), 13); const s = rotXY([0, -1, 0], st.rx, st.ry); if (s[2] >= 0) txt(g, 'N', cx + R * s[0] + 4, cy - R * s[1] + 14, ink(), 13);
+    const la = +q(el, '#la').value, lo = +q(el, '#lo').value;
+    q(el, '#out').innerHTML = `λ = <b>${Math.abs(lo)}° ${lo < 0 ? 'Tây' : lo > 0 ? 'Đông' : ''}</b> · φ = <b>${Math.abs(la)}° ${la < 0 ? 'Nam' : la > 0 ? 'Bắc' : ''}</b>`;
+  };
+  drag3(c, st, draw);
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + '°'; draw(); })); draw();
+};
+
+// Múi chiếu 6° của Gauss và UTM
+function zonesOf(lon) {
+  lon = Math.max(-179.9999, Math.min(179.9999, lon));
+  const utm = Math.floor((lon + 180) / 6) + 1, utmCM = 6 * utm - 183;
+  const gauss = lon >= 0 ? Math.floor(lon / 6) + 1 : 60 - Math.floor(-lon / 6);
+  const gCM = gauss <= 30 ? 6 * gauss - 3 : -(6 * (60 - gauss) + 3);
+  return { utm, utmCM, gauss, gCM };
+}
+const dirLon = x => Math.abs(x) + '° ' + (x < 0 ? 'Tây' : 'Đông');
+W.zoneCalc = el => {
+  mk(el, `<canvas width="600" height="90" style="width:100%"></canvas>` + slider('lo', 'Kinh độ λ (âm = Tây)', -180, 180, 0.5, 105.5, '°') + `<div class="res" id="out"></div>
+  <div class="mtab" id="pre">${[['Hà Nội', 105.85], ['TP. Hồ Chí Minh', 106.7], ['Đà Nẵng', 108.2], ['Greenwich', 0.5], ['London (hơi tây Greenwich)', -0.13], ['New York', -74]].map(a => `<button data-l="${a[1]}">${a[0]}</button>`).join('')}</div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const lon = +q(el, '#lo').value, z = zonesOf(lon); g.clearRect(0, 0, 600, 90);
+    for (let i = 0; i < 60; i++) { g.fillStyle = i % 2 ? 'rgba(59,125,224,.35)' : 'rgba(59,125,224,.15)'; g.fillRect(10 + i * 9.67, 20, 9.67, 30); }
+    const x = 10 + (lon + 180) / 360 * 580; g.strokeStyle = CL.red; g.lineWidth = 2; g.beginPath(); g.moveTo(x, 10); g.lineTo(x, 60); g.stroke(); g.lineWidth = 1;
+    txt(g, '180°T', 10, 76, CL.grey, 11); txt(g, '0°', 300, 76, CL.grey, 11, 'center'); txt(g, '180°Đ', 590, 76, CL.grey, 11, 'right'); txt(g, '60 múi, mỗi múi 6° kinh độ', 300, 14, ink(), 12, 'center');
+    q(el, '#out').innerHTML = `<div class="tw"><table><tr><th></th><th>Số hiệu múi</th><th>Kinh tuyến trục</th><th>Phạm vi múi</th></tr>
+    <tr><td><b>Gauss–Krüger</b></td><td><b>${z.gauss}</b></td><td>${dirLon(z.gCM)}</td><td>${dirLon(z.gCM - 3)} → ${dirLon(z.gCM + 3)}</td></tr>
+    <tr><td><b>UTM</b></td><td><b>${z.utm}</b></td><td>${dirLon(z.utmCM)}</td><td>${dirLon(z.utmCM - 3)} → ${dirLon(z.utmCM + 3)}</td></tr></table></div>`;
+  };
+  q(el, '#lo').addEventListener('input', e => { q(el, '#lov').textContent = e.target.value + '°'; draw(); });
+  qa(el, '#pre button').forEach(b => b.onclick = () => { q(el, '#lo').value = b.dataset.l; q(el, '#lov').textContent = b.dataset.l + '°'; draw(); }); draw();
+};
+
+// Hệ tọa độ vuông góc phẳng: tọa độ quy ước ↔ tọa độ thực
+W.gaussCoord = el => {
+  mk(el, `<div class="mtab"><button data-s="g" class="on">Gauss–Krüger</button><button data-s="u">UTM</button></div>` + field('n', 'Số hiệu múi (ghi trước y)', 18, 1) + field('yq', 'y trong tọa độ quy ước (km)', 565, 'any') + field('x', 'x (km)', 1220, 'any') +
+    `<button class="btn" id="ex">Ví dụ M (x = 1220 km; y = 18 565 km)</button><div class="res" id="out"></div><canvas width="600" height="170" style="width:100%"></canvas>`);
+  const g = q(el, 'canvas').getContext('2d'); let sys = 'g';
+  const draw = () => {
+    const n = Math.round(num(el, 'n', 1)), yq = num(el, 'yq', 500), x = num(el, 'x', 0), yr = yq - 500;
+    const CM = sys === 'g' ? (n <= 30 ? 6 * n - 3 : -(6 * (60 - n) + 3)) : 6 * n - 183;
+    const okN = n >= 1 && n <= 60;
+    q(el, '#out').innerHTML = okN ? `Tọa độ quy ước ghi: y = <b>${n} ${fmt(yq, 3).replace(/,?0+$/, '')} km</b>, x = ${fmt(x, 3).replace(/,?0+$/, '')} km<br>Múi <b>${n}</b>, kinh tuyến trục ${dirLon(CM)}.<br>Bỏ dời trục: y<sub>thực</sub> = ${fmt(yq, 3).replace(/,?0+$/, '')} − 500 = <b>${fmt(yr, 3).replace(/,?0+$/, '')} km</b> → điểm nằm <b>${yr > 0 ? Math.abs(yr) + ' km về phía Đông' : yr < 0 ? Math.abs(yr) + ' km về phía Tây' : 'đúng trên'}</b> kinh tuyến trục.<br>Gợi ý kiểm tra: trong một múi, y quy ước thường nằm khoảng 170–830 km (tức |y thực| ≲ 330 km).` : 'Số hiệu múi phải từ 1 đến 60.';
+    g.clearRect(0, 0, 600, 170); const cx = 300, ax = 40; g.strokeStyle = CL.grey; g.beginPath(); g.moveTo(ax, 140); g.lineTo(590, 140); g.stroke();
+    g.strokeStyle = CL.orange; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(cx, 10); g.lineTo(cx, 150); g.stroke(); g.setLineDash([]);
+    txt(g, 'kinh tuyến trục (y quy ước = 500)', cx + 5, 22, CL.orange, 11); txt(g, 'y quy ước ' + fmt(yq, 0) + ' km', 590, 160, CL.grey, 11, 'right');
+    const px = cx + Math.max(-250, Math.min(250, yr)) * .75; g.fillStyle = CL.red; g.beginPath(); g.arc(px, 70, 6, 0, 7); g.fill(); txt(g, 'M', px + 9, 66, ink(), 14);
+    g.strokeStyle = CL.red; g.beginPath(); g.moveTo(cx, 70); g.lineTo(px, 70); g.stroke();
+  };
+  qa(el, 'input').forEach(i => i.oninput = draw);
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { sys = b.dataset.s; qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  q(el, '#ex').onclick = () => { q(el, '#n').value = 18; q(el, '#yq').value = 565; q(el, '#x').value = 1220; draw(); }; draw();
+};
+
+// Hệ số biến dạng độ dài
+W.projDist = el => {
+  mk(el, `<canvas width="600" height="270" style="width:100%"></canvas>` + slider('y', 'Cách kinh tuyến trục y', 0, 340, 1, 150, ' km') + field('S', 'Đoạn thẳng dài S (km)', 1, 'any') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d'), R = 6371, kG = y => 1 + y * y / (2 * R * R), kU = y => .9996 * kG(y);
+  const draw = () => {
+    const y0 = +q(el, '#y').value, S = num(el, 'S', 1);
+    g.clearRect(0, 0, 600, 270); const X0 = 50, X1 = 580, Yt = 20, Yb = 240, vmin = .9994, vmax = 1.0016, mx = y => X0 + y / 340 * (X1 - X0), my = k => Yb - (k - vmin) / (vmax - vmin) * (Yb - Yt);
+    g.strokeStyle = CL.grey; g.lineWidth = 1; g.beginPath(); g.moveTo(X0, Yb); g.lineTo(X1, Yb); g.moveTo(X0, Yt); g.lineTo(X0, Yb); g.stroke();
+    g.setLineDash([3, 4]); g.beginPath(); g.moveTo(X0, my(1)); g.lineTo(X1, my(1)); g.stroke(); g.setLineDash([]); txt(g, 'k = 1', 10, my(1) + 4, ink(), 11);
+    [0.9996, 1.001].forEach(k => txt(g, k.toString().replace('.', ','), 4, my(k) + 4, CL.grey, 10));
+    [[kG, CL.red, 'Gauss'], [kU, CL.blue, 'UTM']].forEach(([f, col, nm]) => { g.strokeStyle = col; g.lineWidth = 2.5; g.beginPath(); for (let y = 0; y <= 340; y += 4) { const x = mx(y), yy = my(f(y)); y ? g.lineTo(x, yy) : g.moveTo(x, yy); } g.stroke(); txt(g, nm, mx(345) - 40, my(f(340)) + (nm === 'UTM' ? 16 : -6), col, 13); });
+    g.lineWidth = 1; g.strokeStyle = CL.orange; g.beginPath(); g.moveTo(mx(y0), Yt); g.lineTo(mx(y0), Yb); g.stroke();
+    [0, 100, 180, 250, 340].forEach(y => txt(g, y, mx(y), 258, CL.grey, 11, 'center')); txt(g, 'y (km, tính từ kinh tuyến trục) →', X1, 268, CL.grey, 11, 'right');
+    const a = kG(y0), b = kU(y0);
+    q(el, '#out').innerHTML = `Tại y = ${y0} km: hệ số Gauss k = <b>${a.toFixed(6).replace('.', ',')}</b> (đoạn ${S} km bị kéo dài ${fmt((a - 1) * S * 1e6, 0)} mm) · hệ số UTM k = <b>${b.toFixed(6).replace('.', ',')}</b> (đoạn ${S} km thành ${fmt((b - 1) * S * 1e6, 0)} mm ${b < 1 ? 'ngắn đi' : 'dài thêm'})<br>Mở rộng: k(y) ≈ k₀·(1 + y²/2R²), với k₀ = 1 (Gauss) hoặc 0,9996 (UTM), R = 6371 km.`;
+  };
+  q(el, '#y').addEventListener('input', e => { q(el, '#yv').textContent = e.target.value + ' km'; draw(); }); q(el, '#S').oninput = draw; draw();
+};
+
+// Độ cao, chênh cao, độ cao giả định
+W.heights = el => {
+  mk(el, `<canvas width="600" height="260" style="width:100%"></canvas>` + slider('ha', 'Độ cao H_A', 0, 100, 1, 30, ' m') + slider('hab', 'Chênh cao h_AB', -40, 40, 1, 25, ' m') + slider('hbc', 'Chênh cao h_BC', -40, 40, 1, -15, ' m') + slider('s', 'Độ cao của mặt geoid giả định so với geoid', 0, 60, 1, 0, ' m') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const ha = +q(el, '#ha').value, hab = +q(el, '#hab').value, hbc = +q(el, '#hbc').value, s = +q(el, '#s').value, hb = ha + hab, hc = hb + hbc;
+    g.clearRect(0, 0, 600, 260); const y0 = 235, k = 1.45, xs = [100, 300, 500], H = [ha, hb, hc];
+    g.strokeStyle = CL.green; g.lineWidth = 2; g.beginPath(); g.moveTo(10, y0); g.lineTo(590, y0); g.stroke(); txt(g, 'Geoid', 12, y0 - 5, CL.green, 12);
+    if (s > 0) { g.setLineDash([6, 4]); g.strokeStyle = CL.purple; g.beginPath(); g.moveTo(10, y0 - s * k); g.lineTo(590, y0 - s * k); g.stroke(); g.setLineDash([]); txt(g, 'Geoid giả định', 12, y0 - s * k - 5, CL.purple, 12); }
+    g.strokeStyle = CL.grey; g.lineWidth = 2; g.beginPath(); for (let x = 10; x <= 590; x += 5) { let h = 0, w = 0; for (let i = 0; i < 3; i++) { const wi = Math.exp(-Math.pow((x - xs[i]) / 90, 2)); h += H[i] * wi; w += wi; } const y = y0 - Math.max(-30, h / Math.max(w, .001)) * k; x === 10 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); g.lineWidth = 1;
+    ['A', 'B', 'C'].forEach((n, i) => { const y = y0 - H[i] * k; g.strokeStyle = CL.blue; g.beginPath(); g.moveTo(xs[i], y); g.lineTo(xs[i], y0); g.stroke(); g.fillStyle = CL.red; g.beginPath(); g.arc(xs[i], y, 5, 0, 7); g.fill(); txt(g, n, xs[i] + 8, y - 6, ink(), 14); txt(g, 'H' + n + ' = ' + H[i], xs[i] + 6, (y + y0) / 2, CL.blue, 12); });
+    g.setLineDash([4, 4]); g.strokeStyle = CL.orange; g.beginPath(); g.moveTo(xs[0], y0 - ha * k); g.lineTo(xs[1], y0 - ha * k); g.moveTo(xs[1], y0 - hb * k); g.lineTo(xs[2], y0 - hb * k); g.stroke(); g.setLineDash([]);
+    q(el, '#out').innerHTML = `H<sub>B</sub> = H<sub>A</sub> + h<sub>AB</sub> = ${ha} ${hab < 0 ? '−' : '+'} ${Math.abs(hab)} = <b>${hb} m</b> · H<sub>C</sub> = H<sub>B</sub> + h<sub>BC</sub> = ${hb} ${hbc < 0 ? '−' : '+'} ${Math.abs(hbc)} = <b>${hc} m</b><br>Độ cao giả định (so với mặt giả định cao ${s} m): H′<sub>A</sub> = ${ha - s}, H′<sub>B</sub> = ${hb - s}, H′<sub>C</sub> = ${hc - s} m → chênh cao h′<sub>AB</sub> = ${hb - ha} m, h′<sub>BC</sub> = ${hc - hb} m — <b>không đổi</b> khi đổi mặt chuẩn.`;
+  };
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + ' m'; draw(); })); draw();
+};
+
+// Phương vị thật – phương vị từ – góc định hướng
+W.azimuth = el => {
+  mk(el, `<div class="two"><div><canvas width="320" height="320" style="width:100%"></canvas></div><div>` + slider('at', 'Phương vị từ A_t', 0, 359, 1, 60, '°') + slider('dl', 'Độ lệch từ δ (+ nếu bắc từ lệch Đông)', -20, 20, 1, 3, '°') + slider('dlam', 'Δλ = λ − λ₀ (+ nếu ở phía Đông kinh tuyến trục)', -3, 3, 0.1, 1.5, '°') + slider('ph', 'Vĩ độ φ', 0, 80, 1, 16, '°') + `<div class="res" id="out"></div></div></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const at = +q(el, '#at').value, dl = +q(el, '#dl').value, dlam = +q(el, '#dlam').value, ph = +q(el, '#ph').value;
+    const ath = norm360(at + dl), gam = dlam * Math.sin(ph * D2R), al = norm360(ath - gam);
+    g.clearRect(0, 0, 320, 320); const cx = 160, cy = 175, R = 120, dir = a => [Math.sin(a * D2R), -Math.cos(a * D2R)];
+    g.strokeStyle = CL.grey; g.beginPath(); g.arc(cx, cy, R + 10, 0, 7); g.stroke();
+    [[0, CL.blue, 'Bắc thật'], [dl, CL.red, 'Bắc từ'], [gam, CL.green, 'Bắc tọa độ']].forEach(([a, col, n], i) => { const d = dir(a); arrow(g, cx, cy, cx + R * d[0], cy + R * d[1], col, 2.5); txt(g, n, cx + (R + 4) * d[0] + (d[0] < 0 && i ? -20 : 4), cy + (R + 4) * d[1] - (i === 0 ? 6 : i === 1 ? -2 : 12), col, 12); });
+    const d = dir(ath); g.strokeStyle = CL.orange; g.lineWidth = 3; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (R - 10) * d[0], cy + (R - 10) * d[1]); g.stroke(); g.lineWidth = 1; txt(g, 'M→N', cx + (R - 10) * d[0] * .6 + 6, cy + (R - 10) * d[1] * .6, CL.orange, 13);
+    g.fillStyle = ink(); g.beginPath(); g.arc(cx, cy, 4, 0, 7); g.fill(); txt(g, 'M', cx - 16, cy + 16, ink(), 13);
+    txt(g, '(δ và γ được vẽ phóng đại theo thang độ thật)', 160, 312, CL.grey, 11, 'center');
+    q(el, '#out').innerHTML = `A<sub>th</sub> = A<sub>t</sub> + δ = ${at}° ${dl < 0 ? '−' : '+'} ${Math.abs(dl)}° = <b>${fmt(ath, 1)}°</b><br>γ = Δλ·sin φ = ${fmt(dlam, 1)}°·sin ${ph}° = <b>${fmt(gam, 3)}°</b> (≈ ${fmt(gam * 60, 1)}′)<br>α = A<sub>th</sub> − γ = <b>${fmt(al, 3)}°</b>`;
+  };
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = i.value + '°'; draw(); })); draw();
+};
+
+// BT1, BT2: góc bằng ↔ góc định hướng
+W.betaCalc = el => {
+  mk(el, `<div class="two"><div class="mini"><h4>BT1: biết α<sub>OA</sub>, α<sub>OB</sub> → tìm β</h4>${field('a1', 'α_OA (độ)', 35)}${field('b1', 'α_OB (độ)', 120)}<div class="res" id="o1"></div></div>
+  <div class="mini"><h4>BT2: biết α<sub>OA</sub>, β → tìm α<sub>OB</sub></h4>${field('a2', 'α_OA (độ)', 300)}${field('b2', 'β (độ)', 95)}<div class="res" id="o2"></div></div></div>`);
+  const f = () => {
+    const a1 = num(el, 'a1', 0), b1 = num(el, 'b1', 0), a2 = num(el, 'a2', 0), b2 = num(el, 'b2', 0), r = norm360(b1 - a1);
+    q(el, '#o1').innerHTML = `β = α<sub>OB</sub> − α<sub>OA</sub> = ${b1} − ${a1} = ${fmt(b1 - a1, 3)}°${(b1 - a1) < 0 ? ' → &lt; 0 nên cộng 360° ' : ''} ⇒ <b>β = ${fmt(r, 3)}°</b>`;
+    q(el, '#o2').innerHTML = `α<sub>OB</sub> = α<sub>OA</sub> + β = ${fmt(a2 + b2, 3)}°${(a2 + b2) >= 360 ? ' → ≥ 360° nên trừ 360°' : ''} ⇒ <b>α<sub>OB</sub> = ${fmt(norm360(a2 + b2), 3)}°</b>`;
+  };
+  qa(el, 'input').forEach(i => i.oninput = f); f();
+};
+
+// Vẽ hệ tọa độ phẳng: x hướng lên (Bắc), y hướng sang phải (Đông)
+function plotXY(g, W_, H_, pts, lines, labels) {
+  const xs = pts.map(p => p[1]), ys = pts.map(p => p[0]);
+  let minY = Math.min(...xs), maxY = Math.max(...xs), minX = Math.min(...ys), maxX = Math.max(...ys);
+  const pad = Math.max(maxX - minX, maxY - minY, 1) * .18, k = Math.min((W_ - 80) / (maxY - minY + 2 * pad), (H_ - 60) / (maxX - minX + 2 * pad));
+  const px = y => 40 + (y - minY + pad) * k, py = x => H_ - 30 - (x - minX + pad) * k;
+  g.clearRect(0, 0, W_, H_); g.strokeStyle = CL.grey; g.lineWidth = 1; g.beginPath(); g.moveTo(10, H_ - 12); g.lineTo(W_ - 10, H_ - 12); g.moveTo(14, H_ - 8); g.lineTo(14, 8); g.stroke(); txt(g, 'y (Đông) →', W_ - 12, H_ - 16, CL.grey, 11, 'right'); txt(g, '↑ x (Bắc)', 20, 16, CL.grey, 11);
+  lines.forEach(([a, b, col, dash]) => { g.strokeStyle = col; g.lineWidth = 2.5; g.setLineDash(dash ? [5, 4] : []); g.beginPath(); g.moveTo(px(a[1]), py(a[0])); g.lineTo(px(b[1]), py(b[0])); g.stroke(); }); g.setLineDash([]);
+  pts.forEach((p, i) => { g.fillStyle = CL.red; g.beginPath(); g.arc(px(p[1]), py(p[0]), 5, 0, 7); g.fill(); txt(g, labels[i], px(p[1]) + 8, py(p[0]) - 8, ink(), 14); });
+  return { px, py };
+}
+// Bài toán thuận – nghịch
+W.fwdInv = el => {
+  mk(el, `<div class="mtab"><button data-m="f">Bài toán thuận</button><button data-m="i" class="on">Bài toán nghịch</button></div><div id="pf" style="display:none">${field('xb', 'x_B (m)', 1000)}${field('yb', 'y_B (m)', 500)}${field('al', 'α_BC (độ)', 53.1301)}${field('sb', 'S_BC (m)', 100)}</div>
+  <div id="pi">${field('xa', 'x_A (m)', 1000)}${field('ya', 'y_A (m)', 500)}${field('xb2', 'x_B (m)', 950)}${field('yb2', 'y_B (m)', 620)}</div><div class="res" id="out"></div><canvas width="600" height="260" style="width:100%"></canvas>`);
+  const g = q(el, 'canvas').getContext('2d'); let mode = 'i';
+  const draw = () => {
+    q(el, '#pf').style.display = mode === 'f' ? '' : 'none'; q(el, '#pi').style.display = mode === 'i' ? '' : 'none';
+    if (mode === 'f') {
+      const xb = num(el, 'xb', 0), yb = num(el, 'yb', 0), al = num(el, 'al', 0), S = num(el, 'sb', 0), dx = S * Math.cos(al * D2R), dy = S * Math.sin(al * D2R);
+      q(el, '#out').innerHTML = `Δx<sub>BC</sub> = S·cos α = <b>${fmt(dx, 3)}</b> m · Δy<sub>BC</sub> = S·sin α = <b>${fmt(dy, 3)}</b> m<br>x<sub>C</sub> = ${fmt(xb, 3)} + ${fmt(dx, 3)} = <b>${fmt(xb + dx, 3)}</b> · y<sub>C</sub> = ${fmt(yb, 3)} + ${fmt(dy, 3)} = <b>${fmt(yb + dy, 3)}</b>`;
+      plotXY(g, 600, 260, [[xb, yb], [xb + dx, yb + dy]], [[[xb, yb], [xb + dx, yb + dy], CL.blue]], ['B', 'C']);
+    } else {
+      const xa = num(el, 'xa', 0), ya = num(el, 'ya', 0), xb = num(el, 'xb2', 0), yb = num(el, 'yb2', 0), dx = xb - xa, dy = yb - ya, S = Math.hypot(dx, dy);
+      const a0 = dx === 0 ? 90 : Math.atan(Math.abs(dy / dx)) / D2R; let quad, al;
+      if (dx > 0 && dy >= 0) { quad = 'I'; al = a0; } else if (dx <= 0 && dy > 0) { quad = 'II'; al = 180 - a0; } else if (dx < 0 && dy <= 0) { quad = 'III'; al = 180 + a0; } else { quad = 'IV'; al = 360 - a0; }
+      if (S === 0) { q(el, '#out').textContent = 'Hai điểm trùng nhau.'; return; }
+      q(el, '#out').innerHTML = `Δx = ${fmt(dx, 3)} · Δy = ${fmt(dy, 3)} → S<sub>AB</sub> = √(Δx² + Δy²) = <b>${fmt(S, 3)} m</b><br>α₀ = arctg(|Δy|/|Δx|) = ${fmt(a0, 4)}° · dấu (${dx >= 0 ? '+' : '−'}, ${dy >= 0 ? '+' : '−'}) ⇒ góc phần tư <b>${quad}</b> ⇒ <b>α<sub>AB</sub> = ${fmt(al, 4)}°</b>${dx === 0 || dy === 0 ? '<br><i>Trường hợp đặc biệt (Δx = 0 hoặc Δy = 0): α = 0°, 90°, 180° hoặc 270°.</i>' : ''}`;
+      plotXY(g, 600, 260, [[xa, ya], [xb, yb]], [[[xa, ya], [xb, yb], CL.blue], [[xa, ya], [xa + Math.max(S * .4, 1e-9), ya], CL.grey, 1]], ['A', 'B']);
+    }
+  };
+  qa(el, 'input').forEach(i => i.oninput = draw);
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { mode = b.dataset.m; qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(); }); draw();
+};
+
+// Chuyền góc định hướng theo đường chuyền
+W.azchain = el => {
+  mk(el, `<div class="mtab"><button data-s="l" class="on">Góc bằng ở bên trái tuyến</button><button data-s="r">Góc bằng ở bên phải tuyến</button></div><div class="two"><div>${field('aab', 'α_AB (độ)', 110)}${field('b1', 'β₁ tại B (độ)', 200)}${field('b2', 'β₂ tại C (độ)', 250)}</div><div>${field('s1', 'S_AB (m)', 100)}${field('s2', 'S_BC (m)', 80)}${field('s3', 'S_CD (m)', 90)}</div></div><div class="res" id="out"></div><canvas width="600" height="260" style="width:100%"></canvas>`);
+  const g = q(el, 'canvas').getContext('2d'); let side = 'l';
+  const draw = () => {
+    const aab = num(el, 'aab', 0), b1 = num(el, 'b1', 0), b2 = num(el, 'b2', 0), S = [num(el, 's1', 0), num(el, 's2', 0), num(el, 's3', 0)], sg = side === 'l' ? 1 : -1;
+    const step = (a, b) => norm360(a + sg * (b - 180)), abc = step(aab, b1), acd = step(abc, b2), al = [aab, abc, acd];
+    let p = [[1000, 1000]]; al.forEach((a, i) => p.push([p[i][0] + S[i] * Math.cos(a * D2R), p[i][1] + S[i] * Math.sin(a * D2R)]));
+    const lines = [0, 1, 2].map(i => [p[i], p[i + 1], CL.blue]); plotXY(g, 600, 260, p, lines, ['A', 'B', 'C', 'D']);
+    q(el, '#out').innerHTML = side === 'l' ? `α<sub>BC</sub> = α<sub>AB</sub> + β₁ − 180° = <b>${fmt(abc, 3)}°</b><br>α<sub>CD</sub> = α<sub>BC</sub> + β₂ − 180° = <b>${fmt(acd, 3)}°</b> (= α<sub>AB</sub> + β₁ + β₂ − 2×180° đưa về 0–360°)`
+      : `α<sub>BC</sub> = α<sub>AB</sub> − β₁ + 180° = <b>${fmt(abc, 3)}°</b><br>α<sub>CD</sub> = α<sub>BC</sub> − β₂ + 180° = <b>${fmt(acd, 3)}°</b> (= α<sub>AB</sub> − β₁ − β₂ + 2×180° đưa về 0–360°)`;
+    q(el, '#out').innerHTML += `<br>Tọa độ (giả sử A = 1000; 1000): B (${fmt(p[1][0], 3)}; ${fmt(p[1][1], 3)}) · C (${fmt(p[2][0], 3)}; ${fmt(p[2][1], 3)}) · D (${fmt(p[3][0], 3)}; ${fmt(p[3][1], 3)})`;
+  };
+  qa(el, 'input').forEach(i => i.oninput = draw);
+  qa(el, '.mtab button').forEach(b => b.onclick = () => { side = b.dataset.s; qa(el, '.mtab button').forEach(x => x.classList.toggle('on', x === b)); draw(); }); draw();
+};
+
+/* ================= CHƯƠNG 2 ================= */
+
+// Sơ đồ máy thủy chuẩn, bấm vào từng bộ phận
+W.levelParts = el => {
+  const P = {
+    vk: ['Vật kính', 'Thu ánh sáng từ mia, tạo ảnh của mia trong ống ngắm.'],
+    hn: ['Thấu kính phân kỳ lấy nét trong', 'Được đẩy tới – lui bằng vít điều chỉnh (vít lấy nét) để ảnh mia hiện rõ nét đúng trên mặt phẳng dây chữ thập.'],
+    ct: ['Màng chữ thập và dây chữ thập', 'Màng mang các dây khắc (dây ngang, dây đứng). Dây ngang giữa là dấu để đọc số trên mia.'],
+    tk: ['Thị kính', 'Phóng đại ảnh mia và dây chữ thập cho mắt người đo; xoay để lấy nét dây chữ thập cho rõ.'],
+    td: ['Ống thủy dài', 'Ống chứa bọt khí; khi bọt vào giữa thì trục ống thủy nằm ngang, dùng để đưa trục ngắm về ngang (hai đầu bọt được nhìn ghép qua hệ lăng kính).'],
+    vn: ['Vít nghiêng (và lò xo hồi vị)', 'Nghiêng nhẹ ống kính quanh một trục ngang để đưa bọt thủy dài về giữa trước mỗi lần đọc số.'],
+    tt: ['Ống thủy tròn', 'Bọt tròn dùng để cân bằng sơ bộ: máy ở trạng thái gần thẳng đứng.'],
+    vc: ['Vít cân bằng', 'Ba vít ở đế, vặn để đưa bọt ống thủy tròn vào giữa (cân bằng sơ bộ trục đứng).'],
+    dm: ['Đế máy', 'Phần gắn máy lên chân máy; mang các vít cân bằng.'],
+    td2: ['Trục đứng (trục quay)', 'Trục để máy xoay theo phương ngang; khi máy đã cân bằng thì trục này thẳng đứng, theo phương dây dọi.']
+  };
+  const f = (id, sh) => `<g data-p="${id}" style="cursor:pointer" class="pt">${sh}</g>`;
+  mk(el, `<svg class="w" viewBox="0 0 560 260" style="width:100%;background:var(--bg)"><g stroke="currentColor" fill="none" stroke-width="1.5">
+    <rect x="120" y="70" width="300" height="40" rx="6" fill="rgba(120,130,150,.15)"/><line x1="70" y1="90" x2="440" y2="90" stroke-dasharray="6 4" stroke="${CL.red}"/>
+    ${f('vk', `<ellipse cx="130" cy="90" rx="9" ry="26" fill="rgba(59,125,224,.35)"/>`)}${f('hn', `<path d="M200 68 Q210 90 200 112 M214 68 Q204 90 214 112" stroke="${CL.purple}" stroke-width="2.5"/>`)}
+    ${f('ct', `<path d="M338 72 V108 M326 90 H350" stroke="${CL.green}" stroke-width="2.5"/>`)}${f('tk', `<rect x="420" y="76" width="34" height="28" fill="rgba(59,125,224,.35)"/>`)}
+    ${f('td', `<rect x="235" y="50" width="70" height="14" rx="7" fill="rgba(232,145,45,.3)"/><circle cx="270" cy="57" r="4" fill="${CL.orange}"/>`)}${f('vn', `<rect x="368" y="112" width="8" height="52" fill="rgba(224,82,82,.35)"/>`)}
+    ${f('tt', `<ellipse cx="180" cy="168" rx="16" ry="7" fill="rgba(31,165,106,.3)"/>`)}${f('dm', `<rect x="110" y="186" width="330" height="14" fill="rgba(120,130,150,.3)"/>`)}
+    ${f('vc', `<rect x="140" y="204" width="16" height="22"/><rect x="266" y="204" width="16" height="22"/><rect x="392" y="204" width="16" height="22"/>`)}${f('td2', `<line x1="274" y1="110" x2="274" y2="245" stroke-dasharray="4 4" stroke="${CL.blue}" stroke-width="2.5"/>`)}
+  </g></svg><div class="res" id="d">Bấm vào từng bộ phận trên sơ đồ (ống kính, bọt thủy, vít…) hoặc bấm tên bên dưới.</div><div class="mtab">${Object.keys(P).map(k => `<button data-k="${k}">${P[k][0]}</button>`).join('')}</div>`);
+  const show = k => { q(el, '#d').innerHTML = `<b>${P[k][0]}</b>: ${P[k][1]}`; qa(el, '.mtab button').forEach(b => b.classList.toggle('on', b.dataset.k === k)); qa(el, 'g.pt').forEach(g => g.style.opacity = g.dataset.p === k ? 1 : .55); };
+  qa(el, 'g.pt').forEach(g => g.onclick = () => show(g.dataset.p)); qa(el, '.mtab button').forEach(b => b.onclick = () => show(b.dataset.k));
+};
+
+// Độ nhạy ống thủy dài
+W.bubbleSens = el => {
+  mk(el, slider('R', 'Bán kính cong R của ống thủy', 5, 200, 1, 20, ' m') + `<div class="res" id="out"></div>`);
+  const f = () => { const R = +q(el, '#R').value, th = 0.002 / R * RHO; q(el, '#out').innerHTML = `Bọt dịch 1 vạch (2 mm) ⇔ trục ống thủy nghiêng θ″ = (2 mm / R)·ρ″ = 0,002/${R}·206265 ≈ <b>${fmt(th, 1)}″</b>. R càng lớn, ống càng nhạy.`; };
+  bindSlider(el, 'R', f, ' m'); f();
+};
+
+// Mia đo cao và số đọc
+W.staff = el => {
+  mk(el, `<div class="two"><div><canvas width="260" height="340" style="width:100%;max-width:260px"></canvas></div><div>` + slider('r', 'Số đọc trên mia', 0.5, 3, 0.001, 1.045, ' m') + `<button class="btn" id="pre">Số đọc 1,045 m</button><div class="res" id="out"></div></div></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const r = +q(el, '#r').value, span = .30, k = 340 / span; g.clearRect(0, 0, 260, 340);
+    const lo = r - span / 2, hi = r + span / 2; g.fillStyle = '#fff'; g.fillRect(60, 0, 110, 340);
+    for (let cm = Math.floor(lo * 100); cm <= Math.ceil(hi * 100); cm++) { const y = 170 - (cm / 100 - r) * k; const m = Math.floor(cm / 100); if (cm % 2 === 0) { g.fillStyle = m % 2 ? '#c62828' : '#111'; g.fillRect(60, y - k / 100, 60, k / 100); } if (cm % 10 === 0) { g.fillStyle = m % 2 ? '#c62828' : '#111'; g.fillRect(60, y - 2, 110, 3); g.font = 'bold 15px Segoe UI'; g.textAlign = 'left'; g.fillText((cm % 100) / 10 + '', 176, y + 5); } }
+    g.strokeStyle = CL.green; g.lineWidth = 2; g.beginPath(); g.moveTo(10, 170); g.lineTo(250, 170); g.stroke(); g.lineWidth = 1;
+    const mm = Math.round(r * 1000), m = Math.floor(mm / 1000), dm = Math.floor(mm % 1000 / 100), cmv = Math.floor(mm % 100 / 10), mmv = mm % 10;
+    q(el, '#out').innerHTML = `Số đọc <b>${fmt(r, 3)} m</b> = ${m} m + ${dm} dm + ${cmv} cm + ${mmv} mm.<br>Mét, đề-xi-mét đọc theo số ghi trên mia; xen kẽ đen/đỏ; cm đếm theo vạch; mm ước lượng bằng mắt.`;
+  };
+  q(el, '#r').addEventListener('input', e => { q(el, '#rv').textContent = (+e.target.value).toFixed(3).replace('.', ',') + ' m'; draw(); });
+  q(el, '#pre').onclick = () => { q(el, '#r').value = 1.045; q(el, '#rv').textContent = '1,045 m'; draw(); }; q(el, '#rv').textContent = '1,045 m'; draw();
+};
+
+// Thử nghiệm hai mốc (two-peg test)
+W.twoPeg = el => {
+  const PRE = { 'Ví dụ trong bài (1,500 – 0,500 – 3,500 – 2,000)': [1.5, .5, 3.5, 2], 'Ví dụ 1 (3,458 – 2,116 – 4,244 – 2,914)': [3.458, 2.116, 4.244, 2.914] };
+  mk(el, `<div class="mtab" id="pre">${Object.keys(PRE).map((k, i) => `<button data-k="${k}" class="${i ? '' : 'on'}">${k}</button>`).join('')}</div><div class="two"><div>${field('a1', 'a₁ (máy giữa, mia A)', 1.5)}${field('b1', 'b₁ (máy giữa, mia B)', 0.5)}${field('dab', 'Khoảng cách AB (m)', 20)}</div><div>${field('a2', 'a₂ (máy tại C, mia A)', 3.5)}${field('b2', 'b₂ (máy tại C, mia B)', 2)}${field('dbc', 'Khoảng cách BC (m)', 10)}</div></div><div class="res" id="out"></div><canvas width="600" height="270" style="width:100%"></canvas>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const a1 = num(el, 'a1', 0), b1 = num(el, 'b1', 0), a2 = num(el, 'a2', 0), b2 = num(el, 'b2', 0), dab = Math.max(1, num(el, 'dab', 20)), dbc = Math.max(1, num(el, 'dbc', 10));
+    const dT = a1 - b1, dF = a2 - b2, err = dF - dT, e = err / dab, a4 = a2 - e * (dab + dbc), b4 = b2 - e * dbc, i = e * RHO;
+    q(el, '#out').innerHTML = `ΔH<sub>TRUE</sub> = a₁ − b₁ = <b>${fmt(dT)} m</b> · ΔH<sub>FALSE</sub> = a₂ − b₂ = <b>${fmt(dF)} m</b><br>Sai số = ΔH<sub>FALSE</sub> − ΔH<sub>TRUE</sub> = <b>${fmt(err)} m</b> trong ${dab} m ${err === 0 ? '→ máy <b>không có</b> lỗi chuẩn trực' : (err > 0 ? '→ ΔH<sub>FALSE</sub> &gt; ΔH<sub>TRUE</sub>: đường ngắm <b>nghiêng lên</b>' : '→ ΔH<sub>FALSE</sub> &lt; ΔH<sub>TRUE</sub>: đường ngắm <b>nghiêng xuống</b>')}<br>Sai số trong ${dab + dbc} m (từ C đến A) = ${fmt(err)}×${dab + dbc}/${dab} = <b>${fmt(e * (dab + dbc))} m</b> ⇒ số đọc cần có trên mia A: a₄ = a₂ − ${e < 0 ? '(' + fmt(e * (dab + dbc)) + ')' : fmt(e * (dab + dbc))} = <b>${fmt(a4)} m</b><br>Mở rộng: kiểm tra chéo — mia B phải đọc b₄ = ${fmt(b4)} m và a₄ − b₄ = ${fmt(a4 - b4)} = ΔH<sub>TRUE</sub>. Góc lệch trục ngắm ≈ ${fmt(i, 0)}″ (ví dụ trong bài phóng đại để dễ tính).`;
+    // vẽ
+    const zA = 0, zB = dT, sl = dT / dab, xC = dab + dbc, zP = [zA + a2, zB + b2], sLOS = (zP[1] - zP[0]) / dab, zI = zP[1] + sLOS * dbc, zC = sl * xC;
+    const zmin = Math.min(zA, zB, zC) - .3, zmax = Math.max(zA + a2 + .3, zB + b2 + .3, zI + .3, zA + 3.6), kx = 500 / (xC + 6), kz = 230 / (zmax - zmin), X = x => 50 + (x + 1) * kx, Z = z => 250 - (z - zmin) * kz;
+    g.clearRect(0, 0, 600, 270); g.strokeStyle = CL.grey; g.lineWidth = 2; g.beginPath(); g.moveTo(X(-1), Z(sl * -1)); g.lineTo(X(xC + 3), Z(sl * (xC + 3))); g.stroke();
+    [[0, zA, 'A', a2], [dab, zB, 'B', b2]].forEach(([x, z, n, rd]) => { g.fillStyle = 'rgba(200,170,90,.7)'; g.fillRect(X(x) - 3, Z(z + 3.6), 6, 3.6 * kz); txt(g, n, X(x) - 4, Z(z) + 16, ink(), 14); g.fillStyle = CL.red; g.beginPath(); g.arc(X(x), Z(z + rd), 4, 0, 7); g.fill(); });
+    g.strokeStyle = CL.red; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(xC), Z(zI)); g.lineTo(X(0), Z(zP[0])); g.stroke();
+    g.strokeStyle = CL.green; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(X(xC), Z(zI)); g.lineTo(X(-0.5), Z(zI)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = CL.green; g.beginPath(); g.arc(X(0), Z(zI), 4, 0, 7); g.fill(); g.fillStyle = CL.blue; g.fillRect(X(xC) - 8, Z(zI) - 5, 16, 10); g.strokeStyle = CL.blue; g.beginPath(); g.moveTo(X(xC), Z(zI) + 5); g.lineTo(X(xC), Z(zC)); g.stroke(); txt(g, 'C', X(xC) - 4, Z(zC) + 16, ink(), 14);
+    txt(g, 'Máy tại C. Đỏ: đường ngắm thực (có lỗi) · Xanh: đường ngắm nằm ngang đúng', 50, 16, ink(), 12);
+    txt(g, 'a₂', X(0) + 8, Z(zP[0]) + 4, CL.red, 12); txt(g, 'a₄', X(0) + 8, Z(zI) + 14, CL.green, 12);
+  };
+  qa(el, 'input').forEach(i => i.oninput = draw);
+  qa(el, '#pre button').forEach(b => b.onclick = () => { qa(el, '#pre button').forEach(x => x.classList.toggle('on', x === b)); const v = PRE[b.dataset.k]; ['a1', 'b1', 'a2', 'b2'].forEach((id, i) => q(el, '#' + id).value = v[i]); draw(); }); draw();
+};
+
+// Sơ đồ đo cao nguyên lý: BS, FS, HPC
+W.hpcDemo = el => {
+  mk(el, `<canvas width="600" height="250" style="width:100%"></canvas>` + slider('rl', 'RL của A', 90, 110, 0.5, 100, ' m') + slider('bs', 'Số đọc sau BS tại A', 1, 4, 0.05, 3, ' m') + slider('fs', 'Số đọc trước FS tại B', 0.5, 4, 0.05, 1, ' m') + `<div class="res" id="out"></div>`);
+  const g = q(el, 'canvas').getContext('2d');
+  const draw = () => {
+    const rl = +q(el, '#rl').value, bs = +q(el, '#bs').value, fs = +q(el, '#fs').value, hpc = rl + bs, rb = hpc - fs, k = 22, yA = 165;
+    const yB = yA - (rb - rl) * k, yH = yA - bs * k, gy = x => x < 110 ? yA : x > 430 ? yB : yA + (yB - yA) * (x - 110) / 320;
+    g.clearRect(0, 0, 600, 250);
+    g.strokeStyle = CL.grey; g.lineWidth = 2; g.beginPath(); g.moveTo(20, gy(20)); g.lineTo(110, gy(110)); g.lineTo(430, gy(430)); g.lineTo(580, gy(580)); g.stroke();
+    g.fillStyle = 'rgba(200,170,90,.85)'; g.fillRect(106, yA - 3.8 * k, 8, 3.8 * k); g.fillRect(426, yB - 3.8 * k, 8, 3.8 * k);
+    g.strokeStyle = CL.green; g.lineWidth = 1.5; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(90, yH); g.lineTo(450, yH); g.stroke(); g.setLineDash([]);
+    g.fillStyle = CL.blue; g.fillRect(262, yH - 10, 32, 12); g.strokeStyle = CL.blue; g.beginPath(); g.moveTo(270, yH + 2); g.lineTo(258, gy(258)); g.moveTo(286, yH + 2); g.lineTo(298, gy(298)); g.stroke();
+    g.fillStyle = CL.red; [[110, yH], [430, yH]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); });
+    g.strokeStyle = CL.red; g.beginPath(); g.moveTo(122, yH); g.lineTo(122, yA); g.moveTo(418, yH); g.lineTo(418, yB); g.stroke();
+    txt(g, 'A', 100, yA + 20, ink(), 14); txt(g, 'B', 424, yB + 20, ink(), 14); txt(g, 'HPC = ' + fmt(hpc, 3), 300, yH - 18, CL.green, 13, 'center');
+    txt(g, 'BS = ' + fmt(bs, 2), 128, (yH + yA) / 2 + 4, CL.red, 12); txt(g, 'FS = ' + fmt(fs, 2), 340, (yH + yB) / 2 + 4, CL.red, 12);
+    q(el, '#out').innerHTML = `HPC = RL<sub>A</sub> + BS = ${fmt(rl, 3)} + ${fmt(bs, 3)} = <b>${fmt(hpc, 3)} m</b> · RL<sub>B</sub> = HPC − FS = <b>${fmt(rb, 3)} m</b><br>BS − FS = ${fmt(bs - fs, 3)} → ${bs - fs >= 0 ? '<b>độ dâng (rise)</b> từ A đến B' : '<b>độ hạ (fall)</b> từ A đến B'} ⇒ RL<sub>B</sub> = RL<sub>A</sub> + (BS − FS) = ${fmt(rl + bs - fs, 3)} m`;
+  };
+  qa(el, 'input').forEach(i => i.addEventListener('input', () => { q(el, '#' + i.id + 'v').textContent = (+i.value).toFixed(2).replace('.', ',') + ' m'; draw(); })); draw();
+};
+
+// Sổ đo cao: Rise & Fall và HPC
+W.levelBook = el => {
+  const EX = [['1,5', '', '', 'TBM (60,5) · 1A'], ['', '2.5', '', '2A'], ['', '4.0', '', '3A'], ['3.0', '', '2.0', '4A (1B) · điểm chuyển'], ['', '5.5', '', '2B'], ['6.0', '', '1.0', '3B (1C) · điểm chuyển'], ['', '', '3.0', '2C · TBM (65,1)']];
+  EX[0][0] = '1.5';
+  let rows = EX.map(r => ({ bs: r[0], is: r[1], fs: r[2], nm: r[3] })), m = 'rf';
+  mk(el, `<div class="mtab"><button data-m="rf" class="on">Rise &amp; Fall (độ dâng – độ hạ)</button><button data-m="hpc">HPC (mặt phẳng ngắm)</button></div>` + field('rl0', 'RL điểm đầu (m)', 60.5) + field('rle', 'RL đã biết của điểm cuối (m)', 65.1) + `<div class="tw"><table id="tb"></table></div><div class="mtab"><button id="reset">↺ Trả về ví dụ 2</button><button id="add">+ Thêm hàng</button><button id="del">− Bớt hàng</button></div><div class="res" id="out"></div>`);
+  const cell = (i, k) => `<input type="number" step="any" data-i="${i}" data-k="${k}" value="${rows[i][k]}" style="width:66px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)">`;
+  const val = s => s === '' || s == null ? null : parseFloat(String(s).replace(',', '.'));
+  const calc = () => {
+    const rl0 = num(el, 'rl0', 0), out = []; let ok = true, msg = '';
+    let prev = null, hpc = null, rlp = null;
+    rows.forEach((r, i) => {
+      const bs = val(r.bs), is = val(r.is), fs = val(r.fs), rd = fs != null ? fs : is, o = { rise: '', fall: '', hpc: '', rl: '' };
+      if (i === 0) { if (bs == null) { ok = false; msg = 'Hàng đầu phải có số đọc sau (BS).'; } else { o.rl = rl0; prev = bs; hpc = rl0 + bs; o.hpc = hpc; } }
+      else if (ok) {
+        if (rd == null) { ok = false; msg = 'Mỗi hàng sau hàng đầu cần có số đọc giữa (IS) hoặc số đọc trước (FS).'; }
+        else if (prev == null) { ok = false; msg = 'Thiếu dữ liệu.'; }
+        else { const d = prev - rd; o.rise = d > 0 ? d : ''; o.fall = d < 0 ? -d : ''; o.rl = rlp + d; if (Math.abs(hpc - rd - o.rl) > 1e-9) { /* hai phương pháp phải trùng */ } o.rlH = hpc - rd; prev = bs != null ? bs : rd; if (bs != null) { hpc = o.rlH + bs; o.hpc = hpc; } }
+      }
+      if (i === 0) o.rlH = rl0; rlp = o.rl === '' ? rlp : o.rl; out.push(o);
+    });
+    return { out, ok, msg };
+  };
+  const draw = (keepFocus) => {
+    const { out, ok, msg } = calc(), hp = m === 'hpc';
+    if (!keepFocus) q(el, '#tb').innerHTML = `<tr><th>Ghi chú</th><th>BS</th><th>IS</th><th>FS</th>${hp ? '<th>HPC</th>' : '<th>Rise</th><th>Fall</th>'}<th>RL</th></tr>` + rows.map((r, i) => `<tr><td>${r.nm || ('Điểm ' + (i + 1))}</td><td>${cell(i, 'bs')}</td><td>${cell(i, 'is')}</td><td>${cell(i, 'fs')}</td>${hp ? `<td id="c${i}h"></td>` : `<td id="c${i}u"></td><td id="c${i}d"></td>`}<td id="c${i}r"></td></tr>`).join('');
+    out.forEach((o, i) => { const s = (id, v) => { const t = q(el, '#' + id); if (t) t.textContent = v === '' || v == null ? '' : fmt(v, 3); }; s('c' + i + 'h', o.hpc); s('c' + i + 'u', o.rise); s('c' + i + 'd', o.fall); s('c' + i + 'r', ok ? (hp ? o.rlH : o.rl) : ''); });
+    if (!ok) { q(el, '#out').innerHTML = '<span style="color:' + CL.red + '">' + msg + '</span>'; return; }
+    const sum = k => rows.reduce((a, r) => a + (val(r[k]) || 0), 0), sBS = sum('bs'), sFS = sum('fs'), sIS = sum('is'), first = out[0].rl, last = out[out.length - 1].rlH;
+    const sR = out.reduce((a, o) => a + (o.rise || 0), 0), sF = out.reduce((a, o) => a + (o.fall || 0), 0);
+    // kiểm tra HPC: tổng RL (trừ điểm đầu) = tổng (HPC × số IS/FS lấy từ HPC đó) − (ΣIS + ΣFS)
+    let cur = null, cnt = 0, sumH = 0; rows.forEach((r, i) => { if (i > 0 && (val(r.is) != null || val(r.fs) != null)) cnt++; if (val(r.bs) != null) { if (cur != null) sumH += cur * cnt; cur = out[i].hpc; cnt = 0; } }); if (cur != null) sumH += cur * cnt;
+    const sRL = out.slice(1).reduce((a, o) => a + o.rlH, 0), c1 = Math.abs(sBS - sFS - (last - first)) < 1e-6, c2 = Math.abs(sR - sF - (last - first)) < 1e-6, c3 = Math.abs(sRL - (sumH - sIS - sFS)) < 1e-6, ble = num(el, 'rle', last);
+    const mk1 = b => b ? '<span style="color:' + CL.green + '">✓</span>' : '<span style="color:' + CL.red + '">✗</span>';
+    q(el, '#out').innerHTML = `ΣBS = ${fmt(sBS, 3)} · ΣFS = ${fmt(sFS, 3)} → ΣBS − ΣFS = <b>${fmt(sBS - sFS, 3)}</b> · RL cuối − RL đầu = <b>${fmt(last - first, 3)}</b> ${mk1(c1)}<br>Σrise − Σfall = ${fmt(sR, 3)} − ${fmt(sF, 3)} = <b>${fmt(sR - sF, 3)}</b> ${mk1(c2)} · Σ RL (trừ điểm đầu) = ${fmt(sRL, 3)}; ΣHPC·n − Σ(IS+FS) = ${fmt(sumH, 3)} − ${fmt(sIS + sFS, 3)} = ${fmt(sumH - sIS - sFS, 3)} ${mk1(c3)}<br>Sai số khép độ cao: RL tính được ở điểm cuối − RL đã biết = ${fmt(last, 3)} − ${fmt(ble, 3)} = <b>${fmt(last - ble, 3)} m</b>`;
+  };
+  el.addEventListener('input', e => { const t = e.target; if (t.dataset && t.dataset.i != null) { rows[+t.dataset.i][t.dataset.k] = t.value; draw(true); } else draw(true); });
+  qa(el, '.mtab button[data-m]').forEach(b => b.onclick = () => { m = b.dataset.m; qa(el, '.mtab button[data-m]').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  q(el, '#reset').onclick = () => { rows = EX.map(r => ({ bs: r[0], is: r[1], fs: r[2], nm: r[3] })); q(el, '#rl0').value = 60.5; q(el, '#rle').value = 65.1; draw(); };
+  q(el, '#add').onclick = () => { rows.push({ bs: '', is: '', fs: '', nm: '' }); draw(); };
+  q(el, '#del').onclick = () => { if (rows.length > 2) rows.pop(); draw(); };
+  draw();
+};
+
+</script>
+<script>
+/* Khung ứng dụng: mục lục, định tuyến theo hash, tiến độ học, giao diện sáng/tối.
+   Đổi SITE.title / SITE.sub cho từng môn. Không chứa câu hỏi kiểm tra (quiz làm ở web khác). */
+const SITE = { title: 'TRẮC ĐỊA CÔNG TRÌNH', sub: 'Giảng viên: TS. Đào Hồng Hải' };
+const CH = window.CHAPTERS;
+const $ = (s, r = document) => r.querySelector(s);
+const side = $('#side'), main = $('#main');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let done = store.get('done', {});
+const colors = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--accent)'];
+const col = i => colors[i % colors.length];
+
+function buildSide() {
+  const total = CH.reduce((n, c) => n + c.sections.length, 0), got = Object.keys(done).length;
+  side.innerHTML = `<h1>${SITE.title}</h1><div class="sub">${SITE.sub}</div>
+  <div class="bar"><i style="width:${Math.round(got / total * 100)}%"></i></div>
+  <div class="sub" style="margin-top:4px">Đã học ${got}/${total} mục</div>
+  <div class="chap"><button data-go="home"><span class="num" style="background:var(--accent)">⌂</span>Trang chủ</button></div>` +
+    CH.map((c, i) => `<div class="chap" data-c="${c.id}"><button data-toggle="${c.id}"><span class="num" style="background:${col(i)}">${c.num}</span>${c.title}</button>
+    <div class="sec">${c.sections.map(s => `<a href="#${c.id}/${s.id}" data-s="${c.id}/${s.id}"><span>${s.title}</span><span class="tick">${done[c.id + '/' + s.id] ? '✓' : ''}</span></a>`).join('')}</div></div>`).join('') +
+    `<div class="tools"><button id="theme">🌓 Sáng/Tối</button><button id="reset">↺ Xoá tiến độ</button></div>`;
+}
+side.addEventListener('click', e => {
+  const t = e.target.closest('[data-toggle]');
+  if (t) { t.parentElement.classList.toggle('open'); return; }
+  const g = e.target.closest('[data-go]');
+  if (g) { location.hash = ''; side.classList.remove('on'); }
+  if (e.target.closest('a')) side.classList.remove('on');
+  if (e.target.id === 'theme') { const d = document.documentElement.dataset.theme === 'dark'; document.documentElement.dataset.theme = d ? '' : 'dark'; store.set('theme', d ? '' : 'dark'); }
+  if (e.target.id === 'reset' && confirm('Xoá toàn bộ tiến độ học?')) { done = {}; store.set('done', done); buildSide(); route(); }
+});
+$('#menuBtn').onclick = () => side.classList.toggle('on');
+document.documentElement.dataset.theme = store.get('theme', '');
+
+function mark(key) { if (!done[key]) { done[key] = 1; store.set('done', done); buildSide(); openActive(); } }
+function openActive() {
+  const h = location.hash.slice(1), cid = h.split('/')[0];
+  document.querySelectorAll('.chap').forEach(c => c.classList.toggle('open', c.dataset.c === cid));
+  document.querySelectorAll('.sec a').forEach(a => a.classList.toggle('active', a.dataset.s === h));
+}
+function home() {
+  main.innerHTML = `<div class="hero"><span class="pill">Web học tập tương tác</span><h2>${SITE.title}</h2><p>Bài giảng từng chương, có hình minh hoạ tương tác.</p></div>
+  <div class="grid">${CH.map((c, i) => `<a class="mini click" style="text-decoration:none;color:inherit;border-top:5px solid ${col(i)}" href="#${c.id}/${c.sections[0].id}"><h4>Chương ${c.num}. ${c.title}</h4><div style="font-size:14px;color:var(--muted)">${c.blurb || ''}</div><div style="margin-top:8px;font-size:13px"><b>${c.sections.length}</b> bài</div></a>`).join('')}</div>`;
+  mountWidgets(main); openActive();
+}
+function chapterPage(c, s) {
+  const i = c.sections.indexOf(s), prev = c.sections[i - 1], next = c.sections[i + 1];
+  main.innerHTML = `<div class="crumb">Chương ${c.num} · ${c.title}</div><h2 class="st">${s.title}</h2>${s.html}
+  <div class="pager">${prev ? `<a class="btn" href="#${c.id}/${prev.id}">← ${prev.title}</a>` : '<span></span>'}${next ? `<a class="btn primary" href="#${c.id}/${next.id}">${next.title} →</a>` : '<span></span>'}</div>`;
+  mountWidgets(main); mark(c.id + '/' + s.id);
+}
+function route() {
+  const h = location.hash.slice(1); window.scrollTo(0, 0);
+  if (!h) home();
+  else {
+    const [cid, sid] = h.split('/'), c = CH.find(x => x.id === cid);
+    if (!c) home(); else chapterPage(c, c.sections.find(x => x.id === sid) || c.sections[0]);
+  }
+  openActive();
+}
+window.addEventListener('hashchange', route);
+buildSide(); route();
+
+</script>
+</body>
+</html>

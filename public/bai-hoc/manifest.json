@@ -1,0 +1,68 @@
+{
+  "hocKy": [
+    {
+      "ma": "hk1-2026-2027",
+      "mon": [
+        {
+          "ma": "dia-chat-kien-truc",
+          "ten": "Địa chất kiến trúc",
+          "mau": "#f4a261",
+          "chuong": [],
+          "baiHoc": [
+            {
+              "file": "Dia-chat-kien-truc-hoc-tap.html",
+              "ten": "Địa chất kiến trúc – Học tương tác",
+              "capNhat": "2026-10-26T08:06:03.875Z"
+            }
+          ]
+        },
+        {
+          "ma": "khoa-hoc-du-lieu",
+          "ten": "Khoa học dữ liệu",
+          "mau": "#4cc9f0",
+          "chuong": [],
+          "baiHoc": []
+        },
+        {
+          "ma": "khoang-vat-thach-hoc",
+          "ten": "Khoáng vật thạch học",
+          "mau": "#b5179e",
+          "chuong": [],
+          "baiHoc": [
+            {
+              "file": "khoang-vat-thach-hoc.html",
+              "ten": "Khoáng vật & Thạch học – Học tương tác",
+              "capNhat": "2026-10-26T08:06:03.909Z"
+            }
+          ]
+        },
+        {
+          "ma": "trac-dia-cong-trinh",
+          "ten": "Trắc địa công trình",
+          "mau": "#80ed99",
+          "chuong": [],
+          "baiHoc": [
+            {
+              "file": "trac-dia-cong-trinh.html",
+              "ten": "Trắc địa công trình – Học tương tác",
+              "capNhat": "2026-10-26T08:06:03.839Z"
+            }
+          ]
+        },
+        {
+          "ma": "triet-hoc-mac-lenin",
+          "ten": "Triết học Mác-Lênin",
+          "mau": "#e5383b",
+          "chuong": [],
+          "baiHoc": [
+            {
+              "file": "triet-hoc-mac-lenin.html",
+              "ten": "Triết học Mác – Lênin • Chương 1 & 2",
+              "capNhat": "2026-10-26T08:06:03.944Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
