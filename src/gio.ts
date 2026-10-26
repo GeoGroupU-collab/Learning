@@ -2,6 +2,12 @@
 
 let chenhLech = 0;
 const dongHo: number[] = [];
+const donDep: (() => void)[] = [];
+
+// Đăng ký việc dọn dẹp chạy khi rời trang (cùng lúc dừng đồng hồ).
+export function khiRoiTrang(viec: () => void): void {
+  donDep.push(viec);
+}
 
 export function datGioMayChu(now: number): void {
   chenhLech = now - Date.now();
@@ -43,4 +49,13 @@ export function demNguoc(el: HTMLElement, luc: number, khiHet?: () => void): voi
 
 export function dungDongHo(): void {
   while (dongHo.length) clearInterval(dongHo.pop());
+  while (donDep.length) donDep.pop()!();
+}
+
+// Chạy một việc định kỳ, tự dừng khi chuyển trang (dungDongHo). Bỏ qua khi tab đang ẩn.
+export function chayDinhKy(viec: () => void, ms: number, chiKhiHienThi = true): void {
+  dongHo.push(window.setInterval(() => {
+    if (chiKhiHienThi && document.hidden) return;
+    viec();
+  }, ms));
 }

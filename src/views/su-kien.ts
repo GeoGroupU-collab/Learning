@@ -78,11 +78,27 @@ export async function veSuKien(goc: HTMLElement): Promise<void> {
     goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Bạn được miễn tuần này.')));
     return;
   }
-  const trangThaiThi = tt.moKhoa ? 'Bạn đã nộp đủ câu hỏi nên được vào phòng thi.' : 'Bạn chưa nộp đủ câu hỏi nên không được vào phòng thi tuần này.';
-  goc.append(h('div', { class: 'card' },
-    h('h3', {}, 'Phòng thi'),
-    h('p', { class: tt.moKhoa ? '' : 'loi' }, trangThaiThi),
-    h('p', { class: 'phu nho' }, t.trangThai === 'mo' ? 'Phòng thi đang mở nhưng chức năng làm bài sẽ có ở bản cập nhật tới (mốc M3).' : 'Phòng thi sẽ mở theo giờ ở trên.')));
+  const luot = tt.luotThi ?? null;
+  const cfg = tt.thi ?? { soMonThi: 2, soCauMoiMonThi: 20, thoiGianPhut: 40 };
+  const hanhDong: (HTMLElement | null)[] = [];
+  let noiDung = '';
+  if (luot?.trangThai === 'da_nop') {
+    noiDung = `Bạn đã thi tuần này: đúng ${luot.soDung}/${luot.soCau} câu, ${luot.diem} điểm.`;
+    hanhDong.push(h('a', { class: 'nut nut-phu', href: '#/su-kien/thi' }, 'Xem kết quả'));
+  } else if (luot?.trangThai === 'dang_lam' || luot?.trangThai === 'het_gio') {
+    noiDung = 'Bạn đang làm bài. Đồng hồ vẫn chạy.';
+    hanhDong.push(h('a', { class: 'nut', href: '#/su-kien/thi' }, 'Tiếp tục làm bài'));
+  } else if (!tt.moKhoa) {
+    noiDung = 'Bạn chưa nộp đủ câu hỏi nên không được vào phòng thi tuần này.';
+  } else if (t.trangThai === 'mo') {
+    noiDung = `${cfg.soMonThi * cfg.soCauMoiMonThi} câu trong ${cfg.thoiGianPhut} phút. Mỗi người thi một lần.`;
+    hanhDong.push(h('a', { class: 'nut', href: '#/su-kien/thi' }, 'Vào phòng thi'));
+  } else if (t.trangThai === 'cho_mo_cua') {
+    noiDung = 'Bạn đã nộp đủ câu hỏi. Phòng thi sẽ mở theo giờ ở trên.';
+  } else {
+    noiDung = 'Phòng thi đã đóng.';
+  }
+  goc.append(h('div', { class: 'card' }, h('h3', {}, 'Phòng thi'), h('p', { class: tt.moKhoa || luot ? '' : 'loi' }, noiDung), ...hanhDong.filter((x): x is HTMLElement => x !== null)));
 }
 
 // ---------- Form nộp câu hỏi ----------

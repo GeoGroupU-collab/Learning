@@ -92,3 +92,14 @@ function voiKhoa_(viec) {
     lock.releaseLock();
   }
 }
+
+// Đọc đúng một dòng của tab theo số dòng (nhanh hơn đọc cả tab).
+function docMotDong_(ten, soDong) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
+  var lastCol = sheet.getLastColumn();
+  var tieuDe = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var gt = sheet.getRange(soDong, 1, 1, lastCol).getValues()[0];
+  var o = { _dong: soDong };
+  for (var i = 0; i < tieuDe.length; i++) o[tieuDe[i]] = gt[i];
+  return o;
+}

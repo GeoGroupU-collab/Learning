@@ -234,3 +234,59 @@ Môn nào có chương thì thành viên chọn chương trong danh sách. Môn 
 - Sửa câu đã nộp bằng cách vào lại **Nộp câu hỏi** và nộp lại, đến hết hạn.
 - Được xin miễn tối đa 1 tuần trong học kỳ, trước hạn nộp, và chỉ khi chưa nộp câu hỏi.
 - Phòng thi (làm bài, chấm điểm) chưa có, sẽ làm ở mốc M3.
+
+---
+
+## Phần 4. Phòng thi, chốt tuần, xếp hạng, nhớ đăng nhập (mốc M3)
+
+Bản này có thêm tab `PhienDangNhap`, hành động thi và chấm ở máy chủ, và **trigger tự chốt tuần**. Phải cập nhật Apps Script và đặt trigger.
+
+### Bước 21. Cập nhật Apps Script và đặt trigger
+
+1. Mở `backend/dist/Code.gs` mới, **Ctrl+A**, **Ctrl+C**. Dán đè vào `Code.gs` trong Apps Script, **Ctrl+S**.
+2. Chọn hàm `khoiTao`, bấm **Chạy** (thêm tab `PhienDangNhap`).
+3. Chọn hàm `datTrigger`, bấm **Chạy**. Google có thể hỏi thêm quyền "quản lý trigger": cho phép.
+4. **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
+
+Làm đúng khi thấy: nhật ký ghi "Đã đặt trigger chotTuanTuDong chạy mỗi 15 phút". Vào biểu tượng đồng hồ (**Trình kích hoạt**) ở menu trái thấy một dòng `chotTuanTuDong`, kiểu "Theo thời gian".
+
+### Bước 22. Đưa bản web mới lên
+
+GitHub Desktop: Summary `Thêm phòng thi và xếp hạng`, **Commit to main**, **Push origin**. Chờ Actions tick xanh, rồi **Ctrl+F5**.
+
+### Nhớ đăng nhập
+
+Từ bản này, sau khi đăng nhập Google một lần, trình duyệt giữ **mã phiên 30 ngày** và các lần sau vào thẳng, không phải đăng nhập lại.
+- Mã phiên lưu trong trình duyệt của từng người. Ở máy dùng chung, hãy bấm **Tài khoản**, **Đăng xuất**.
+- Người bị gỡ khỏi lớp mất quyền ngay ở lần gọi kế tiếp, dù còn phiên.
+- Muốn ép mọi người đăng nhập lại: xóa toàn bộ các dòng dưới tiêu đề trong tab `PhienDangNhap` của Sheet.
+- Sheet chỉ lưu bản băm của mã phiên, không lưu mã gốc.
+
+### Bước 23. Vòng thử trọn vẹn với 3 tài khoản thử nghiệm
+
+Chuẩn bị: 3 tài khoản Google thử (ví dụ `thu1`, `thu2`, `thu3`) và tài khoản chủ. Vì mỗi người thi rút đề từ câu của người khác, cần ít nhất vài người nộp câu hỏi để có đủ câu. Với dữ liệu thử, đề có thể ngắn hơn 40 câu (máy chủ tự giảm và ghi vào tab `NhatKy` dòng `canhBaoRutDe`). Đó là bình thường khi thử.
+
+1. Chủ: **Quản trị**, **Thành viên**, thêm 3 email thử.
+2. Chủ: **Quản trị**, **Chia nhóm**, **Xem trước**, **Chốt** (hoặc chuyển người vào nhóm).
+3. Chủ: **Quản trị**, **Tuần**. Để thử ngay, sửa tuần 1 cho khung giờ hiện tại: hạn nộp 5 phút nữa không hợp lý, hãy đặt **hạn nộp = hôm nay lúc vừa qua**, **mở cửa = hôm nay lúc vừa qua + 1 phút**, **đóng cửa = một giờ sau**. Bấm **Lưu giờ**.
+   Lưu ý: để thử nộp câu hỏi trước, đặt hạn nộp ở tương lai, nộp xong rồi sửa lại giờ cho mở cửa.
+4. Mỗi tài khoản thử: **Sự kiện**, **Nộp câu hỏi**, nộp 15 câu. Làm đúng khi thấy "Đã nộp đủ 15 câu".
+5. Sửa giờ tuần 1 để phòng thi đang mở.
+6. `thu1`: **Vào phòng thi**, chọn 2 môn, **Bắt đầu thi**. Trả lời vài câu, đợi 30 giây (hiện "Đã tự lưu"), tắt tab, mở lại web và vào **Sự kiện**, **Tiếp tục làm bài**. Các câu đã chọn phải còn nguyên và đồng hồ vẫn chạy.
+7. `thu1`: **Nộp bài**. Làm đúng khi thấy điểm và "Đúng x/y câu". Vào lại **Vào phòng thi** thì chỉ thấy kết quả, không thi lại được.
+8. `thu2`: thi và để hết giờ (hoặc bỏ dở). `thu3`: không thi.
+9. Mở **Nhóm** bằng tài khoản `thu1`: thấy trạng thái từng người (Đã thi, Đang thi, Chưa nộp câu hỏi...) và điểm nhóm. Mở **Xếp hạng**: thấy bảng nhóm "Tạm tính".
+10. Chốt tuần: sửa giờ **đóng cửa** về quá khứ rồi đợi tối đa 15 phút (hoặc trong Apps Script chạy hàm `chotTuanTuDong`). Làm đúng khi tab `KetQuaTuan` có dòng điểm từng nhóm, tab `Tuan` cột `trangThai` là `da_chot`, và trang **Xếp hạng** hiện "Nhóm vinh danh".
+11. Dọn dữ liệu thử: xóa các dòng thử trong `CauHoi`, `LuotThi`, `KetQuaTuan`, `Mien`, `NhapCauHoi`, `PhienDangNhap`, `NhatKy`, các email thử trong `ThanhVien`, `NhomThanhVien`, và đặt lại giờ tuần 1 đúng lịch thật (dùng **Tuần**, **Tạo lịch** để tạo lại).
+
+### Cách tính điểm đang áp dụng
+- Mỗi người thi 2 môn tự chọn, mỗi môn 20 câu (40 câu), 40 phút. Điểm quy về thang 100.
+- Đề rút ngẫu nhiên từ ngân hàng của tuần đó, loại câu của chính người thi. Thiếu câu thì lấy từ tuần khác cùng môn, rồi từ môn khác, vẫn thiếu thì đề ngắn hơn và ghi vào `NhatKy`.
+- Điểm nhóm = tổng điểm các thành viên chia cho số thành viên đang hoạt động trừ người được miễn. Người không thi tính 0 điểm nhưng vẫn nằm trong mẫu số.
+- Cùng điểm: nhóm có tỉ lệ thành viên đã thi cao hơn đứng trên; vẫn bằng: nhóm có thời gian làm bài bình quân ngắn hơn đứng trên.
+- Bắt đầu thi trước giờ đóng cửa thì được làm hết 40 phút. Bài quá hạn được chấm theo bản tự lưu cuối cùng.
+- Xem lại đáp án sau khi đóng cửa, báo sai câu hỏi và câu khó nhất sẽ làm ở mốc M4.
+
+### Giới hạn cần biết
+- Phòng thi chưa có nút **Báo sai câu hỏi** (mốc M4). Nếu có câu sai trong tuần đầu, chủ sửa trực tiếp trong tab `CauHoi` hoặc đổi cột `trangThai` thành `suspended`.
+- Nếu nhiều người cùng bấm **Bắt đầu thi** đúng lúc mở cửa, mỗi người có thể chờ vài giây. Nên nhắc lớp vào thi rải rác, không cùng một giây.

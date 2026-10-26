@@ -1,12 +1,14 @@
 import './style.css';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from './config';
 import { goi, LoiApi } from './api';
-import { daDangNhap, dangXuat, veNutDangNhap } from './auth';
+import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth';
 import { h, xoaHet, thongBao } from './dom';
 import { layManifest, veBaiHoc, veDanhSachBai, veDanhSachMon, laMoi } from './views/bai-hoc';
 import { veNhom } from './views/nhom';
 import { veQuanTri } from './views/quan-tri';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
+import { vePhongThi } from './views/phong-thi';
+import { veXepHang } from './views/xep-hang';
 import { veCauHoiCuaToi } from './views/cau-hoi-cua-toi';
 import { dungDongHo, datGioMayChu, demNguoc, dinhDangNgay } from './gio';
 import type { TuanHienTai } from './types';
@@ -54,14 +56,26 @@ function manHinhDangNhap(): void {
     khungNut.append(h('button', { class: 'nut', onclick: () => khoiDong() }, 'Đăng nhập thử (chế độ phát triển)'));
     return;
   }
-  veNutDangNhap(khungNut, () => khoiDong()).catch((e: Error) => khungNut.append(h('p', { class: 'loi' }, e.message)));
+  veNutDangNhap(khungNut, () => void doiLayPhien()).catch((e: Error) => khungNut.append(h('p', { class: 'loi' }, e.message)));
+}
+
+// Sau khi Google xác nhận, đổi lấy mã phiên dài hạn để lần sau khỏi đăng nhập lại.
+async function doiLayPhien(): Promise<void> {
+  manHinhDon(h('p', { class: 'phu' }, 'Đang đăng nhập...'));
+  try {
+    const r = await goi<{ phien: string }>('dangNhap');
+    luuPhien(r.phien);
+  } catch (e) {
+    return manHinhChuaDuyet((e as Error).message);
+  }
+  await khoiDong();
 }
 
 function manHinhChuaDuyet(thongDiep: string): void {
   manHinhDon(
     h('h1', {}, 'Chưa vào được'),
     h('p', {}, thongDiep),
-    h('button', { class: 'nut nut-phu', onclick: () => { dangXuat(); manHinhDangNhap(); } }, 'Đăng nhập tài khoản khác')
+    h('button', { class: 'nut nut-phu', onclick: () => { void thoat(); } }, 'Đăng nhập tài khoản khác')
   );
 }
 
@@ -72,7 +86,7 @@ async function khoiDong(): Promise<void> {
   } catch (e) {
     const loi = e as LoiApi;
     if (loi.ma === 'chua_duyet') return manHinhChuaDuyet(loi.message);
-    if (loi.ma === 'token_expired' || loi.ma === 'unauthorized') return manHinhDangNhap();
+    if (loi.ma === 'token_expired' || loi.ma === 'unauthorized' || loi.ma === 'phien_het_han') return manHinhDangNhap();
     return manHinhChuaDuyet(loi.message);
   }
   veKhung();
@@ -134,11 +148,12 @@ async function dinhTuyen(): Promise<void> {
       case 'nhom':
         return await veNhom(vungNoiDung, me);
       case 'su-kien':
+        if (a === 'thi') return await vePhongThi(vungNoiDung);
         return a === 'nop' ? await veNopCauHoi(vungNoiDung) : await veSuKien(vungNoiDung);
       case 'cau-hoi':
         return await veCauHoiCuaToi(vungNoiDung);
       case 'xep-hang':
-        return veSapCo('Xếp hạng', 'Bảng xếp hạng nhóm sẽ hiện sau khi có điểm của sự kiện đầu tiên.');
+        return await veXepHang(vungNoiDung);
       case 'quan-tri':
         if (me.vaiTro === 'member') return veSapCo('Quản trị', 'Bạn không có quyền vào trang này.');
         return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
@@ -212,6 +227,19 @@ async function capNhatTheSuKien(the: HTMLElement): Promise<void> {
   }
 }
 
+async function thoat(): Promise<void> {
+  const coPhien = layPhien() !== null;
+  try {
+    if (coPhien) await goi('dangXuat', { phien: layPhien() });
+  } catch {
+    /* máy chủ không trả lời vẫn đăng xuất ở máy này */
+  }
+  dangXuat();
+  me = null;
+  location.hash = '#/';
+  manHinhDangNhap();
+}
+
 function veCaiDat(noi: HTMLElement): void {
   xoaHet(noi);
   noi.append(
@@ -220,13 +248,17 @@ function veCaiDat(noi: HTMLElement): void {
       h('div', { class: 'mon-ten' }, me!.hoTen),
       h('div', { class: 'phu nho' }, me!.email),
       h('a', { class: 'nut nut-phu', href: '#/cau-hoi' }, 'Câu hỏi của tôi'),
-      h('button', { class: 'nut nut-nguy', onclick: () => { dangXuat(); me = null; location.hash = '#/'; manHinhDangNhap(); } }, 'Đăng xuất'))
+      h('button', { class: 'nut nut-nguy', onclick: () => { void thoat(); } }, 'Đăng xuất'))
   );
 }
 
 // ---------- Khởi động ----------
 
 window.addEventListener('hashchange', () => void dinhTuyen());
+window.addEventListener('phien-het-han', () => {
+  me = null;
+  manHinhDangNhap();
+});
 
 if (laTrinhDuyetTrongUngDung()) canhBaoTrinhDuyet();
 else if (!DEV_MOCK && chuaCauHinh())

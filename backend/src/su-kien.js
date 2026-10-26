@@ -9,7 +9,10 @@ function docTuan_(maHocKy) {
   return docBang_('Tuan')
     .filter(function (r) { return r.maHocKy === maHocKy; })
     .map(function (r) {
-      return { soTuan: Number(r.soTuan), hanNop: msCua_(r.hanNopCauHoi), moCua: msCua_(r.moCua), dongCua: msCua_(r.dongCua), _dong: r._dong };
+      return {
+        soTuan: Number(r.soTuan), hanNop: msCua_(r.hanNopCauHoi), moCua: msCua_(r.moCua), dongCua: msCua_(r.dongCua), _dong: r._dong,
+        soMonThi: Number(r.soMonThi) || 0, soCauMoiMonThi: Number(r.soCauMoiMonThi) || 0, thoiGianPhut: Number(r.thoiGianPhut) || 0,
+      };
     });
 }
 
@@ -71,6 +74,9 @@ function hdTuanHienTai_(email) {
   res.moKhoa = daNop >= soMon * soCauMoiMon;
   res.mien = mien.some(function (m) { return Number(m.soTuan) === t.soTuan; });
   res.soMienDaDung = mien.length;
+  res.thi = { soMonThi: t.soMonThi || Number(cauHinh.soMonThi) || 2, soCauMoiMonThi: t.soCauMoiMonThi || Number(cauHinh.soCauMoiMonThi) || 20, thoiGianPhut: t.thoiGianPhut || Number(cauHinh.thoiGianPhut) || 40 };
+  var luot = luotThiCua_(hk.maHocKy, t.soTuan, email);
+  res.luotThi = luot ? tomTatLuot_(luot, res.now, Number(cauHinh.graceGiay) || 30) : null;
   return res;
 }
 

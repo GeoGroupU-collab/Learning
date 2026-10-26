@@ -167,10 +167,131 @@ function kiemTraBoCauHoi(dsCau, opts) {
   return { ok: loi.length === 0, loi: loi };
 }
 
+
+// ---------- Rút đề và chấm bài ----------
+
+// Xáo trộn Fisher-Yates. rng trả số trong [0,1); mặc định Math.random.
+function xao_(mang, rng) {
+  var r = rng || Math.random;
+  var a = mang.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(r() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// Rút đề cho một người.
+// pool: [{id, maMon, soTuan, tacGia, trangThai}]. opts: {email, monChon, soCauMoiMon, soTuan, rng}.
+// Mỗi môn: ưu tiên câu active của tuần này; thiếu thì lấy tuần khác cùng môn; thiếu nữa thì môn khác.
+// Luôn loại câu của chính người thi và không trùng câu. Trả {ds: [{id, tt}], thieu, canhBao}.
+// tt là thứ tự đáp án đã xáo, ví dụ 'CADB': ô hiển thị A là đáp án gốc C.
+function rutDe(pool, opts) {
+  var email = chuanHoaEmail(opts.email);
+  var hopLe = pool.filter(function (c) { return c.trangThai === 'active' && chuanHoaEmail(c.tacGia) !== email; });
+  var daLay = {};
+  var ds = [];
+  var thieu = 0;
+  var canhBao = [];
+  var lay = function (cacUngVien, can, nhoXong) {
+    var chon = xao_(cacUngVien.filter(function (c) { return !daLay[c.id]; }), opts.rng).slice(0, can);
+    chon.forEach(function (c) { daLay[c.id] = true; nhoXong.push(c.id); });
+    return chon.length;
+  };
+  opts.monChon.forEach(function (ma) {
+    var cua = [];
+    var can = opts.soCauMoiMon;
+    can -= lay(hopLe.filter(function (c) { return c.maMon === ma && c.soTuan === opts.soTuan; }), can, cua);
+    if (can > 0) {
+      var them = lay(hopLe.filter(function (c) { return c.maMon === ma; }), can, cua);
+      if (them > 0) canhBao.push('Môn ' + ma + ': lấy ' + them + ' câu từ tuần khác vì thiếu câu của tuần này.');
+      can -= them;
+    }
+    if (can > 0) {
+      var khac = lay(hopLe, can, cua);
+      if (khac > 0) canhBao.push('Môn ' + ma + ': lấy ' + khac + ' câu từ môn khác vì thiếu câu.');
+      can -= khac;
+    }
+    if (can > 0) {
+      thieu += can;
+      canhBao.push('Môn ' + ma + ': thiếu ' + can + ' câu, đề ngắn hơn.');
+    }
+    xao_(cua, opts.rng).forEach(function (id) {
+      ds.push({ id: id, tt: xao_(['A', 'B', 'C', 'D'], opts.rng).join('') });
+    });
+  });
+  return { ds: ds, thieu: thieu, canhBao: canhBao };
+}
+
+// Chấm bài. ds: [{id, tt}], traLoi: {id: 'A'..'D' (ô người thi chọn)}, dapAn: {id: 'A'..'D' (đáp án gốc)}.
+function chamBai(ds, traLoi, dapAn) {
+  var dung = 0;
+  ds.forEach(function (c) {
+    var chon = traLoi && traLoi[c.id];
+    var idx = 'ABCD'.indexOf(chon);
+    if (idx !== -1 && c.tt.charAt(idx) === dapAn[c.id]) dung++;
+  });
+  return { soDung: dung, soCau: ds.length };
+}
+
+function diemCaNhan(soDung, soCau) {
+  return soCau > 0 ? Math.round((soDung / soCau) * 1000) / 10 : 0;
+}
+
+// ---------- Điểm nhóm và xếp hạng ----------
+
+// thanhVien: [{email, mien, diem (số hoặc null nếu không thi), giay}] gồm các thành viên đang active.
+// Điểm nhóm = tổng điểm / (số người - số người miễn). Người vắng tính 0 và vẫn nằm trong mẫu số.
+function diemNhomTuan(thanhVien) {
+  var tinh = thanhVien.filter(function (t) { return !t.mien; });
+  var tham = tinh.filter(function (t) { return t.diem !== null && t.diem !== undefined; });
+  var tong = 0;
+  tham.forEach(function (t) { tong += t.diem; });
+  var giay = 0;
+  tham.forEach(function (t) { giay += t.giay || 0; });
+  return {
+    diem: tinh.length ? Math.round((tong / tinh.length) * 100) / 100 : 0,
+    soTinh: tinh.length,
+    soThamGia: tham.length,
+    tiLeThamGia: tinh.length ? tham.length / tinh.length : 0,
+    giayTB: tham.length ? giay / tham.length : 0,
+  };
+}
+
+// Xếp hạng: điểm cao hơn trên; bằng điểm thì tỉ lệ tham gia cao hơn; vẫn bằng thì thời gian bình quân ngắn hơn.
+// Nhóm bằng hoàn toàn ở cả ba tiêu chí thì cùng hạng. Trả mảng đã sắp xếp, thêm trường hang.
+function xepHangNhom(nhoms) {
+  var ds = nhoms.slice().sort(function (a, b) {
+    if (b.diem !== a.diem) return b.diem - a.diem;
+    if (b.tiLeThamGia !== a.tiLeThamGia) return b.tiLeThamGia - a.tiLeThamGia;
+    return a.giayTB - b.giayTB;
+  });
+  var kq = [];
+  ds.forEach(function (n, i) {
+    var truoc = kq[i - 1];
+    var hang = i + 1;
+    if (truoc && truoc.diem === n.diem && truoc.tiLeThamGia === n.tiLeThamGia && truoc.giayTB === n.giayTB) hang = truoc.hang;
+    var o = {};
+    Object.keys(n).forEach(function (k) { o[k] = n[k]; });
+    o.hang = hang;
+    kq.push(o);
+  });
+  return kq;
+}
+
+// Điểm lũy kế = trung bình điểm nhóm các tuần đã chốt.
+function diemLuyKe(diemCacTuan) {
+  if (!diemCacTuan.length) return 0;
+  var tong = 0;
+  diemCacTuan.forEach(function (d) { tong += d; });
+  return Math.round((tong / diemCacTuan.length) * 100) / 100;
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     docGpa: docGpa, chiaNhom: chiaNhom, doLechGpa: doLechGpa, chuanHoaEmail: chuanHoaEmail, laLinkHopLe: laLinkHopLe,
     taoLichTuan: taoLichTuan, trangThaiTuan: trangThaiTuan, chonTuanHienTai: chonTuanHienTai, mocKeTiep: mocKeTiep,
     chuanHoaChu: chuanHoaChu, kiemTraBoCauHoi: kiemTraBoCauHoi,
+    rutDe: rutDe, chamBai: chamBai, diemCaNhan: diemCaNhan, diemNhomTuan: diemNhomTuan, xepHangNhom: xepHangNhom, diemLuyKe: diemLuyKe,
   };
 }

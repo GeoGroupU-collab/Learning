@@ -41,7 +41,8 @@ const MON_GIA = [
   { ma: 'khoang-vat-thach-hoc', ten: 'Khoáng vật thạch học', mau: '#b5179e', chuong: [] },
 ];
 let nhapGia: BanNhap | null = null;
-let cauDaNop: CauCuaToi[] = [];
+let cauDaNop: CauCuaToi[] = trangThaiGia === 'nop' ? [] : Array.from({ length: 15 }, (_, i) => ({ id: String(i), soTuan: 1, tenMon: 'Khoa học dữ liệu', maChuong: '', noiDung: `Câu mẫu ${i}`, A: 'a', B: 'b', C: 'c', D: 'd', dapAn: 'A', trangNguon: 'tr.1', giaiThich: '', trangThai: 'active', soBaoSai: 0 }));
+let luotGia: null | { maPhienThi: string; hetHanLuc: number; traLoi: Record<string, string>; daNop: boolean; soDung: number } = null;
 let mienGia = false;
 
 function tuanGia() {
@@ -62,6 +63,8 @@ function tuanGia() {
     moKhoa: cauDaNop.length >= 15,
     mien: mienGia,
     soMienDaDung: mienGia ? 1 : 0,
+    thi: { soMonThi: 2, soCauMoiMonThi: 20, thoiGianPhut: 40 },
+    luotThi: luotGia ? (luotGia.daNop ? { trangThai: 'da_nop', soDung: luotGia.soDung, soCau: 40, diem: luotGia.soDung * 2.5, giayLam: 600 } : { trangThai: 'dang_lam', hetHanLuc: luotGia.hetHanLuc }) : null,
   };
 }
 
@@ -87,7 +90,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     }
     case 'nhomCuaToi': {
       const n = tuiTrong();
-      return n ? { maNhom: n.maNhom, tenNhom: n.tenNhom, linkZalo, thanhVien: n.thanhVien.map((t) => ({ email: t.email, hoTen: t.hoTen, trangThai: 'active' })) } : null;
+      return n ? { maNhom: n.maNhom, tenNhom: n.tenNhom, linkZalo, tuan: { soTuan: 1, trangThai: 'mo' }, thanhVien: n.thanhVien.map((t, i) => ({ email: t.email, hoTen: t.hoTen, trangThai: 'active', tt: ['da_thi', 'dang_thi', 'da_nop_cau', 'chua_nop_cau', 'mien'][i % 5], diem: i % 5 === 0 ? 70 + i : null })) } : null;
     }
     case 'capNhatLinkZalo':
       if (payload.link && !String(payload.link).startsWith('https://')) throw new LoiApi('link_sai', 'Link phải bắt đầu bằng https://');
@@ -98,6 +101,10 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       if (n) n.tenNhom = String(payload.tenNhom);
       return { tenNhom: payload.tenNhom };
     }
+    case 'dangNhap':
+      return { phien: 'mock' };
+    case 'dangXuat':
+      return {};
     case 'tuanHienTai':
       return tuanGia();
     case 'nhapLay':
@@ -125,6 +132,38 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'admin.taoLichTuan':
     case 'admin.suaTuan':
       return { soTuan: 5 };
+    case 'batDauThi': {
+      if (luotGia?.daNop) return { trangThai: 'da_nop', soDung: luotGia.soDung, soCau: 40, diem: luotGia.soDung * 2.5, giayLam: 600 };
+      if (!luotGia) luotGia = { maPhienThi: 'mock-phien-' + Date.now(), hetHanLuc: Date.now() + 40 * 60000, traLoi: {}, daNop: false, soDung: 0 };
+      const cauHoi = Array.from({ length: 40 }, (_, i) => ({
+        id: 'q' + i,
+        maMon: i < 20 ? 'khoa-hoc-du-lieu' : 'dia-chat-kien-truc',
+        noiDung: `Đây là nội dung câu hỏi thử số ${i + 1}. Chọn một đáp án đúng nhất trong bốn đáp án bên dưới.`,
+        dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Đáp án ${k} của câu ${i + 1}` })),
+      }));
+      return { trangThai: 'dang_lam', maPhienThi: luotGia.maPhienThi, hetHanLuc: luotGia.hetHanLuc, now: Date.now(), cauHoi, traLoi: luotGia.traLoi };
+    }
+    case 'thi.luu':
+      if (luotGia) luotGia.traLoi = payload.traLoi as Record<string, string>;
+      return { daLuu: true };
+    case 'thi.nop': {
+      if (luotGia) {
+        luotGia.daNop = true;
+        luotGia.soDung = Object.keys(payload.traLoi as object).length >= 30 ? 30 : 12;
+      }
+      return { trangThai: 'da_nop', soDung: luotGia?.soDung ?? 0, soCau: 40, diem: (luotGia?.soDung ?? 0) * 2.5, giayLam: 600 };
+    }
+    case 'xepHang': {
+      const nhom = (hang: number, ten: string, diem: number, thamGia: number) => ({ maNhom: 'n' + hang, tenNhom: ten, diem, hang, soTinh: 6, soThamGia: thamGia });
+      const tuan = [nhom(1, 'Nhóm 3', 78.5, 6), nhom(2, 'Nhóm 1', 64.2, 5), nhom(3, 'Nhóm 2', 41.7, 4)];
+      return {
+        tuanHienTai: { soTuan: 1, daChot: false, nhom: tuan },
+        cacTuan: [],
+        luyKe: tuan.map((n) => ({ maNhom: n.maNhom, tenNhom: n.tenNhom, diem: n.diem, hang: n.hang })),
+        vinhDanh: { soTuan: 1, nhom: [{ tenNhom: 'Nhóm 3', diem: 78.5 }] },
+        nhomToi: 'n2',
+      };
+    }
     case 'admin.dsThanhVien':
       return thanhVien;
     case 'admin.nhapDangKy':

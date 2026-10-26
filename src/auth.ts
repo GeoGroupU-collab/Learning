@@ -1,4 +1,5 @@
-// Đăng nhập Google Identity Services. ID token chỉ giữ trong bộ nhớ, không lưu localStorage.
+// Đăng nhập Google Identity Services. ID token của Google chỉ giữ trong bộ nhớ và chỉ dùng một lần
+// để đổi lấy mã phiên của máy chủ. Mã phiên (30 ngày) lưu trong localStorage để khỏi đăng nhập lại.
 import { CONFIG, DEV_MOCK } from './config';
 
 interface GoogleId {
@@ -17,16 +18,43 @@ let token: string | null = null;
 let khiCoToken: ((ok: boolean) => void) | null = null;
 let khoiTaoXong = false;
 
+const KHOA_PHIEN = 'lg_phien';
+
 export function layToken(): string | null {
   return DEV_MOCK ? 'mock' : token;
 }
 
+export function layPhien(): string | null {
+  try {
+    return localStorage.getItem(KHOA_PHIEN);
+  } catch {
+    return null;
+  }
+}
+
+export function luuPhien(ma: string): void {
+  try {
+    localStorage.setItem(KHOA_PHIEN, ma);
+  } catch {
+    /* trình duyệt chặn lưu: vẫn dùng được, chỉ không nhớ đăng nhập */
+  }
+}
+
+export function xoaPhien(): void {
+  try {
+    localStorage.removeItem(KHOA_PHIEN);
+  } catch {
+    /* bỏ qua */
+  }
+}
+
 export function daDangNhap(): boolean {
-  return DEV_MOCK ? true : token !== null;
+  return DEV_MOCK ? true : layPhien() !== null;
 }
 
 export function dangXuat(): void {
   token = null;
+  xoaPhien();
   window.google?.accounts.id.disableAutoSelect();
 }
 

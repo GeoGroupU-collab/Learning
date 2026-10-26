@@ -1,5 +1,5 @@
 import { CONFIG, DEV_MOCK } from './config';
-import { layToken, lamMoiToken } from './auth';
+import { layToken, layPhien, lamMoiToken, xoaPhien } from './auth';
 
 export class LoiApi extends Error {
   constructor(public ma: string, message: string) {
@@ -19,13 +19,17 @@ export async function goi<T>(action: string, payload: Record<string, unknown> = 
     res = await fetch(CONFIG.API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, idToken: layToken(), ...payload }),
+      body: JSON.stringify({ action, ...(action !== 'dangNhap' && layPhien() ? { phien: layPhien() } : { idToken: layToken() }), ...payload }),
     });
   } catch {
     throw new LoiApi('mang', 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.');
   }
   const j = (await res.json()) as { ok: boolean; data?: T; error?: string; message?: string };
   if (!j.ok) {
+    if (j.error === 'phien_het_han') {
+      xoaPhien();
+      window.dispatchEvent(new Event('phien-het-han'));
+    }
     if (j.error === 'token_expired' && thuLai && (await lamMoiToken())) return goi<T>(action, payload, false);
     throw new LoiApi(j.error ?? 'loi', j.message ?? 'Có lỗi xảy ra.');
   }

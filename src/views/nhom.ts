@@ -1,8 +1,44 @@
 import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
-import type { ChiTietNhom, Me } from '../types';
+import { chayDinhKy, dungDongHo } from '../gio';
+import type { ChiTietNhom, KetQuaXepHang, Me, ThanhVienNhom } from '../types';
+
+const NHAN_TT: Record<string, string> = {
+  mien: 'Được miễn',
+  da_thi: 'Đã thi',
+  dang_thi: 'Đang thi',
+  da_nop_cau: 'Đã nộp câu hỏi',
+  chua_nop_cau: 'Chưa nộp câu hỏi',
+};
+
+function dongThanhVien(t: ThanhVienNhom, me: Me): HTMLElement {
+  const nhan = t.tt === 'da_thi' && t.diem != null ? `Đã thi · ${t.diem.toFixed(1)} điểm` : (NHAN_TT[t.tt ?? ''] ?? '');
+  return h('li', {},
+    h('span', {}, t.hoTen || t.email, t.email === me.email ? h('span', { class: 'nhan' }, 'Bạn') : null),
+    h('span', { class: t.tt === 'da_thi' ? 'tt-tot' : 'phu nho' }, nhan));
+}
+
+function veDiemNhom(vung: HTMLElement, xh: KetQuaXepHang | null): void {
+  xoaHet(vung);
+  vung.append(h('h3', {}, 'Điểm nhóm'));
+  const t = xh?.tuanHienTai;
+  const toi = xh?.nhomToi;
+  const n = t?.nhom.find((x) => x.maNhom === toi);
+  if (!t || !n) {
+    vung.append(h('p', { class: 'phu' }, 'Điểm tuần và hạng nhóm sẽ hiện khi có lượt thi đầu tiên.'));
+    return;
+  }
+  const lk = xh?.luyKe.find((x) => x.maNhom === toi);
+  vung.append(
+    h('div', { class: 'so-lieu' },
+      h('div', {}, h('div', { class: 'phu nho' }, `Tuần ${t.soTuan}${t.daChot ? '' : ' (tạm tính)'}`), h('div', { class: 'diem-vua' }, n.diem.toFixed(1))),
+      h('div', {}, h('div', { class: 'phu nho' }, 'Hạng'), h('div', { class: 'diem-vua' }, `${n.hang}/${t.nhom.length}`)),
+      h('div', {}, h('div', { class: 'phu nho' }, 'Lũy kế'), h('div', { class: 'diem-vua' }, lk ? lk.diem.toFixed(1) : '—'))),
+    h('p', { class: 'phu nho' }, `${n.soThamGia ?? 0}/${n.soTinh ?? 0} thành viên đã thi tuần này.`));
+}
 
 export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
+  dungDongHo();
   xoaHet(goc);
   goc.append(h('h1', {}, 'Nhóm'), h('p', { class: 'phu' }, 'Đang tải...'));
   let nhom: ChiTietNhom | null;
@@ -42,9 +78,13 @@ export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
   );
 
   const ds = h('ul', { class: 'ds-thanh-vien' });
-  n.thanhVien.forEach((t) =>
-    ds.append(h('li', {}, h('span', {}, t.hoTen || t.email), t.email === me.email ? h('span', { class: 'nhan' }, 'Bạn') : null))
-  );
+  const soTv = h('p', { class: 'phu' }, '');
+  const veDs = (nh: ChiTietNhom): void => {
+    xoaHet(ds);
+    nh.thanhVien.forEach((t) => ds.append(dongThanhVien(t, me)));
+    soTv.textContent = `${nh.thanhVien.length} thành viên${nh.tuan ? ` · Tuần ${nh.tuan.soTuan}` : ''}`;
+  };
+  veDs(n);
 
   const o = h('input', { type: 'url', class: 'o-nhap', placeholder: 'https://zalo.me/g/...', value: n.linkZalo, maxlength: 300 }) as HTMLInputElement;
   const khungLink = h('div', {});
@@ -58,8 +98,11 @@ export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
   };
   veLink();
 
+  const vungDiem = h('div', { class: 'card' }, h('h3', {}, 'Điểm nhóm'), h('p', { class: 'phu' }, 'Đang tải...'));
+
   goc.append(
-    h('div', { class: 'card' }, h('div', { class: 'hang' }, tieuDe, nutDoiTen), h('p', { class: 'phu' }, `${n.thanhVien.length} thành viên`), ds),
+    h('div', { class: 'card' }, h('div', { class: 'hang' }, tieuDe, nutDoiTen), soTv, ds),
+    vungDiem,
     h(
       'div',
       { class: 'card' },
@@ -84,7 +127,20 @@ export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {
         },
         'Lưu link'
       )
-    ),
-    h('div', { class: 'card' }, h('h3', {}, 'Điểm nhóm'), h('p', { class: 'phu' }, 'Điểm tuần và hạng nhóm sẽ hiện ở đây từ sự kiện đầu tiên.'))
+    )
   );
+
+  const taiDiem = async (): Promise<void> => {
+    try {
+      veDiemNhom(vungDiem, await goi<KetQuaXepHang>('xepHang'));
+    } catch {
+      veDiemNhom(vungDiem, null);
+    }
+  };
+  await taiDiem();
+  // Làm mới gần thời gian thật, chỉ khi tab đang hiển thị.
+  chayDinhKy(() => {
+    void goi<ChiTietNhom | null>('nhomCuaToi').then((nh) => { if (nh) veDs(nh); }).catch(() => undefined);
+    void taiDiem();
+  }, 15000);
 }

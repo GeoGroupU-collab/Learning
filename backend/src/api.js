@@ -6,7 +6,11 @@ function doPost(e) {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var hd = HANH_DONG_[body.action];
     if (!hd) throw loi_('khong_biet', 'Hành động không hợp lệ.');
-    var email = xacMinhToken_(body.idToken);
+    var email;
+    if (body.action === 'dangNhap') email = xacMinhToken_(body.idToken);
+    else if (hd.choPhienThi && body.maPhienThi) email = emailTuPhienThi_(body.maPhienThi); // tự lưu và nộp không phụ thuộc đăng nhập
+    else if (body.phien) email = emailTuPhien_(body.phien);
+    else email = xacMinhToken_(body.idToken);
     var tv = canThanhVienActive_(email);
     if (hd.vaiTro) canVaiTro_(tv, hd.vaiTro);
     var du_lieu = hd.chay(email, tv, body);
@@ -27,7 +31,14 @@ var CHU_ = ['owner'];
 var CHU_TRO_LY_ = ['owner', 'assistant'];
 
 var HANH_DONG_ = {
+  dangNhap: { chay: hdDangNhap_ },
+  dangXuat: { chay: hdDangXuat_ },
   me: { chay: hdMe_ },
+  batDauThi: { chay: hdBatDauThi_ },
+  'thi.luu': { choPhienThi: true, chay: hdThiLuu_ },
+  'thi.nop': { choPhienThi: true, chay: hdThiNop_ },
+  xepHang: { chay: hdXepHang_ },
+  'admin.chotTuan': { vaiTro: CHU_, chay: hdChotTuanThuCong_ },
   nhomCuaToi: { chay: hdNhomCuaToi_ },
   capNhatLinkZalo: { chay: hdCapNhatLinkZalo_ },
   doiTenNhom: { chay: hdDoiTenNhom_ },
@@ -94,7 +105,16 @@ function hdNhomCuaToi_(email) {
   var hk = hocKyDangMo_();
   if (!hk) return null;
   var nhom = nhomCuaEmail_(email, hk.maHocKy);
-  return nhom ? chiTietNhom_(nhom) : null;
+  if (!nhom) return null;
+  var ct = chiTietNhom_(nhom);
+  var t = chonTuanHienTai(docTuan_(hk.maHocKy), Date.now());
+  var tt = trangThaiThanhVienTuan_(hk.maHocKy, t, ct.thanhVien.map(function (x) { return x.email; }));
+  ct.thanhVien.forEach(function (x) {
+    x.tt = tt[x.email] ? tt[x.email].tt : '';
+    x.diem = tt[x.email] ? tt[x.email].diem : null;
+  });
+  ct.tuan = t ? { soTuan: t.soTuan, trangThai: trangThaiTuan(t, Date.now()) } : null;
+  return ct;
 }
 
 function canNhomCuaToi_(email) {

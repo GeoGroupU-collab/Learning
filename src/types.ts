@@ -10,6 +10,8 @@ export interface ThanhVienNhom {
   email: string;
   hoTen: string;
   trangThai: string;
+  tt?: string;
+  diem?: number | null;
 }
 
 export interface ChiTietNhom {
@@ -17,6 +19,7 @@ export interface ChiTietNhom {
   tenNhom: string;
   linkZalo: string;
   thanhVien: ThanhVienNhom[];
+  tuan?: { soTuan: number; trangThai: string } | null;
 }
 
 export interface ThanhVienDs {
@@ -94,6 +97,50 @@ export interface TuanHienTai {
   moKhoa?: boolean;
   mien?: boolean;
   soMienDaDung?: number;
+  thi?: { soMonThi: number; soCauMoiMonThi: number; thoiGianPhut: number };
+  luotThi?: null | LuotThiTomTat;
+}
+
+export interface LuotThiTomTat {
+  trangThai: 'dang_lam' | 'da_nop' | 'het_gio';
+  hetHanLuc?: number;
+  soDung?: number;
+  soCau?: number;
+  diem?: number;
+  giayLam?: number;
+}
+
+export interface CauThi {
+  id: string;
+  maMon: string;
+  noiDung: string;
+  dapAn: { k: string; text: string }[];
+}
+
+export interface DuLieuThi {
+  trangThai: 'dang_lam';
+  maPhienThi: string;
+  hetHanLuc: number;
+  now: number;
+  cauHoi: CauThi[];
+  traLoi: Record<string, string>;
+}
+
+export interface NhomXepHang {
+  maNhom: string;
+  tenNhom: string;
+  diem: number;
+  hang: number;
+  soTinh?: number;
+  soThamGia?: number;
+}
+
+export interface KetQuaXepHang {
+  tuanHienTai: null | { soTuan: number; daChot: boolean; nhom: NhomXepHang[] };
+  cacTuan: { soTuan: number; daChot: boolean; nhom: NhomXepHang[] }[];
+  luyKe: NhomXepHang[];
+  vinhDanh: null | { soTuan: number; nhom: { tenNhom: string; diem: number }[] };
+  nhomToi: string | null;
 }
 
 export interface CauNhap {
