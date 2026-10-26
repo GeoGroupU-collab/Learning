@@ -77,7 +77,7 @@ function lamDe(goc: HTMLElement, de: DeTaoDe): void {
 function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
   xoaHet(goc);
   goc.append(
-    h('h1', {}, 'Tạo đề thi'),
+    h('h1', {}, 'Tự tạo đề luyện tập'),
     theCap(tt.cap),
     h('div', { class: 'card' },
       h('p', {}, `Chọn một môn và các chương muốn ôn. Đề gồm ${tt.soCauMoiDe} câu rút ngẫu nhiên từ ngân hàng câu hỏi của lớp, không có câu do bạn nộp. Làm xong được +${tt.diemMoiDe} điểm cấp bậc.`),
@@ -174,7 +174,7 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
 export async function veTaoDe(goc: HTMLElement): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Tạo đề thi'), khungCho(2));
+  goc.append(h('h1', {}, 'Tự tạo đề luyện tập'), khungCho(2));
   let daVe = false;
   await goiNhanh<ThongTinTaoDe>('taoDe.thongTin', {}, (tt, tuCache) => {
     // Bản đã lưu chỉ để hiện nhanh; khi dữ liệu mới về mà người dùng chưa chọn gì thì vẽ lại.

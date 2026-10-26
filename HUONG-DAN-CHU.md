@@ -316,11 +316,11 @@ Bản này thêm 3 tab mới trong Sheet (`Diem`, `DeTuTao`, `DanhHieu`) và nhi
 3. **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
 4. GitHub Desktop: Summary `Thêm điểm cấp bậc, xem lại, ngân hàng`, **Commit to main**, **Push origin**, chờ Actions tick xanh, rồi **Ctrl+F5**.
 
-Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Võ Sĩ, Lv 1) và thẻ **Tạo đề thi**.
+Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Võ Sĩ, Lv 1) và thẻ **Tự tạo đề luyện tập**.
 
 ### Cách tính điểm cá nhân
 
-- **Tạo đề thi (ngoài sự kiện):** mục **Tạo đề thi** (từ trang chủ). Chọn một **môn**, chọn một hoặc nhiều **chương** (không chọn chương nào là lấy tất cả), rồi bấm **Tạo đề**. Đề gồm **30 câu** rút ngẫu nhiên từ ngân hàng (không có câu của chính mình, ưu tiên câu chưa gặp). Làm xong xem đáp án và giải thích. Mỗi đề làm xong **+20 điểm**, tối đa **120 điểm mỗi tuần** (tuần tính từ Thứ Hai đến Chủ nhật). Đề hợp lệ là trả lời ít nhất một nửa số câu. Nếu số câu phù hợp ít hơn 30 thì đề ngắn hơn, tối thiểu 10 câu; ít hơn 10 câu thì không tạo được và web báo chọn thêm chương. Đề đang làm dở có thể **Làm tiếp** hoặc **Bỏ đề này** để tạo đề khác.
+- **Tạo đề thi (ngoài sự kiện):** mục **Tự tạo đề luyện tập** (từ trang chủ). Chọn một **môn**, chọn một hoặc nhiều **chương** (không chọn chương nào là lấy tất cả), rồi bấm **Tạo đề**. Đề gồm **30 câu** rút ngẫu nhiên từ ngân hàng (không có câu của chính mình, ưu tiên câu chưa gặp). Làm xong xem đáp án và giải thích. Mỗi đề làm xong **+20 điểm**, tối đa **120 điểm mỗi tuần** (tuần tính từ Thứ Hai đến Chủ nhật). Đề hợp lệ là trả lời ít nhất một nửa số câu. Nếu số câu phù hợp ít hơn 30 thì đề ngắn hơn, tối thiểu 10 câu; ít hơn 10 câu thì không tạo được và web báo chọn thêm chương. Đề đang làm dở có thể **Làm tiếp** hoặc **Bỏ đề này** để tạo đề khác.
 - **Thưởng nhóm cuối tuần:** khi tuần được chốt, thành viên **đã thi** của nhóm hạng 1 được **+50**, hạng 2 được **+30**, các nhóm còn lại **+10**. Người vắng hoặc được miễn không được thưởng.
 - **Danh hiệu cá nhân của tuần:** người có điểm thi cao nhất tuần nhận danh hiệu **Thiên Kiêu Tuần N** (bằng điểm thì ai làm nhanh hơn; bằng cả hai thì cùng nhận), hiện ở mục **Xếp hạng**, tab **Cá nhân**.
 - **Level:** cứ **100 điểm** lên 1 level, bắt đầu từ Lv 1. **Cấp lớn** đổi theo level:
@@ -369,7 +369,7 @@ Làm đúng khi thấy: sau khi áp dụng, tab `NhatKy` có dòng `nhapNganHang
 
 ### Bước 26. Thử nhanh
 
-1. Tài khoản thử: vào **Tạo đề thi**, chọn môn và chương, làm một đề. Làm đúng khi thấy "+20 điểm cấp bậc" và thẻ cấp có 20 điểm.
+1. Tài khoản thử: vào **Tự tạo đề luyện tập**, chọn môn và chương, làm một đề. Làm đúng khi thấy "+20 điểm cấp bậc" và thẻ cấp có 20 điểm.
 2. Làm tiếp tới đề thứ 7 trong cùng tuần: đề thứ 7 không được cộng thêm (đạt trần 120).
 3. Sau khi chốt tuần thử (`chotTuanTuDong`): kiểm tra tab `Diem` có dòng thưởng nhóm, tab `DanhHieu` có dòng danh hiệu, mục **Xếp hạng**, tab **Cá nhân** hiện đủ.
 4. Dọn dữ liệu thử trong `Diem`, `DeTuTao`, `DanhHieu`, `BaoSai`, `LuotThi`, `KetQuaTuan`.
@@ -393,7 +393,7 @@ Tạo đề chọn theo chương nên cần danh sách chương thống nhất. 
    `Chương 2: Thống kê`
 3. Bấm **Lưu danh sách chương**.
 
-Làm đúng khi thấy: tiêu đề môn hiện "N chương". Từ giờ ở **Nộp câu hỏi** và **Tạo đề thi** có ô chọn chương của môn đó.
+Làm đúng khi thấy: tiêu đề môn hiện "N chương". Từ giờ ở **Nộp câu hỏi** và **Tự tạo đề luyện tập** có ô chọn chương của môn đó.
 
 - Đổi thứ tự hoặc thêm chương: sửa danh sách rồi lưu. Giữ nguyên **tên** một chương thì giữ nguyên mã, các câu đã nộp vẫn khớp.
 - Đổi **tên** một chương sẽ tạo mã mới, các câu cũ thuộc chương đó trở thành "chưa thuộc chương chuẩn".
@@ -438,9 +438,9 @@ Trong **Sự kiện**, **Nộp câu hỏi** có mục **Dùng AI soạn câu h�
 
 Lưu ý: AI có thể nhầm hoặc bịa, người nộp chịu trách nhiệm về câu mình nộp. Máy chủ vẫn kiểm tra lại (đủ 5 câu mỗi môn, 4 đáp án khác nhau, không trùng câu đã có). Nếu môn đã có danh sách chương (**Quản trị**, **Chương**), AI được cho biết tên chương đúng để ghi.
 
-### Tạo đề thi từ ngân hàng (chủ)
+### Tạo đề sự kiện từ ngân hàng (chủ)
 
-**Quản trị**, tab **Đề thi**:
+**Quản trị**, tab **Đề sự kiện**:
 
 1. **Chọn môn, số câu, chương:** tích môn muốn lấy, nhập số câu, và (nếu muốn) mở "Chỉ lấy một số chương".
 2. **Bộ lọc:** chỉ lấy câu của một số tuần, loại trừ tác giả (nhập email), và **Tránh câu đã dùng trong các đề trước**. Chỉ lấy câu đang dùng.
@@ -450,7 +450,7 @@ Lưu ý: AI có thể nhầm hoặc bịa, người nộp chịu trách nhiệm 
 Với mỗi đề đã lưu bạn có:
 - **In đề** và **In đáp án:** mở trang in, chọn "Lưu dưới dạng PDF" trong hộp thoại in. Bản đáp án riêng, có giải thích, chương và trang nguồn.
 - **Tải đề .html**, **Tải đáp án .html**, **JSON**, **CSV**.
-- **Phát hành cho thành viên:** hiện trong mục **Tạo đề thi** của thành viên với tên "Đề do lớp trưởng phát hành". Mỗi người làm lần đầu được **+20 điểm** (tính vào trần 120 điểm mỗi tuần), các lần sau làm lại không cộng. **Gỡ phát hành** để ẩn.
+- **Phát hành cho thành viên:** hiện trong mục **Tự tạo đề luyện tập** của thành viên với tên "Đề do lớp trưởng phát hành". Mỗi người làm lần đầu được **+20 điểm** (tính vào trần 120 điểm mỗi tuần), các lần sau làm lại không cộng. **Gỡ phát hành** để ẩn.
 - **Gán làm đề sự kiện:** chọn tuần rồi bấm **Gán làm đề sự kiện**. Phòng thi tuần đó dùng đúng đề này, cả lớp cùng bộ câu (thứ tự câu và đáp án mỗi người khác nhau), không cần chọn môn. Dùng cho tuần chung kết. Chỉ gán được **trước giờ mở cửa** của tuần đó.
 - Thời gian làm bài của tuần đề cố định: **Quản trị**, **Tuần**, mục **Thời gian làm bài (phút)**.
 
@@ -563,7 +563,7 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
 - [ ] Thi: bắt đầu, tắt trang, mở lại làm tiếp, nộp; không thi được lần hai.
 - [ ] Chốt tuần (hàm `chotTuanTuDong`): điểm nhóm đúng cách tính, thưởng nhóm, danh hiệu.
 - [ ] Xem lại bài sau khi đóng cửa, câu khó nhất, báo sai (2 người thì tạm loại).
-- [ ] Tạo đề thi (chọn môn, chương), được +20, đạt trần 120 thì không cộng thêm.
+- [ ] Tự tạo đề luyện tập (chọn môn, chương), được +20, đạt trần 120 thì không cộng thêm.
 - [ ] Dùng AI soạn câu hỏi: tải file mẫu, dán kết quả vào form.
 - [ ] Xóa dữ liệu thử trong Sheet (các dòng thử trong `CauHoi`, `LuotThi`, `DeTuTao`, `Diem`, `DanhHieu`, `KetQuaTuan`, `Mien`, `BaoSai`, `NhapCauHoi`, `NhatKy`, `PhienDangNhap`, và các email thử trong `ThanhVien`, `NhomThanhVien`), rồi **Tạo lịch** lại để giờ các tuần đúng lịch thật.
 
@@ -573,4 +573,4 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
 - [ ] Nếu M3 chưa chạy ổn trước 7/11: dời sự kiện đầu một tuần (Quản trị, Tuần, sửa giờ) thay vì cắt giảm.
 
 **Chuẩn bị tuần chung kết (trước 13/12)**
-- [ ] Dựng đề cố định ở tab **Đề thi** (loại trừ tác giả nếu cần), in đề và đáp án để kiểm tra, **Gán làm đề sự kiện** cho tuần chung kết trước giờ mở cửa, chỉnh thời gian làm bài ở tab Tuần.
+- [ ] Dựng đề cố định ở tab **Đề sự kiện** (loại trừ tác giả nếu cần), in đề và đáp án để kiểm tra, **Gán làm đề sự kiện** cho tuần chung kết trước giờ mở cửa, chỉnh thời gian làm bài ở tab Tuần.

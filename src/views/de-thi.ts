@@ -227,7 +227,7 @@ export async function veDeThi(noi: HTMLElement): Promise<void> {
         h('button', { class: 'nut', onclick: () => void luu('nhap') }, 'Lưu nháp'),
         h('button', { class: 'nut nut-phu', onclick: () => void luu('phat_hanh') }, 'Lưu và phát hành cho thành viên'),
         h('button', { class: 'nut nut-nguy', onclick: () => { idDeDangSua = null; cau = []; oTen.value = ''; veCau(); } }, 'Làm lại từ đầu')),
-      h('p', { class: 'phu nho' }, 'Đề phát hành: thành viên làm ở mục Tạo đề thi, lần đầu được +20 điểm, xem đáp án sau khi nộp. Đề gán cho một tuần: cả lớp thi cùng bộ câu trong phòng thi sự kiện.')));
+      h('p', { class: 'phu nho' }, 'Đề phát hành: thành viên làm ở mục Tự tạo đề luyện tập, lần đầu được +20 điểm, xem đáp án sau khi nộp. Đề gán cho một tuần: cả lớp thi cùng bộ câu trong phòng thi sự kiện.')));
 
   noi.append(vungDs, vungXay);
   veCau();

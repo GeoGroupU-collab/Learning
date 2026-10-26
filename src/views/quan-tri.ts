@@ -21,7 +21,7 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const laChu = me.vaiTro === 'owner';
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề thi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
+  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề sự kiện'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
   const noiDung = h('div', {});

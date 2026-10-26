@@ -240,8 +240,8 @@ function veTrangChu(noi: HTMLElement): void {
       h('div', { class: 'phu nho' }, m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký')),
     ...(d ? [theCap(d.cap)] : []),
     h('a', { class: 'card', href: '#/tao-de' },
-      h('div', { class: 'mon-ten' }, 'Tạo đề thi'),
-      h('div', { class: 'phu nho' }, 'Chọn môn, chọn chương, làm đề 30 câu. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.')),
+      h('div', { class: 'mon-ten' }, 'Tự tạo đề luyện tập'),
+      h('div', { class: 'phu nho' }, 'Tự chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.')),
     d ? theSuKien(d) : h('div', { class: 'card' }, h('div', { class: 'mon-ten' }, 'Đang tải...'))
   );
   const vungMon = h('div', {});

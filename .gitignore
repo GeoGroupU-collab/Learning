@@ -6,3 +6,4 @@ backend/dist/
 client_secret*.json
 *.pem
 *.key
+phat-cho-lop/

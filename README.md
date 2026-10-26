@@ -41,6 +41,7 @@ npm run build:backend   # gom backend/src/*.js thành backend/dist/Code.gs
 npm test                # Vitest (máy chủ qua giả lập Apps Script, logic thuần, giao diện thuần)
 npm run dev:mock        # xem giao diện với dữ liệu giả, không cần Google (thêm ?tt=nop|cho|mo|dong, ?vai=member|assistant)
 npm run build           # sinh manifest, kiểm tra kiểu, build web vào dist/
+node scripts/tao-pdf-thanh-vien.mjs "<link Google Form>"   # tạo phat-cho-lop/HUONG-DAN-THANH-VIEN.pdf kèm mã QR (cần Chrome; thư mục này không đưa lên GitHub)
 ```
 
 Chế độ dữ liệu giả chỉ bật bằng `npm run dev:mock`; bản build đưa lên không chứa mã giả lập (đã kiểm tra bản build không có `mockGoi`).
