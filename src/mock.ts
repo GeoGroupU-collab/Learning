@@ -225,6 +225,52 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'admin.doiTrangThaiDe':
     case 'admin.ganDeChoTuan':
       return {};
+    case 'admin.dsHocKy':
+      return [
+        { maHocKy: 'hk0-2025-2026', tenHocKy: 'Học kỳ 2 năm học 2025-2026', batDau: '2026-02-15', ketThuc: '2026-06-01', trangThai: 'dong', coTongKet: true },
+        { maHocKy: 'hk1-2026-2027', tenHocKy: 'Học kỳ 1 năm học 2026-2027', batDau: '2026-10-26', ketThuc: '', trangThai: 'mo', coTongKet: false },
+      ];
+    case 'admin.tongKet':
+      return {
+        maHocKy: 'hk0-2025-2026', tenHocKy: 'Học kỳ 2 năm học 2025-2026', ngayTongKet: '2026-06-02T00:00:00Z',
+        nhomVoDich: [{ tenNhom: 'Nhóm 3', diem: 78.5 }],
+        bangNhom: [{ maNhom: 'n3', tenNhom: 'Nhóm 3', diem: 78.5, hang: 1 }, { maNhom: 'n1', tenNhom: 'Nhóm 1', diem: 66.2, hang: 2 }],
+        tuan: [{ soTuan: 1, soThamGia: 30, soTinh: 36, tiLe: 83.3 }, { soTuan: 2, soThamGia: 33, soTinh: 36, tiLe: 91.7 }], thamGiaTrungBinh: 87.5,
+        topCaNhan: [{ hoTen: 'Nguyễn Văn A', diemTB: 94.5, soTuan: 5 }], topCapBac: [{ hoTen: 'Nguyễn Văn A', tong: 1250, level: 13, tenCapLon: 'Đại Võ Sư' }],
+        danhHieu: [{ hoTen: 'Nguyễn Văn A', soLan: 2 }], thongKe: { soTuanDaChot: 5, soCauHoi: 540, soLuotThi: 170, soDeTuTao: 120, soThanhVien: 37 },
+      };
+    case 'admin.ketThucHocKy':
+    case 'admin.taoHocKy':
+      return { soMon: 5, soNhom: 0, thuMucBaiHoc: 'public/bai-hoc/hk2/', maHocKy: 'hk2' };
+    case 'admin.themMon':
+      return { maHocKy: 'hk1-2026-2027', maMon: String(payload.maMon), duongDan: `public/bai-hoc/hk1-2026-2027/${String(payload.maMon)}/mon.json`, monJson: JSON.stringify({ ten: payload.tenMon, mau: payload.mau, chuong: [] }, null, 2) };
+    case 'admin.bangDiem':
+      return {
+        tuan: [1, 2],
+        nguoi: thanhVien.slice(0, 8).map((t, i) => ({
+          hoTen: t.hoTen, email: t.email, nhom: i < 4 ? 'Nhóm 1' : 'Nhóm 2', diemTuan: { '1': 90 - i * 8, '2': i === 3 ? 'mien' : i === 5 ? null : 80 - i * 5 },
+          soTuanThi: i === 5 ? 1 : 2, diemTB: 85 - i * 6, tongCapBac: 230 - i * 20, level: 3 - Math.floor(i / 4), tenCapLon: 'Võ Sĩ',
+        })),
+        nhom: [{ soTuan: 1, nhom: 'Nhóm 1', diem: 70, hang: 1, soThamGia: 4, soTinh: 4 }, { soTuan: 1, nhom: 'Nhóm 2', diem: 55.5, hang: 2, soThamGia: 3, soTinh: 4 }],
+      };
+    case 'admin.chamLaiTuan':
+      return { soBaiDoi: 12, soCauBiLoai: 1 };
+    case 'admin.nhatKy':
+      return {
+        tong: 3, trang: 1, coTrang: 50, cacHanhDong: ['chotChiaNhom', 'nopCauHoi', 'saoLuu'],
+        dong: [
+          { thoiGian: '2026-11-09T01:00:00Z', email: 'he_thong', hanhDong: 'chotTuan', doiTuong: 'hk1-2026-2027/1', chiTiet: '{"soNhom":6}' },
+          { thoiGian: '2026-11-06T10:00:00Z', email: 'sv1@example.test', hanhDong: 'nopCauHoi', doiTuong: 'hk1-2026-2027/1', chiTiet: '{"soCau":15}' },
+          { thoiGian: '2026-11-05T10:00:00Z', email: 'toi@example.test', hanhDong: 'chotChiaNhom', doiTuong: 'hk1-2026-2027', chiTiet: '{"soNhom":6}' },
+        ],
+      };
+    case 'admin.saoLuuNgay':
+      return { ten: 'Sao luu 2026-11-09 0300', url: 'https://drive.google.com/x', soBanHienCo: 3, daXoa: 0 };
+    case 'admin.dsSaoLuu':
+      return {
+        thuMuc: 'Learning Group - Sao luu', url: 'https://drive.google.com/folder', soBanToiDa: 8,
+        ban: [{ ten: 'Sao luu 2026-11-09 0300', ngay: '2026-11-08T20:00:00Z', url: 'https://drive.google.com/a' }, { ten: 'Sao luu 2026-11-02 0300', ngay: '2026-11-01T20:00:00Z', url: 'https://drive.google.com/b' }],
+      };
     case 'admin.dsMon':
       return { mon: MON_GIA.map((m, i) => ({ ma: m.ma, ten: m.ten, mau: m.mau, chuong: i === 0 ? m.chuong : [], soCau: 40, giaTriTrongNganHang: [{ giaTri: 'c1', soCau: 30 }, { giaTri: i === 0 ? 'Chương hai' : 'Mở đầu', soCau: 10 }] })) };
     case 'admin.luuChuong':

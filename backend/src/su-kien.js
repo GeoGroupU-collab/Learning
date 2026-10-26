@@ -36,7 +36,7 @@ function canTuanDangNop_(hk) {
 
 function cauHoiCuaEmailTuan_(maHocKy, soTuan, email) {
   return docBang_('CauHoi').filter(function (c) {
-    return c.maHocKy === maHocKy && Number(c.soTuan) === soTuan && chuanHoaEmail(c.tacGia) === email && c.trangThai !== 'removed';
+    return c.maHocKy === maHocKy && Number(c.soTuan) === soTuan && chuanHoaEmail(c.tacGia) === email;
   });
 }
 

@@ -515,3 +515,15 @@ describe('quản trị ngân hàng', () => {
     expect(nk).toContain('doiTrangThaiCau');
   });
 });
+
+describe('câu của mình bị xóa không làm mất quyền thi', () => {
+  it('đã nộp đủ 15 câu, sau đó một câu bị xóa thì vẫn được vào phòng thi và thẻ nhóm vẫn ghi đã nộp câu hỏi', () => {
+    nopHetCauHoi();
+    const cauCuaU2 = mt.docTab('CauHoi').find((c) => c.tacGia === NGUOI[2]).id;
+    expect(goiAs(CHU, 'admin.doiTrangThaiCau', { id: cauCuaU2, trangThai: 'removed' }).ok).toBe(true);
+    expect(goiAs(NGUOI[2], 'tuanHienTai').data.moKhoa).toBe(true);
+    vi.setSystemTime(gio('2026-11-07T08:00:00'));
+    expect(goiAs(NGUOI[2], 'batDauThi', { monChon: MON.slice(0, 2) }).ok).toBe(true);
+    expect(goiAs(NGUOI[0], 'nhomCuaToi').data.thanhVien.find((t) => t.email === NGUOI[2]).tt).not.toBe('chua_nop_cau');
+  });
+});

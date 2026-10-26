@@ -249,6 +249,17 @@ function tuanDaChot_(maHocKy, soTuan) {
   return docBang_('KetQuaTuan').some(function (r) { return r.maHocKy === maHocKy && Number(r.soTuan) === soTuan; });
 }
 
+// Ghi (thay thế) kết quả các nhóm của một tuần vào tab KetQuaTuan.
+function ghiKetQuaTuan_(hk, t, bang) {
+  xoaDongNeu_('KetQuaTuan', function (r) { return r.maHocKy === hk.maHocKy && Number(r.soTuan) === t.soTuan; });
+  bang.forEach(function (n) {
+    themDong_('KetQuaTuan', {
+      maHocKy: hk.maHocKy, soTuan: t.soTuan, maNhom: n.maNhom, diemNhom: n.diem, soThanhVienTinh: n.soTinh,
+      soThamGia: n.soThamGia, tongGiayLam: n.tongGiay, hang: n.hang,
+    });
+  });
+}
+
 // Chấm nốt các lượt thi đã hết hạn mà chưa nộp, rồi chốt kết quả nhóm. Trả true nếu đã chốt.
 function chotMotTuan_(hk, t, grace) {
   var bayGio = Date.now();
@@ -261,13 +272,7 @@ function chotMotTuan_(hk, t, grace) {
   });
   if (chuaXong) return false;
   var bang = tinhBangTuan_(hk.maHocKy, t.soTuan);
-  xoaDongNeu_('KetQuaTuan', function (r) { return r.maHocKy === hk.maHocKy && Number(r.soTuan) === t.soTuan; });
-  bang.forEach(function (n) {
-    themDong_('KetQuaTuan', {
-      maHocKy: hk.maHocKy, soTuan: t.soTuan, maNhom: n.maNhom, diemNhom: n.diem, soThanhVienTinh: n.soTinh,
-      soThamGia: n.soThamGia, tongGiayLam: n.tongGiay, hang: n.hang,
-    });
-  });
+  ghiKetQuaTuan_(hk, t, bang);
   traoThuongTuan_(hk, t, bang);
   suaDong_('Tuan', t._dong, { trangThai: 'da_chot' });
   ghiNhatKy_('he_thong', 'chotTuan', hk.maHocKy + '/' + t.soTuan, { soNhom: bang.length });
@@ -289,13 +294,16 @@ function chotTuanTuDong() {
   });
 }
 
-// Chạy một lần để đặt trigger 15 phút. Chạy lại không tạo trigger trùng.
+// Chạy một lần để đặt các trigger: chốt tuần mỗi 15 phút và sao lưu mỗi Chủ nhật 3 giờ sáng.
+// Chạy lại không tạo trigger trùng.
 function datTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (tg) {
-    if (tg.getHandlerFunction() === 'chotTuanTuDong') ScriptApp.deleteTrigger(tg);
+    var ten = tg.getHandlerFunction();
+    if (ten === 'chotTuanTuDong' || ten === 'saoLuuHangTuan') ScriptApp.deleteTrigger(tg);
   });
   ScriptApp.newTrigger('chotTuanTuDong').timeBased().everyMinutes(15).create();
-  Logger.log('Đã đặt trigger chotTuanTuDong chạy mỗi 15 phút.');
+  ScriptApp.newTrigger('saoLuuHangTuan').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(3).create();
+  Logger.log('Đã đặt trigger chotTuanTuDong (mỗi 15 phút) và saoLuuHangTuan (Chủ nhật 3 giờ sáng).');
 }
 
 function hdChotTuanThuCong_(email, tv, body) {
@@ -390,7 +398,7 @@ function trangThaiThanhVienTuan_(maHocKy, t, emails) {
   docBang_('LuotThi').forEach(function (r) { if (r.maHocKy === maHocKy && Number(r.soTuan) === t.soTuan) luot[chuanHoaEmail(r.email)] = r; });
   docBang_('Mien').forEach(function (m) { if (m.maHocKy === maHocKy && Number(m.soTuan) === t.soTuan) mien[chuanHoaEmail(m.email)] = true; });
   docBang_('CauHoi').forEach(function (c) {
-    if (c.maHocKy === maHocKy && Number(c.soTuan) === t.soTuan && c.trangThai !== 'removed') {
+    if (c.maHocKy === maHocKy && Number(c.soTuan) === t.soTuan) {
       var e = chuanHoaEmail(c.tacGia);
       nopCau[e] = (nopCau[e] || 0) + 1;
     }

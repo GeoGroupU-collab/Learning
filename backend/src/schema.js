@@ -29,6 +29,7 @@ var TABS = [
     headers: ['maLuot', 'email', 'batDauLuc', 'nopLuc', 'maMon', 'chuong', 'idDe', 'dsCau', 'traLoi', 'soDung', 'soCau', 'diem', 'diemThuong', 'tuanKey'],
   },
   { name: 'DanhHieu', headers: ['maHocKy', 'soTuan', 'email', 'danhHieu', 'diem', 'giayLam'] },
+  { name: 'TongKet', headers: ['maHocKy', 'noiDung', 'ngayTao'] },
   { name: 'PhienDangNhap', headers: ['hashPhien', 'email', 'taoLuc', 'hetHan'] },
   { name: 'NhapCauHoi', headers: ['maHocKy', 'soTuan', 'email', 'duLieu', 'capNhat'] },
   { name: 'BaoSai', headers: ['idCauHoi', 'email', 'lyDo', 'thoiGian'] },

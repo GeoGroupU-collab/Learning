@@ -28,6 +28,7 @@ Chỉ dùng cho hoạt động học tập của CLB: chia nhóm, tổ chức th
 - Dữ liệu nằm trong Google Sheet riêng của lớp trưởng, không chia sẻ cho thành viên.
 - Bạn có thể nhắn lớp trưởng để yêu cầu xóa họ tên, GPA và dữ liệu cá nhân. Điểm được giữ ở dạng ẩn danh để lịch sử điểm nhóm không bị đổi.
 - Khi rút khỏi CLB, bạn mất quyền truy cập ngay.
+- Mỗi tuần Sheet được sao lưu vào Google Drive riêng của lớp trưởng (giữ 8 bản gần nhất).
 
 ## Đăng nhập
 

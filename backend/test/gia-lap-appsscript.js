@@ -60,6 +60,26 @@ export function taoMoiTruong() {
   const boNho = new Map();
   let dangGiu = false;
   const theo = { soLanGiuKhoa: 0 };
+  const thuMucDrive = [];
+  const trigger = [];
+  let demTep = 0;
+  const taoThuMuc = (ten) => {
+    const cacTep = [];
+    return {
+      ten, cacTep,
+      getUrl: () => 'https://drive/thumuc/' + ten,
+      themTep(tenTep) {
+        const tep = { ten: tenTep, taoLuc: new Date(Date.now() + demTep++), rac: false };
+        cacTep.push(tep);
+        return { getUrl: () => 'https://drive/' + tenTep, getName: () => tep.ten, getDateCreated: () => tep.taoLuc, setTrashed: (v) => { tep.rac = v; } };
+      },
+      getFiles() {
+        const ds = cacTep.filter((t) => !t.rac).map((t) => ({ getName: () => t.ten, getDateCreated: () => t.taoLuc, setTrashed: (v) => { t.rac = v; }, getUrl: () => 'https://drive/' + t.ten }));
+        let i = 0;
+        return { hasNext: () => i < ds.length, next: () => ds[i++] };
+      },
+    };
+  };
   const token = {};
 
   const env = {
@@ -88,6 +108,7 @@ export function taoMoiTruong() {
     Utilities: {
       DigestAlgorithm: { SHA_256: 'sha256' },
       Charset: { UTF_8: 'utf8' },
+      formatDate: (d, tz, mau) => d.toISOString().slice(0, 16).replace('T', mau.includes('HHmm') ? ' ' : ' ').replace(':', ''),
       computeDigest: (alg, s) => Array.from(createHash('sha256').update(String(s)).digest()).map((b) => (b > 127 ? b - 256 : b)),
       getUuid: () => randomUUID(),
     },
@@ -96,6 +117,26 @@ export function taoMoiTruong() {
       createTextOutput: (s) => ({ s, setMimeType() { return this; } }),
     },
     Logger: { log() {} },
+    DriveApp: {
+      getFileById: () => ({
+        makeCopy(ten, thuMuc) {
+          const f = thuMuc.themTep(ten);
+          return f;
+        },
+      }),
+      getFoldersByName: (ten) => { const k = thuMucDrive.find((x) => x.ten === ten); const ds = k ? [k] : []; let i = 0; return { hasNext: () => i < ds.length, next: () => ds[i++] }; },
+      createFolder: (ten) => { const k = taoThuMuc(ten); thuMucDrive.push(k); return k; },
+    },
+    ScriptApp: {
+      WeekDay: { SUNDAY: 'SUNDAY' },
+      getProjectTriggers: () => trigger.map((t) => ({ getHandlerFunction: () => t.ham, _t: t })),
+      deleteTrigger: (tg) => { trigger.splice(trigger.indexOf(tg._t), 1); },
+      newTrigger: (ham) => {
+        const t = { ham, loai: '' };
+        const chuoi = { timeBased: () => chuoi, everyMinutes: (n) => { t.loai = 'moi ' + n + ' phut'; return chuoi; }, onWeekDay: (d) => { t.loai = d; return chuoi; }, atHour: (h) => { t.loai += ' luc ' + h; return chuoi; }, create: () => { trigger.push(t); return t; } };
+        return chuoi;
+      },
+    },
     console: { error() {}, log() {} },
   };
 
@@ -103,12 +144,14 @@ export function taoMoiTruong() {
   const thuTu = ['schema.js', ...cacFile.filter((f) => f !== 'schema.js').sort()];
   const ma = thuTu.map((f) => readFileSync(join(thuMucSrc, f), 'utf8')).join('\n');
   const tenDichVu = Object.keys(env);
-  const xuat = new Function(...tenDichVu, ma + '\nreturn { doPost, khoiTao, chotTuanTuDong };')(...tenDichVu.map((k) => env[k]));
+  const xuat = new Function(...tenDichVu, ma + '\nreturn { doPost, khoiTao, chotTuanTuDong, datTrigger, saoLuuNgay, saoLuuHangTuan };')(...tenDichVu.map((k) => env[k]));
 
   return {
     ...xuat,
     ss,
     props,
+    thuMucDrive,
+    trigger,
     boNho,
     theo,
     // Đăng ký một token Google giả cho email.

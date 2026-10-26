@@ -365,3 +365,50 @@ export interface DeThiDayDu {
   trangThai: string;
   cau: CauDe[];
 }
+
+export interface HocKyTomTat {
+  maHocKy: string;
+  tenHocKy: string;
+  batDau: string;
+  ketThuc: string;
+  trangThai: 'mo' | 'dong';
+  coTongKet: boolean;
+}
+
+export interface TongKetHocKy {
+  maHocKy: string;
+  tenHocKy: string;
+  ngayTongKet: string;
+  nhomVoDich: { tenNhom: string; diem: number }[];
+  bangNhom: { maNhom: string; tenNhom: string; diem: number; hang: number }[];
+  tuan: { soTuan: number; soThamGia: number; soTinh: number; tiLe: number }[];
+  thamGiaTrungBinh: number;
+  topCaNhan: { hoTen: string; diemTB: number; soTuan: number }[];
+  topCapBac: { hoTen: string; tong: number; level: number; tenCapLon: string }[];
+  danhHieu: { hoTen: string; soLan: number }[];
+  thongKe: { soTuanDaChot: number; soCauHoi: number; soLuotThi: number; soDeTuTao: number; soThanhVien: number };
+}
+
+export interface BangDiemKq {
+  tuan: number[];
+  nguoi: {
+    hoTen: string; email: string; nhom: string; diemTuan: Record<string, number | 'mien' | null>; soTuanThi: number; diemTB: number | null;
+    tongCapBac: number; level: number; tenCapLon: string;
+  }[];
+  nhom: { soTuan: number; nhom: string; diem: number; hang: number; soThamGia: number; soTinh: number }[];
+}
+
+export interface NhatKyKq {
+  tong: number;
+  trang: number;
+  coTrang: number;
+  cacHanhDong: string[];
+  dong: { thoiGian: string; email: string; hanhDong: string; doiTuong: string; chiTiet: string }[];
+}
+
+export interface SaoLuuKq {
+  thuMuc: string;
+  url: string;
+  soBanToiDa: number;
+  ban: { ten: string; ngay: string; url: string }[];
+}

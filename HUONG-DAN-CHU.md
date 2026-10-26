@@ -1,6 +1,18 @@
 # Hướng dẫn cho chủ (lớp trưởng) – Learning Group
 
-Tài liệu này được viết thêm sau mỗi mốc. Hiện có **Phần 1 (mốc M0)**: tạo Google Sheet, dán mã, chạy khởi tạo, tạo Form đăng ký.
+Tài liệu này theo từng mốc. Làm lần lượt từ Phần 1; mỗi bước có dòng "Làm đúng khi thấy".
+
+| Phần | Nội dung | Mốc |
+|---|---|---|
+| 1 | Tạo Sheet, dán mã, chạy `khoiTao`, tạo Form đăng ký | M0 |
+| 2 | Đăng nhập Google, đưa web lên GitHub Pages | M1 |
+| 3 | Lịch tuần, nộp câu hỏi, xin miễn | M2 |
+| 4 | Phòng thi, chốt tuần, xếp hạng, nhớ đăng nhập, vòng thử 3 tài khoản | M3 |
+| 5 | Điểm cá nhân, cấp bậc, báo sai, xem lại, quản lý ngân hàng | M4 |
+| 6 | Danh sách chương, web mượt hơn | M4 |
+| 7 | Nhờ AI soạn câu hỏi, tạo đề thi, huy hiệu | M5 |
+| 8 | Học kỳ, tổng kết, sao lưu, nhật ký, bảng điểm, chấm lại, lưu trữ năm học | M6 |
+| 9 | Danh sách kiểm tra cuối cùng trước khi chạy thật | M6 |
 
 Quy tắc an toàn quan trọng nhất: **Google Sheet này tuyệt đối không chia sẻ cho thành viên**, vì trong đó có GPA, email và đáp án.
 
@@ -452,3 +464,113 @@ Mục **Xếp hạng**, tab **Nhóm**:
 - **Lịch sử điểm nhóm theo tuần:** biểu đồ đường, nhóm của bạn vẽ đậm.
 - **Huy hiệu:** **Đủ quân** (mọi thành viên tính trong mẫu số cùng thi trong tuần, cộng dồn số tuần) và **Hạng nhất liên tiếp** (đứng hạng 1 từ 2 tuần liền nhau trở lên, tính đến tuần gần nhất). Mục **Nhóm** cũng hiện huy hiệu của nhóm bạn.
 - Giải **nhóm tiến bộ nhất** đang **tắt** theo yêu cầu của bạn (khóa `giaiTienBo` trong `CauHinh`).
+
+---
+
+## Phần 8. Học kỳ, tổng kết, sao lưu, nhật ký, bảng điểm, lưu trữ (mốc M6)
+
+### Bước 30. Cập nhật Apps Script và đặt trigger sao lưu
+
+1. Dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**.
+2. Chạy `khoiTao` (thêm tab `TongKet`).
+3. Chạy lại `datTrigger`. Lần này nó đặt **hai** trigger: `chotTuanTuDong` (mỗi 15 phút) và `saoLuuHangTuan` (Chủ nhật 3 giờ sáng). Google sẽ hỏi quyền truy cập Drive: cho phép.
+4. **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
+5. Commit và push bản web bằng GitHub Desktop, chờ Actions tick xanh, **Ctrl+F5**.
+
+Làm đúng khi thấy: trong Apps Script, biểu tượng đồng hồ (**Trình kích hoạt**) có hai dòng: `chotTuanTuDong` và `saoLuuHangTuan`.
+
+### Bước 31. Thử sao lưu
+
+**Quản trị**, tab **Sao lưu**, bấm **Sao lưu ngay**. Làm đúng khi thấy một dòng "Sao luu 2026-.. ...." trong danh sách, và bấm **Mở thư mục sao lưu trong Drive** thấy thư mục "Learning Group - Sao luu" có file đó. Hệ thống giữ 8 bản gần nhất, bản cũ hơn vào thùng rác Drive.
+
+**Khôi phục từ bản sao lưu:** mở bản sao lưu trong Drive (đó là một Google Sheet đầy đủ, có cả mã Apps Script). Muốn quay lại bản đó: dùng bản sao lưu làm Sheet chính (Apps Script đi kèm), triển khai lại Web app và cập nhật `API_URL` trong `src/config.ts`; hoặc chép riêng các tab cần thiết sang Sheet hiện tại.
+
+### Bước 32. Bảng điểm, nhật ký
+
+- **Quản trị**, **Điểm** (chủ và trợ lý đều xem): điểm thi từng người theo tuần, điểm trung bình, nhóm, cấp bậc, kèm điểm nhóm các tuần đã chốt. **Xuất CSV (báo cáo cho thầy)**: mở bằng Excel được, tiếng Việt đúng dấu. Không có GPA.
+- **Nhật ký** (chủ và trợ lý): mọi thao tác quản trị (nhập đăng ký, chia nhóm, sửa câu hỏi, chấm lại, kết thúc học kỳ, sao lưu...), mới nhất ở trên, lọc theo hành động, người làm, từ khóa.
+
+### Chấm lại tuần
+
+Khi một câu bị báo sai là sai thật (bị tạm loại hoặc xóa), vào **Quản trị**, **Điểm**, mục **Chấm lại tuần**, chọn tuần rồi bấm **Chấm lại**. Hệ thống:
+- Loại các câu không còn "đang dùng" khỏi tử số và mẫu số của mọi bài trong tuần đó.
+- Tính lại điểm cá nhân, điểm nhóm, hạng, thưởng nhóm (50, 30, 10) và danh hiệu của tuần.
+- Không đổi điểm tạo đề tự luyện. Chạy lại nhiều lần vẫn an toàn (lần sau không đổi thêm).
+Chỉ chấm lại được tuần **đã chốt**. Nên chấm lại một lần sau khi đã xử lý xong các câu báo sai của tuần đó.
+
+### Thêm môn mới
+
+**Quản trị**, **Học kỳ**, **Thêm môn mới vào học kỳ đang mở**: nhập mã môn (chữ thường không dấu, ví dụ `giai-tich-1`), tên, màu. Web hiển thị đường dẫn và nội dung file `mon.json`: tạo file đó trong `public/bai-hoc/<học kỳ>/<môn>/` trên GitHub rồi upload bài học .html vào cùng thư mục. Danh sách chương nhập ở tab **Chương**.
+
+### Bước 33. Cuối học kỳ
+
+1. **Sao lưu ngay** (tab Sao lưu).
+2. Đợi mọi người thi xong tuần cuối. Nếu có câu bị báo sai, xử lý rồi **Chấm lại tuần** cho các tuần cần thiết.
+3. **Quản trị**, **Học kỳ**, **Kết thúc học kỳ này**. Hệ thống: chốt các tuần đã diễn ra, hủy các tuần chưa diễn ra, tính tổng kết (nhóm vô địch, thống kê tham gia theo tuần, cá nhân điểm cao nhất, cấp bậc cao nhất, danh hiệu) rồi đóng học kỳ. Nếu còn người đang làm bài, hệ thống báo tuần nào và không đóng; thử lại sau.
+4. Mở **Tổng kết các học kỳ đã kết thúc**: **In hoặc lưu PDF** để báo cáo thầy, **Tải JSON** để lưu. Tổng kết cũng được lưu trong tab `TongKet`.
+5. **Tạo học kỳ mới** (cùng tab). Chọn có sao chép môn và chương của học kỳ trước hay không, và có giữ nhóm cũ hay không.
+   - **Điểm cấp bậc, danh hiệu, thành viên được giữ xuyên suốt các học kỳ.** Ngân hàng câu hỏi, lịch tuần và bảng xếp hạng nhóm bắt đầu trống.
+   - Nếu chia lại nhóm bằng GPA mới: trong Sheet, đổi tên tab `DangKy` thành `DangKy HK1` (để lưu), vào Apps Script, **Cài đặt dự án**, **Thuộc tính tập lệnh**, xóa thuộc tính `FORM_ID`, chạy `taoFormDangKy` để tạo Form mới và tab `DangKy` mới. Gửi link Form mới cho lớp, đóng Form trước sự kiện đầu 2 ngày rồi làm **Nhập đăng ký** và **Chia nhóm** như Phần 4.
+   - Tạo lịch tuần mới ở tab **Tuần**; điền danh sách chương ở tab **Chương**; upload bài học vào thư mục `public/bai-hoc/<mã học kỳ mới>/`.
+
+### Bước 34. Lưu trữ cuối năm học (không bắt buộc)
+
+Sheet càng nhiều dòng thì web càng chậm một chút. Cuối mỗi năm học:
+
+1. Trong Google Sheet: **Tệp**, **Tạo bản sao**, đặt tên `Learning Group - Năm học 2026-2027 (lưu trữ)`. Bản này chỉ để xem lại, đừng nối vào web.
+2. Trong Sheet đang chạy, xóa **các dòng dữ liệu** (giữ nguyên dòng tiêu đề trên cùng) của các tab của học kỳ cũ: `CauHoi`, `NhapCauHoi`, `LuotThi`, `DeTuTao`, `BaoSai`, `Mien`, `KetQuaTuan`, `Tuan`, `Nhom`, `NhomThanhVien`, `NhatKy`, `PhienDangNhap` (xóa tab này chỉ buộc mọi người đăng nhập lại).
+3. **Tuyệt đối không xóa** dòng trong các tab: `ThanhVien`, `Diem` (điểm cấp bậc 4 năm), `DanhHieu`, `TongKet`, `HocKy`, `Mon`, `CauHinh`, `DeThi`. Các tab này nhỏ và cần cho cấp bậc, lịch sử và tổng kết.
+4. Chỉ làm bước 2 sau khi đã kết thúc học kỳ và có bản sao ở bước 1.
+
+### Thêm thành viên ở các năm sau
+
+Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viên**, **Thêm người đăng ký muộn**, rồi **Chia nhóm** (hoặc chuyển nhóm tại mục Nhóm hiện tại). Không cần đụng đến mã.
+
+### Quyền trợ lý
+
+Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được điểm mọi người, bảng điểm, nhật ký, ngân hàng câu hỏi (duyệt, tạm loại, khôi phục), danh sách sao lưu. Trợ lý **không** gỡ người, không đổi cấu hình, không xóa hay sửa câu hỏi, không xem GPA, không kết thúc học kỳ.
+
+---
+
+## Phần 9. Danh sách kiểm tra cuối cùng trước khi chạy thật
+
+Đánh dấu từng mục khi đã làm. Mục nào chưa chắc thì quay lại bước tương ứng.
+
+**Tài khoản và triển khai**
+- [ ] Đăng nhập tài khoản dự án; Google Cloud: ứng dụng OAuth ở trạng thái **In production**, nguồn JavaScript đúng `https://geogroupu-collab.github.io` (Phần 2).
+- [ ] Mở link Web app `/exec` thấy `{"ok":true,...}` (Bước 12).
+- [ ] Trang web mở được, đăng nhập được, tài khoản chưa đăng ký bị chặn đúng (Bước 15).
+- [ ] `client_secret*.json` không nằm trong kho GitHub (kiểm tra trên GitHub không thấy file này).
+- [ ] Sheet **không chia sẻ** cho thành viên (nút Chia sẻ chỉ có tài khoản dự án).
+
+**Sheet và trigger**
+- [ ] Đã dán `Code.gs` bản mới nhất và triển khai **Phiên bản mới** sau mỗi lần cập nhật.
+- [ ] Đã chạy `khoiTao`; đủ tab (kể cả `DeTuTao`, `Diem`, `DanhHieu`, `TongKet`, `PhienDangNhap`, `NhapCauHoi`).
+- [ ] Đã chạy `datTrigger`; thấy hai trigger `chotTuanTuDong` và `saoLuuHangTuan`.
+- [ ] Sao lưu thử thành công, thấy file trong Drive (Bước 31).
+- [ ] `OWNER_EMAIL` và `GOOGLE_CLIENT_ID` đã đặt trong Script Properties.
+
+**Dữ liệu học kỳ**
+- [ ] Tab `HocKy` có học kỳ ở trạng thái `mo`; tab `Mon` đúng 5 môn.
+- [ ] Danh sách chương đã nhập cho từng môn (tab Chương).
+- [ ] Lịch tuần đã tạo đúng ngày (7-8/11, 14-15/11, 21-22/11, 28-29/11, 5-6/12), giờ hạn nộp 23:59 Thứ Sáu.
+- [ ] Form đăng ký đã gửi cho lớp, đóng đúng hạn 5/11; đã nhập đăng ký, chia nhóm và **Chốt**.
+- [ ] Bài học đã upload; **không** có file quiz hoặc đề ôn trong `public/bai-hoc`.
+- [ ] Chủ đã thử trên điện thoại thật (Chrome và Safari), và mở link trong Zalo thấy cảnh báo.
+
+**Vòng thử cuối với 3 tài khoản Google thử nghiệm** (làm Bước 20, 23 và 26 rồi dọn dữ liệu thử)
+- [ ] Đăng ký, nộp 15 câu, xin miễn và hủy xin miễn.
+- [ ] Thi: bắt đầu, tắt trang, mở lại làm tiếp, nộp; không thi được lần hai.
+- [ ] Chốt tuần (hàm `chotTuanTuDong`): điểm nhóm đúng cách tính, thưởng nhóm, danh hiệu.
+- [ ] Xem lại bài sau khi đóng cửa, câu khó nhất, báo sai (2 người thì tạm loại).
+- [ ] Tạo đề thi (chọn môn, chương), được +20, đạt trần 120 thì không cộng thêm.
+- [ ] Dùng AI soạn câu hỏi: tải file mẫu, dán kết quả vào form.
+- [ ] Xóa dữ liệu thử trong Sheet (các dòng thử trong `CauHoi`, `LuotThi`, `DeTuTao`, `Diem`, `DanhHieu`, `KetQuaTuan`, `Mien`, `BaoSai`, `NhapCauHoi`, `NhatKy`, `PhienDangNhap`, và các email thử trong `ThanhVien`, `NhomThanhVien`), rồi **Tạo lịch** lại để giờ các tuần đúng lịch thật.
+
+**Trước sự kiện đầu tiên (7/11)**
+- [ ] Nhắc cả lớp: dùng Chrome hoặc Safari, nộp câu hỏi trước Thứ Sáu 23:59, vào thi rải rác không cùng một giây. Gửi `HUONG-DAN-THANH-VIEN.md`.
+- [ ] Sao lưu ngay trước giờ mở cửa.
+- [ ] Nếu M3 chưa chạy ổn trước 7/11: dời sự kiện đầu một tuần (Quản trị, Tuần, sửa giờ) thay vì cắt giảm.
+
+**Chuẩn bị tuần chung kết (trước 13/12)**
+- [ ] Dựng đề cố định ở tab **Đề thi** (loại trừ tác giả nếu cần), in đề và đáp án để kiểm tra, **Gán làm đề sự kiện** cho tuần chung kết trước giờ mở cửa, chỉnh thời gian làm bài ở tab Tuần.

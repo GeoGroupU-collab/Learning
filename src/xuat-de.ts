@@ -1,6 +1,6 @@
 // Xuất đề thi ra file in được (HTML, in ra PDF từ trình duyệt), JSON và CSV. Không dùng DOM nên kiểm thử được.
 import { taoCsv } from './csv';
-import type { DeThiDayDu } from './types';
+import type { DeThiDayDu, TongKetHocKy } from './types';
 
 export function escHtml(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
@@ -61,4 +61,19 @@ export function jsonDe(de: DeThiDayDu): string {
     soCau: de.cau.length,
     cau: de.cau.map((c, i) => ({ stt: i + 1, id: c.id, mon: c.tenMon, chuong: c.maChuong, trangNguon: c.trangNguon, noiDung: c.noiDung, dapAn: { A: c.A, B: c.B, C: c.C, D: c.D }, dapAnDung: c.dapAn, giaiThich: c.giaiThich })),
   }, null, 2);
+}
+
+// Trang tổng kết học kỳ để in ra PDF.
+export function htmlTongKet(tk: TongKetHocKy): string {
+  const bang = (tieuDe: string[], hang: (string | number)[][]): string =>
+    `<table><tr>${tieuDe.map((t) => `<th>${escHtml(t)}</th>`).join('')}</tr>${hang.map((r) => `<tr>${r.map((c) => `<td>${escHtml(c)}</td>`).join('')}</tr>`).join('')}</table>`;
+  const noiDung = `<h1>Tổng kết ${escHtml(tk.tenHocKy)}</h1>
+    <div class="phu">${tk.thongKe.soTuanDaChot} tuần sự kiện · ${tk.thongKe.soThanhVien} thành viên · ${tk.thongKe.soCauHoi} câu hỏi · ${tk.thongKe.soLuotThi} lượt thi · ${tk.thongKe.soDeTuTao} đề tự tạo</div>
+    <h2>Nhóm vô địch</h2><p>${tk.nhomVoDich.length ? tk.nhomVoDich.map((n) => `${escHtml(n.tenNhom)} (${n.diem} điểm lũy kế)`).join(', ') : 'Chưa có'}</p>
+    <h2>Xếp hạng nhóm (điểm lũy kế)</h2>${bang(['Hạng', 'Nhóm', 'Điểm'], tk.bangNhom.map((n) => [n.hang, n.tenNhom, n.diem]))}
+    <h2>Tham gia theo tuần (trung bình ${tk.thamGiaTrungBinh}%)</h2>${bang(['Tuần', 'Đã thi', 'Số người tính', 'Tỉ lệ %'], tk.tuan.map((t) => [t.soTuan, t.soThamGia, t.soTinh, t.tiLe]))}
+    <h2>Cá nhân điểm thi trung bình cao nhất</h2>${bang(['Họ tên', 'Điểm TB', 'Số tuần thi'], tk.topCaNhan.map((c) => [c.hoTen, c.diemTB, c.soTuan]))}
+    <h2>Cấp bậc cao nhất</h2>${bang(['Họ tên', 'Cấp', 'Level', 'Điểm'], tk.topCapBac.map((c) => [c.hoTen, c.tenCapLon, c.level, c.tong]))}
+    <h2>Danh hiệu cá nhân của tuần</h2>${tk.danhHieu.length ? bang(['Họ tên', 'Số lần'], tk.danhHieu.map((d) => [d.hoTen, d.soLan])) : '<p>Chưa có</p>'}`;
+  return khung(`Tổng kết ${tk.tenHocKy}`, noiDung, false);
 }

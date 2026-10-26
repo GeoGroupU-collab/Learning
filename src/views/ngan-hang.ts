@@ -3,6 +3,8 @@ import { h, xoaHet, thongBao } from '../dom';
 import { docCsv, taiXuong, taoCsv } from '../csv';
 import type { CauNganHang, KetQuaNganHang, TuanHienTai, XemTruocNhap } from '../types';
 
+interface HocKyTomTat { maHocKy: string; tenHocKy: string; trangThai: string }
+
 const NHAN_TT: Record<string, string> = { active: 'Đang dùng', suspended: 'Tạm loại', removed: 'Đã xóa' };
 const COT_XUAT = ['id', 'maHocKy', 'soTuan', 'maMon', 'maChuong', 'trangNguon', 'noiDung', 'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'soBaoSai'];
 
@@ -17,11 +19,19 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
   } catch {
     /* không có môn thì bộ lọc môn để trống */
   }
-  const loc = { soTuan: '', maMon: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
+  let dsHocKy: HocKyTomTat[] = [];
+  try {
+    dsHocKy = await goi<HocKyTomTat[]>('admin.dsHocKy');
+  } catch {
+    /* không có danh sách học kỳ thì chỉ lọc theo học kỳ đang mở */
+  }
+  const loc = { maHocKy: '', soTuan: '', maMon: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
   const danhSach = h('div', {});
   const phanTrang = h('div', { class: 'hang' });
 
   const o = (nhan: string, el: HTMLElement): HTMLElement => h('label', { class: 'nhan-o' }, nhan, el);
+  const hocKy = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Học kỳ đang mở'), h('option', { value: '*' }, 'Tất cả học kỳ'),
+    ...dsHocKy.filter((x) => x.trangThai === 'dong').map((x) => h('option', { value: x.maHocKy }, x.tenHocKy))) as HTMLSelectElement;
   const soTuan = h('input', { class: 'o-nhap', type: 'number', min: 1, placeholder: 'Tất cả' }) as HTMLInputElement;
   const maMon = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Tất cả môn'), ...mon.map((m) => h('option', { value: m.ma }, m.ten))) as HTMLSelectElement;
   const trangThai = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Mọi trạng thái'),
@@ -94,10 +104,10 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
 
   noi.append(
     h('div', { class: 'card' }, h('h3', {}, 'Bộ lọc'),
-      o('Tuần', soTuan), o('Môn', maMon), o('Trạng thái', trangThai), o('Tác giả', tacGia), o('Từ khóa', tuKhoa),
+      o('Học kỳ', hocKy), o('Tuần', soTuan), o('Môn', maMon), o('Trạng thái', trangThai), o('Tác giả', tacGia), o('Từ khóa', tuKhoa),
       h('label', { class: 'dong-chon', for: 'chi-bao-sai' }, chiBaoSai, h('span', {}, 'Chỉ câu đã bị báo sai')),
       h('button', { class: 'nut', onclick: () => {
-        Object.assign(loc, { soTuan: soTuan.value, maMon: maMon.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
+        Object.assign(loc, { maHocKy: hocKy.value, soTuan: soTuan.value, maMon: maMon.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
         void tai();
       } }, 'Lọc')));
 

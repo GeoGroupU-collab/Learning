@@ -4,6 +4,9 @@ import { dinhDangNgay } from '../gio';
 import { veNganHang } from './ngan-hang';
 import { veChuong } from './chuong';
 import { veDeThi } from './de-thi';
+import { veHocKy } from './hoc-ky';
+import { veBangDiem } from './bang-diem';
+import { veNhatKy, veSaoLuu } from './he-thong';
 import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
 const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', assistant: 'Trợ lý', member: 'Thành viên' };
@@ -18,7 +21,7 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const laChu = me.vaiTro === 'owner';
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề thi']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']];
+  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề thi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
   const noiDung = h('div', {});
@@ -28,6 +31,10 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   else if (tab === 'chuong') await veChuong(noiDung, laChu);
   else if (tab === 'cau-hoi') await veNganHang(noiDung, laChu);
   else if (tab === 'de-thi' && laChu) await veDeThi(noiDung);
+  else if (tab === 'diem') await veBangDiem(noiDung, laChu);
+  else if (tab === 'hoc-ky') await veHocKy(noiDung, laChu);
+  else if (tab === 'nhat-ky') await veNhatKy(noiDung);
+  else if (tab === 'sao-luu') await veSaoLuu(noiDung, laChu);
   else await veThanhVien(noiDung, laChu);
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { csvDe, escHtml, htmlDe, jsonDe } from '../src/xuat-de';
+import { csvDe, escHtml, htmlDe, htmlTongKet, jsonDe } from '../src/xuat-de';
 import { docCsv } from '../src/csv';
 import type { DeThiDayDu } from '../src/types';
 
@@ -59,5 +59,23 @@ describe('xuất đề', () => {
     expect(j.soCau).toBe(2);
     expect(j.cau[0]).toMatchObject({ stt: 1, mon: 'Khoa học dữ liệu', dapAnDung: 'B', trangNguon: 'tr. 5' });
     expect(j.cau[0].dapAn.A).toContain('script');
+  });
+});
+
+describe('tổng kết học kỳ để in', () => {
+  const tk = {
+    maHocKy: 'hk1', tenHocKy: 'Học kỳ <1> & "một"', ngayTongKet: '', nhomVoDich: [{ tenNhom: 'Nhóm <A>', diem: 80 }],
+    bangNhom: [{ maNhom: 'n1', tenNhom: 'Nhóm <A>', diem: 80, hang: 1 }], tuan: [{ soTuan: 1, soThamGia: 3, soTinh: 4, tiLe: 75 }], thamGiaTrungBinh: 75,
+    topCaNhan: [{ hoTen: '<b>An</b>', diemTB: 90, soTuan: 1 }], topCapBac: [], danhHieu: [],
+    thongKe: { soTuanDaChot: 1, soCauHoi: 10, soLuotThi: 3, soDeTuTao: 2, soThanhVien: 4 },
+  };
+  it('escape HTML, có nhóm vô địch và các bảng', () => {
+    const html = htmlTongKet(tk);
+    expect(html).not.toContain('<b>An</b>');
+    expect(html).toContain('&lt;b&gt;An&lt;/b&gt;');
+    expect(html).toContain('Nhóm &lt;A&gt; (80 điểm lũy kế)');
+    expect(html).toContain('Học kỳ &lt;1&gt; &amp; &quot;một&quot;');
+    expect(html).toContain('Tham gia theo tuần (trung bình 75%)');
+    expect(html).toContain('<p>Chưa có</p>');
   });
 });

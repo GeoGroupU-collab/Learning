@@ -134,7 +134,11 @@ function hdNganHang_(email, tv, body) {
   var ten = dungTenTheoEmail_();
   var tacGia = String(body.tacGia || '').trim().toLowerCase();
   var tuKhoa = String(body.tuKhoa || '').trim().toLowerCase();
+  // Mặc định chỉ hiện ngân hàng của học kỳ đang mở; '*' là mọi học kỳ; hoặc một mã học kỳ cụ thể.
+  var hkMo = hocKyDangMo_();
+  var maHk = body.maHocKy === '*' ? '' : String(body.maHocKy || (hkMo ? hkMo.maHocKy : ''));
   var ds = docBang_('CauHoi').filter(function (c) {
+    if (maHk && c.maHocKy !== maHk) return false;
     if (body.soTuan && Number(c.soTuan) !== Number(body.soTuan)) return false;
     if (body.maMon && c.maMon !== body.maMon) return false;
     if (body.trangThai && c.trangThai !== body.trangThai) return false;

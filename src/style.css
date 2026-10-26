@@ -183,3 +183,7 @@ summary { display: flex; align-items: center; justify-content: space-between; ga
 .huong-dan { padding-left: 20px; margin: 8px 0; }
 .huong-dan li { margin: 4px 0; }
 .the-ai { border-color: #7b9cff; }
+
+.khoi-ma { background: #0c0f2b; border: 1px solid var(--vien); border-radius: 10px; padding: 10px; overflow-x: auto; font-size: 0.85rem; white-space: pre; }
+.nhat-ky { padding: 10px 12px; margin-bottom: 8px; }
+.dong-dai { word-break: break-word; }
