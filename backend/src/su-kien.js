@@ -40,6 +40,28 @@ function cauHoiCuaEmailTuan_(maHocKy, soTuan, email) {
   });
 }
 
+function phienBanCauHoi_() {
+  return CacheService.getScriptCache().get('pb_CauHoi') || '0';
+}
+
+// Số câu mỗi người đã nộp trong một tuần. Đọc tab CauHoi chỉ khi bản lưu tạm hết hạn hoặc tab có thay đổi.
+function demCauNopTheoTuan_(maHocKy, soTuan) {
+  var cache = CacheService.getScriptCache();
+  var khoa = 'sc_' + maHocKy + '_' + soTuan + '_' + phienBanCauHoi_();
+  var c = cache.get(khoa);
+  if (c) {
+    try { return JSON.parse(c); } catch (e) { /* tính lại */ }
+  }
+  var kq = {};
+  docBang_('CauHoi').forEach(function (r) {
+    if (r.maHocKy !== maHocKy || Number(r.soTuan) !== soTuan) return;
+    var e = chuanHoaEmail(r.tacGia);
+    kq[e] = (kq[e] || 0) + 1;
+  });
+  try { cache.put(khoa, JSON.stringify(kq), 120); } catch (e) { /* bỏ qua */ }
+  return kq;
+}
+
 function mienCuaEmail_(maHocKy, email) {
   return docBang_('Mien').filter(function (m) { return m.maHocKy === maHocKy && chuanHoaEmail(m.email) === email; });
 }
@@ -61,7 +83,7 @@ function hdTuanHienTai_(email) {
   };
   if (!t) return res;
   var mien = mienCuaEmail_(hk.maHocKy, email);
-  var daNop = cauHoiCuaEmailTuan_(hk.maHocKy, t.soTuan, email).length;
+  var daNop = demCauNopTheoTuan_(hk.maHocKy, t.soTuan)[email] || 0;
   res.tuan = {
     soTuan: t.soTuan,
     hanNop: t.hanNop,

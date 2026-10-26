@@ -362,6 +362,10 @@ details[open] > summary { margin-bottom: var(--k2); }
 .the-cap .phu { color: var(--chu-2); }
 .vinh-danh { border-color: var(--vang-vien); }
 
+.chu-cai-lon { width: 48px; height: 48px; font-size: 1.15rem; flex: none; }
+.tai-khoan-dong { display: flex; align-items: center; gap: var(--k3); margin-bottom: var(--k2); }
+.tai-khoan-dong > div { min-width: 0; }
+
 /* ---------- Trang chủ ---------- */
 .chao { margin: 0 0 var(--k5); }
 .chao h1 { margin: 0 0 var(--k1); font-size: 1.9rem; }

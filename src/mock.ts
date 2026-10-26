@@ -120,6 +120,8 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       if (n) n.tenNhom = String(payload.tenNhom);
       return { tenNhom: payload.tenNhom };
     }
+    case 'capNhatHoTen':
+      return { hoTen: String(payload.hoTen) };
     case 'dangNhap':
       return { phien: 'mock' };
     case 'dangXuat':

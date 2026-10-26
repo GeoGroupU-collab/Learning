@@ -574,3 +574,18 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
 
 **Chuẩn bị tuần chung kết (trước 13/12)**
 - [ ] Dựng đề cố định ở tab **Đề sự kiện** (loại trừ tác giả nếu cần), in đề và đáp án để kiểm tra, **Gán làm đề sự kiện** cho tuần chung kết trước giờ mở cửa, chỉnh thời gian làm bài ở tab Tuần.
+
+---
+
+## Phụ lục. Cập nhật tăng tốc và sửa tên tài khoản
+
+**Làm gì:** dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**, **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai** (không cần chạy `khoiTao` hay `datTrigger` lại). Sau đó commit và push bản web, chờ Actions tick xanh, **Ctrl+F5**.
+
+**Có gì mới:**
+- **Tên hiển thị:** ở **Tài khoản** mỗi người tự sửa được tên của mình (2 đến 60 ký tự). Dùng khi tên trong Form viết sai, hoặc khi bạn đã **Gỡ kèm xóa dữ liệu** rồi **Mở lại** người đó (tên bị đặt thành "(đã xóa)"). Trong lúc chưa đặt lại tên, web hiện phần đầu của email thay cho "(đã xóa)".
+- **Gỡ kèm xóa dữ liệu** không còn lỗi khi chưa có tab `DangKy`.
+- **Nhanh hơn:**
+  - Mã dành cho trang Quản trị chỉ tải khi quản trị viên mở trang đó. Thành viên tải ít hơn khoảng một phần ba.
+  - Trang chủ không còn đọc lại tab `CauHoi` (tab lớn nhất) ở mỗi lần mở; số câu đã nộp được nhớ 2 phút và tự cập nhật ngay khi có người nộp hay sửa câu hỏi.
+  - Màn hình đăng nhập "đánh thức" Apps Script ngay khi mở, nên lúc bấm vào đỡ chờ vài giây khởi động nguội.
+  - Sau khi vào trang chủ, web tải trước Xếp hạng và Nhóm (một lần mỗi phiên) nên bấm sang là hiện ngay.

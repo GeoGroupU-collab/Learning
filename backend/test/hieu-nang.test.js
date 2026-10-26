@@ -93,3 +93,71 @@ describe('hiệu năng: số lần đọc Sheet', () => {
     expect(mt.docTab('LuotThi')).toHaveLength(1);
   });
 });
+
+describe('số câu đã nộp lưu tạm', () => {
+  it('lần mở trang chủ sau không đọc lại tab CauHoi (tab lớn nhất)', () => {
+    goiAs(NGUOI[0], 'trangChu');
+    mt.datLaiDem();
+    goiAs(NGUOI[1], 'trangChu');
+    expect(mt.demDoc().CauHoi ?? 0).toBe(0);
+  });
+
+  it('nộp câu hỏi xong thì số đã nộp cập nhật ngay, không chờ bản lưu tạm hết hạn', () => {
+    mt.themDong('ThanhVien', { email: 'moi@x.vn', hoTen: 'Mới', vaiTro: 'member', trangThai: 'active' });
+    expect(goiAs('moi@x.vn', 'tuanHienTai').data.soCauDaNop).toBe(0);
+    expect(goiAs('moi@x.vn', 'nopCauHoi', { cauHoi: taoBoCau('moi@x.vn') }).ok).toBe(true);
+    const sau = goiAs('moi@x.vn', 'tuanHienTai').data;
+    expect(sau.soCauDaNop).toBe(15);
+    expect(sau.moKhoa).toBe(true);
+  });
+
+  it('sửa trạng thái câu hỏi hoặc nộp lại vẫn cho số đúng', () => {
+    goiAs(NGUOI[2], 'tuanHienTai');
+    goiAs(NGUOI[2], 'nopCauHoi', { cauHoi: taoBoCau(NGUOI[2]).map((c) => ({ ...c, noiDung: c.noiDung + ' (sửa)' })) });
+    expect(goiAs(NGUOI[2], 'tuanHienTai').data.soCauDaNop).toBe(15);
+  });
+
+  it('thẻ nhóm thấy ngay người vừa nộp đủ câu hỏi', () => {
+    mt.themDong('ThanhVien', { email: 'moi@x.vn', hoTen: 'Mới', vaiTro: 'member', trangThai: 'active' });
+    goiAs(CHU, 'admin.chuyenNguoi', { email: 'moi@x.vn', maNhom: 'n1' });
+    const tt = (nh) => nh.data.thanhVien.find((t) => t.email === 'moi@x.vn').tt;
+    expect(tt(goiAs(NGUOI[0], 'nhomCuaToi'))).toBe('chua_nop_cau');
+    goiAs('moi@x.vn', 'nopCauHoi', { cauHoi: taoBoCau('moi@x.vn') });
+    expect(tt(goiAs(NGUOI[0], 'nhomCuaToi'))).toBe('da_nop_cau');
+  });
+});
+
+describe('thành viên tự đổi tên hiển thị', () => {
+  it('đổi được, lưu vào Sheet, hiện ở me, ghi nhật ký', () => {
+    const r = goiAs(NGUOI[0], 'capNhatHoTen', { hoTen: '  Nguyễn   Văn  An ' });
+    expect(r).toMatchObject({ ok: true, data: { hoTen: 'Nguyễn Văn An' } });
+    expect(goiAs(NGUOI[0], 'me').data.hoTen).toBe('Nguyễn Văn An');
+    expect(mt.docTab('ThanhVien').find((t) => t.email === NGUOI[0]).hoTen).toBe('Nguyễn Văn An');
+    expect(mt.docTab('NhatKy').some((n) => n.hanhDong === 'doiTen')).toBe(true);
+  });
+
+  it('người bị xóa tên (đã xóa) đặt lại được tên mới', () => {
+    goiAs(CHU, 'admin.goThanhVien', { email: NGUOI[1], loai: 'removed', xoaDuLieu: true });
+    expect(mt.docTab('ThanhVien').find((t) => t.email === NGUOI[1]).hoTen).toBe('(đã xóa)');
+    goiAs(CHU, 'admin.moLaiThanhVien', { email: NGUOI[1] });
+    expect(goiAs(NGUOI[1], 'capNhatHoTen', { hoTen: 'Trần Thị Bình' }).ok).toBe(true);
+    expect(goiAs(NGUOI[1], 'me').data.hoTen).toBe('Trần Thị Bình');
+  });
+
+  it('từ chối tên quá ngắn, quá dài hoặc chứa < >', () => {
+    expect(goiAs(NGUOI[0], 'capNhatHoTen', { hoTen: 'A' }).error).toBe('ten_sai');
+    expect(goiAs(NGUOI[0], 'capNhatHoTen', { hoTen: 'x'.repeat(61) }).error).toBe('ten_sai');
+    expect(goiAs(NGUOI[0], 'capNhatHoTen', { hoTen: '<b>Bình</b>' }).error).toBe('ten_sai');
+    expect(goiAs(NGUOI[0], 'capNhatHoTen', { hoTen: '' }).error).toBe('ten_sai');
+  });
+
+  it('chỉ đổi được tên của chính mình', () => {
+    goiAs(NGUOI[3], 'capNhatHoTen', { hoTen: 'Tên Mới Của Tôi', email: NGUOI[4] });
+    expect(mt.docTab('ThanhVien').find((t) => t.email === NGUOI[4]).hoTen).toBe('Người 4');
+    expect(mt.docTab('ThanhVien').find((t) => t.email === NGUOI[3]).hoTen).toBe('Tên Mới Của Tôi');
+  });
+
+  it('người chưa duyệt không đổi được', () => {
+    expect(goiAs('la@x.vn', 'capNhatHoTen', { hoTen: 'Người Lạ' }).error).toBe('chua_duyet');
+  });
+});

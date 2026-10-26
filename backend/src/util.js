@@ -25,6 +25,10 @@ function datLaiBoNho_() {
 
 function lamMoiBang_(ten) {
   delete BO_NHO_.bang[ten];
+  if (ten === 'CauHoi') {
+    // Đổi số phiên bản để các bản lưu tạm suy ra từ tab này (xem demCauNopTheoTuan_) tự hết hiệu lực.
+    try { CacheService.getScriptCache().put('pb_CauHoi', String(Date.now()) + '.' + Math.floor(Math.random() * 1e6), 21600); } catch (e) { /* bỏ qua */ }
+  }
   if (TAB_CACHE_[ten]) {
     try { CacheService.getScriptCache().remove('bang_' + ten); } catch (e) { /* bỏ qua */ }
   }

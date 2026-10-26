@@ -392,17 +392,11 @@ function tinhXepHangChung_(hk) {
 // Trạng thái từng thành viên trong tuần hiện tại cho trang Nhóm.
 function trangThaiThanhVienTuan_(maHocKy, t, emails) {
   var luot = {};
-  var nopCau = {};
+  var nopCau = t ? demCauNopTheoTuan_(maHocKy, t.soTuan) : {};
   var mien = {};
   if (!t) return {};
   docBang_('LuotThi').forEach(function (r) { if (r.maHocKy === maHocKy && Number(r.soTuan) === t.soTuan) luot[chuanHoaEmail(r.email)] = r; });
   docBang_('Mien').forEach(function (m) { if (m.maHocKy === maHocKy && Number(m.soTuan) === t.soTuan) mien[chuanHoaEmail(m.email)] = true; });
-  docBang_('CauHoi').forEach(function (c) {
-    if (c.maHocKy === maHocKy && Number(c.soTuan) === t.soTuan) {
-      var e = chuanHoaEmail(c.tacGia);
-      nopCau[e] = (nopCau[e] || 0) + 1;
-    }
-  });
   var yeuCau = (Number(layCauHinh_().soMonNopCauHoi) || 3) * (Number(layCauHinh_().soCauNopMoiMon) || 5);
   var kq = {};
   emails.forEach(function (e) {

@@ -35,6 +35,7 @@ var HANH_DONG_ = {
   dangNhap: { chay: hdDangNhap_ },
   dangXuat: { chay: hdDangXuat_ },
   me: { chay: hdMe_ },
+  capNhatHoTen: { chay: hdCapNhatHoTen_ },
   trangChu: { chay: hdTrangChu_ },
   batDauThi: { chay: hdBatDauThi_ },
   'thi.luu': { choPhienThi: true, chay: hdThiLuu_ },
@@ -123,6 +124,21 @@ function chiTietNhom_(nhom) {
     })
     .filter(function (t) { return t.trangThai === 'active'; });
   return { maNhom: nhom.maNhom, tenNhom: nhom.tenNhom, linkZalo: nhom.linkZalo || '', thanhVien: thanhVien };
+}
+
+// Thành viên tự sửa tên hiển thị của mình (ví dụ khi tên trong Form viết sai hoặc đã bị xóa).
+function hdCapNhatHoTen_(email, tv, body) {
+  var ten = String(body.hoTen || '').replace(/[\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim();
+  if (ten.length < 2 || ten.length > 60) throw loi_('ten_sai', 'Tên dài từ 2 đến 60 ký tự.');
+  if (/[<>]/.test(ten)) throw loi_('ten_sai', 'Tên không được chứa ký tự < hoặc >.');
+  return voiKhoa_(function () {
+    var t = timThanhVien_(email);
+    if (!t) throw loi_('khong_thay', 'Không tìm thấy tài khoản.');
+    suaDong_('ThanhVien', t._dong, { hoTen: ten });
+    CacheService.getScriptCache().remove('xhcn');
+    ghiNhatKy_(email, 'doiTen', email, ten);
+    return { hoTen: ten };
+  });
 }
 
 // Gom mọi thứ trang chủ cần vào một yêu cầu để mở web nhanh hơn: thông tin cá nhân, tuần hiện tại, cấp bậc.
@@ -284,7 +300,7 @@ function hdGoThanhVien_(email, tv, body) {
     var thayDoi = { trangThai: loai };
     if (body.xoaDuLieu) {
       thayDoi.hoTen = '(đã xóa)';
-      xoaDongNeu_('DangKy', function (r) {
+      if (SpreadsheetApp.getActiveSpreadsheet().getSheetByName('DangKy')) xoaDongNeu_('DangKy', function (r) {
         var cot = Object.keys(r).filter(function (k) { return k.toLowerCase().indexOf('email') !== -1; })[0];
         return cot && chuanHoaEmail(r[cot]) === emailMuc;
       });

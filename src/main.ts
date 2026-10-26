@@ -14,7 +14,6 @@ import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth'
 import { h, khungCho, xoaHet, thongBao } from './dom';
 import { layManifest, veBaiHoc, veDanhSachBai, veDanhSachMon, laMoi } from './views/bai-hoc';
 import { veNhom } from './views/nhom';
-import { veQuanTri } from './views/quan-tri';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
 import { vePhongThi } from './views/phong-thi';
 import { veXepHang } from './views/xep-hang';
@@ -24,6 +23,17 @@ import { veCauHoiCuaToi } from './views/cau-hoi-cua-toi';
 import { theCap } from './cap';
 import { dungDongHo, datGioMayChu, demNguoc, dinhDangNgay } from './gio';
 import type { Me, TrangChuData } from './types';
+
+// Tên để hiển thị. Tên trống hoặc đã bị xóa dữ liệu thì dùng phần đầu của email.
+function tenHienThi(m: Me): string {
+  const ten = (m.hoTen || '').trim();
+  return ten && ten !== '(đã xóa)' ? ten : (m.email || '').split('@')[0];
+}
+
+function chuCaiDau(m: Me): string {
+  const ky = /\p{L}/u.exec(tenHienThi(m));
+  return (ky ? ky[0] : '?').toUpperCase();
+}
 
 const goc = document.getElementById('app') as HTMLElement;
 let me: Me | null = null;
@@ -58,6 +68,7 @@ function canhBaoTrinhDuyet(): void {
 }
 
 function manHinhDangNhap(): void {
+  lamNongMayChu();
   const khungNut = h('div', { class: 'khung-nut' });
   xoaHet(goc);
   goc.append(h('main', { class: 'man-giua' }, h('div', { class: 'dang-nhap' },
@@ -76,6 +87,32 @@ function manHinhDangNhap(): void {
     return;
   }
   veNutDangNhap(khungNut, () => void doiLayPhien()).catch((e: Error) => khungNut.append(h('p', { class: 'loi' }, e.message)));
+}
+
+// Apps Script nguội cần vài giây ở lần gọi đầu. Gọi sẵn một yêu cầu rẻ lúc người dùng còn đang ở màn đăng nhập
+// để lúc bấm vào đã nóng. Không đọc kết quả, lỗi thì bỏ qua.
+function lamNongMayChu(): void {
+  if (DEV_MOCK || chuaCauHinh()) return;
+  fetch(CONFIG.API_URL, { mode: 'no-cors', cache: 'no-store' }).catch(() => undefined);
+}
+
+// Sau khi vào được trang chủ, tải trước bảng xếp hạng và nhóm (một lần mỗi phiên) để bấm sang là hiện ngay.
+function taiTruocCacMuc(): void {
+  try {
+    if (sessionStorage.getItem('lg_taitruoc')) return;
+    sessionStorage.setItem('lg_taitruoc', '1');
+  } catch {
+    return;
+  }
+  setTimeout(async () => {
+    try {
+      ghiCache('xepHang', {}, await goi('xepHang'));
+      const nhom = await goi('nhomCuaToi');
+      if (nhom) ghiCache('nhomCuaToi', {}, nhom);
+    } catch {
+      /* tải trước thất bại thì không sao */
+    }
+  }, 1500);
 }
 
 // Sau khi Google xác nhận, đổi lấy mã phiên dài hạn để lần sau khỏi đăng nhập lại.
@@ -122,6 +159,7 @@ async function khoiDong(): Promise<void> {
     duLieuTrangChu = moi;
     thoiDiemTaiTrangChu = Date.now();
     datGioMayChu(moi.tuan.now);
+    taiTruocCacMuc();
     if (!daVe || doiVaiTro) {
       veKhung();
       void dinhTuyen();
@@ -159,7 +197,7 @@ function veKhung(): void {
   thanhDuoi = h('nav', { class: 'thanh-duoi', 'aria-label': 'Điều hướng chính' },
     ...MUC_DUOI.map(([href, ten, bieuTuong]) => h('a', { href, 'data-href': href }, icon(bieuTuong, 22) as unknown as HTMLElement, h('span', {}, ten))));
   const laQuanTri = me!.vaiTro !== 'member';
-  const chuCai = (me!.hoTen || me!.email || '?').trim().charAt(0).toUpperCase();
+  const chuCai = chuCaiDau(me!);
   goc.append(
     h('header', { class: 'dau-trang' },
       h('a', { class: 'logo', href: '#/' }, dauHieu(30) as unknown as HTMLElement, h('span', {}, CONFIG.TEN_WEB)),
@@ -209,7 +247,10 @@ async function dinhTuyen(): Promise<void> {
         return await veTaoDe(vungNoiDung);
       case 'quan-tri':
         if (me.vaiTro === 'member') return veSapCo('Quản trị', 'Bạn không có quyền vào trang này.');
-        return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
+        {
+          const { veQuanTri } = await import('./views/quan-tri'); // chỉ tải khi quản trị viên mở trang này
+          return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
+        }
       case 'cai-dat':
         return veCaiDat(vungNoiDung);
       default:
@@ -247,7 +288,7 @@ function veTrangChu(noi: HTMLElement): void {
   xoaHet(noi);
   const m = me!;
   const d = duLieuTrangChu;
-  const ten = (m.hoTen || '').trim().split(/\s+/).pop() || 'bạn';
+  const ten = tenHienThi(m).split(/\s+/).pop() || 'bạn';
   const lienKet = (href: string, bieuTuong: string, tieuDe: string, mo: string, lop = ''): HTMLElement =>
     h('a', { class: `card the-lien-ket ${lop}`.trim(), href }, icon(bieuTuong, 22) as unknown as HTMLElement,
       h('div', {}, h('div', { class: 'mon-ten' }, tieuDe), h('div', { class: 'phu nho' }, mo)));
@@ -324,16 +365,40 @@ function veCaiDat(noi: HTMLElement): void {
     });
     return b;
   };
+  const ohoTen = h('input', { class: 'o-nhap', type: 'text', id: 'ho-ten', maxlength: 60, value: me!.hoTen === '(đã xóa)' ? '' : me!.hoTen, placeholder: 'Họ và tên hiển thị cho cả lớp' }) as HTMLInputElement;
+  const nutLuuTen = h('button', { class: 'nut nho', type: 'button' }, 'Lưu tên') as HTMLButtonElement;
+  nutLuuTen.addEventListener('click', async () => {
+    nutLuuTen.disabled = true;
+    try {
+      const r = await goi<{ hoTen: string }>('capNhatHoTen', { hoTen: ohoTen.value });
+      me = { ...me!, hoTen: r.hoTen };
+      if (duLieuTrangChu) {
+        duLieuTrangChu = { ...duLieuTrangChu, me: me };
+        ghiCache('trangChu', {}, duLieuTrangChu);
+      }
+      thongBao('Đã lưu tên');
+      veKhung();
+      void dinhTuyen();
+    } catch (e) {
+      thongBao((e as LoiApi).message, 'loi');
+      nutLuuTen.disabled = false;
+    }
+  });
   noi.append(
     h('h1', {}, 'Tài khoản'),
     h('div', { class: 'card' },
       h('span', { class: 'nhan-muc' }, 'Giao diện'),
       h('div', { class: 'hang-nut' }, nutCheDo('tu-dong', 'Theo thiết bị'), nutCheDo('sang', 'Sáng'), nutCheDo('toi', 'Tối'))),
     h('div', { class: 'card' },
-      h('div', { class: 'mon-ten' }, me!.hoTen),
-      h('div', { class: 'phu nho' }, me!.email),
-      h('a', { class: 'nut nut-phu', href: '#/cau-hoi' }, 'Câu hỏi của tôi'),
-      h('button', { class: 'nut nut-nguy', onclick: () => { void thoat(); } }, 'Đăng xuất'))
+      h('span', { class: 'nhan-muc' }, 'Thông tin'),
+      h('div', { class: 'tai-khoan-dong' }, h('span', { class: 'chu-cai chu-cai-lon' }, chuCaiDau(me!)),
+        h('div', {}, h('div', { class: 'mon-ten' }, tenHienThi(me!)), h('div', { class: 'phu nho dong-dai' }, me!.email))),
+      ohoTen,
+      h('div', { class: 'hang-nut' }, nutLuuTen)),
+    h('div', { class: 'card' },
+      h('div', { class: 'hang-nut' },
+        h('a', { class: 'nut nut-phu', href: '#/cau-hoi' }, 'Câu hỏi của tôi'),
+        h('button', { class: 'nut nut-nguy', onclick: () => { void thoat(); } }, 'Đăng xuất')))
   );
 }
 
