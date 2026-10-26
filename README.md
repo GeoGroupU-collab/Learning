@@ -2,10 +2,10 @@
 
 Web học tập cho CLB lớp: bài học, chia nhóm theo GPA, thi cuối tuần từ ngân hàng câu hỏi, xếp hạng nhóm và cá nhân (cấp bậc, danh hiệu), tạo đề, báo sai, tổng kết học kỳ. Dùng suốt 4 năm đại học, qua nhiều học kỳ.
 
-- **Giao diện:** web tĩnh trên GitHub Pages (Vite và TypeScript, không dùng framework, bản build khoảng 100 KB, nén còn khoảng 34 KB).
+- **Giao diện:** web tĩnh trên GitHub Pages (Vite và TypeScript, không dùng framework). Thiết kế riêng, sáng và tối, font đóng gói cùng web.
 - **Máy chủ:** Google Apps Script gắn một Google Sheet (cơ sở dữ liệu), triển khai thành Web app. Một điểm vào `doPost`, mọi hành động đều kiểm tra danh tính và vai trò ở máy chủ.
 - **Đăng nhập:** Google Identity Services, máy chủ xác minh ID token một lần rồi cấp mã phiên 30 ngày (chỉ lưu bản băm).
-- **Tài liệu cho người dùng:** [HUONG-DAN-CHU.md](HUONG-DAN-CHU.md) (chủ), [HUONG-DAN-THANH-VIEN.md](HUONG-DAN-THANH-VIEN.md) (cả lớp), [docs/gioi-han-va-quota.md](docs/gioi-han-va-quota.md), [docs/thong-bao-quyen-rieng-tu.md](docs/thong-bao-quyen-rieng-tu.md), [docs/mau-form-dang-ky.md](docs/mau-form-dang-ky.md).
+- **Tài liệu cho người dùng:** [HUONG-DAN-CHU.md](HUONG-DAN-CHU.md) (chủ), [HUONG-DAN-THANH-VIEN.md](HUONG-DAN-THANH-VIEN.md) (cả lớp), [docs/gioi-han-va-quota.md](docs/gioi-han-va-quota.md), [docs/thong-bao-quyen-rieng-tu.md](docs/thong-bao-quyen-rieng-tu.md), [docs/mau-form-dang-ky.md](docs/mau-form-dang-ky.md), [docs/thiet-ke.md](docs/thiet-ke.md) (hệ thiết kế giao diện).
 
 ## Cấu trúc
 

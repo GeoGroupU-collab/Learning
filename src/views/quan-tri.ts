@@ -24,6 +24,7 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề sự kiện'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
+  requestAnimationFrame(() => tabs.querySelector('.tab-dang')?.scrollIntoView({ inline: 'center', block: 'nearest' }));
   const noiDung = h('div', {});
   goc.append(noiDung);
   if (tab === 'chia-nhom' && laChu) await veChiaNhom(noiDung);

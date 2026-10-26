@@ -1,4 +1,5 @@
 import { goi, LoiApi } from '../api';
+import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { taiXuong } from '../csv';
 import { csvDe, htmlDe, jsonDe } from '../xuat-de';
@@ -134,7 +135,7 @@ export async function veDeThi(noi: HTMLElement): Promise<void> {
     }));
     return {
       m, dung, so, chuong,
-      the: h('div', { class: 'card card-mon', style: `--mau:${m.mau || '#4cc9f0'}` },
+      the: h('div', { class: 'card card-mon', style: mauMon(m.mau) },
         h('label', { class: 'dong-chon', for: `de-mon-${m.ma}` }, dung, h('span', {}, `${m.ten} (${m.soCau} câu)`)),
         h('label', { class: 'nhan-o' }, 'Số câu', so),
         m.chuong.length ? h('details', {}, h('summary', {}, 'Chỉ lấy một số chương (không chọn = tất cả)'), vungChuong) : null),

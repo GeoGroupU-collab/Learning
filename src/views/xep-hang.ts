@@ -21,8 +21,8 @@ function ve(vung: HTMLElement, kq: KetQuaXepHang): void {
   xoaHet(vung);
   if (kq.vinhDanh) {
     vung.append(h('div', { class: 'card vinh-danh' },
-      h('div', { class: 'phu nho' }, `Nhóm vinh danh tuần ${kq.vinhDanh.soTuan}`),
-      h('div', { class: 'mon-ten' }, `★ ${kq.vinhDanh.nhom.map((n) => n.tenNhom).join(', ')}`),
+      h('span', { class: 'nhan-muc' }, `Nhóm vinh danh tuần ${kq.vinhDanh.soTuan}`),
+      h('div', { class: 'mon-ten' }, kq.vinhDanh.nhom.map((n) => n.tenNhom).join(', ')),
       h('div', { class: 'phu nho' }, `${kq.vinhDanh.nhom[0].diem.toFixed(1)} điểm`)));
   }
   const t = kq.tuanHienTai;
@@ -59,8 +59,8 @@ function veCaNhan(vung: HTMLElement, kq: KetQuaXepHangCaNhan): void {
   vung.append(theCap(kq.toi.cap, kq.toi.hang ? `Cấp của tôi · hạng ${kq.toi.hang}` : 'Cấp của tôi'));
   if (kq.vinhDanh) {
     vung.append(h('div', { class: 'card vinh-danh' },
-      h('div', { class: 'phu nho' }, `Danh hiệu tuần ${kq.vinhDanh.soTuan}`),
-      ...kq.vinhDanh.nguoi.map((n) => h('div', {}, h('div', { class: 'mon-ten' }, `★ ${n.hoTen}`), h('div', { class: 'phu nho' }, `${n.danhHieu} · ${n.diem} điểm`)))));
+      h('span', { class: 'nhan-muc' }, `Danh hiệu tuần ${kq.vinhDanh.soTuan}`),
+      ...kq.vinhDanh.nguoi.map((n) => h('div', {}, h('div', { class: 'mon-ten' }, n.hoTen), h('div', { class: 'phu nho' }, `${n.danhHieu} · ${n.diem} điểm`)))));
   }
   if (kq.toi.danhHieu.length) {
     vung.append(h('div', { class: 'card' }, h('h3', {}, 'Danh hiệu của tôi'),
@@ -71,7 +71,7 @@ function veCaNhan(vung: HTMLElement, kq: KetQuaXepHangCaNhan): void {
   kq.bang.forEach((x) =>
     tb.append(h('tr', { class: x.laToi ? 'hang-toi' : '' },
       h('td', {}, String(x.hang)),
-      h('td', {}, x.hoTen + (x.soDanhHieu ? ` ★${x.soDanhHieu}` : '')),
+      h('td', {}, x.hoTen, x.soDanhHieu ? h('span', { class: 'nhan nhan-vang' }, `${x.soDanhHieu} danh hiệu`) : null),
       h('td', {}, `${x.tenCapLon} · Lv ${x.level}`),
       h('td', {}, String(x.tong)))));
   t.append(tb);

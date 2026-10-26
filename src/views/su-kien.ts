@@ -1,4 +1,6 @@
 import { goi, goiNhanh, LoiApi } from '../api';
+import { icon } from '../icon';
+import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { datGioMayChu, demNguoc, dinhDangNgay, dungDongHo } from '../gio';
 import { taiXuong } from '../csv';
@@ -119,11 +121,11 @@ const cauTrong = (): CauNhap => ({ maChuong: '', trangNguon: '', noiDung: '', A:
 export async function veNopCauHoi(goc: HTMLElement): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Nộp câu hỏi'), h('p', { class: 'phu' }, 'Đang tải...'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Nộp câu hỏi'), h('p', { class: 'phu' }, 'Đang tải...'));
   const tt = await goi<TuanHienTai>('tuanHienTai');
   datGioMayChu(tt.now);
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Nộp câu hỏi'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Nộp câu hỏi'));
   if (!tt.tuan || tt.tuan.trangThai !== 'nop_cau_hoi') {
     goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Hiện không trong thời gian nhận câu hỏi.')));
     return;
@@ -192,7 +194,7 @@ export async function veNopCauHoi(goc: HTMLElement): Promise<void> {
         veCau();
         luuNhap();
       });
-      vungChonMon.append(h('label', { class: 'dong-chon', for: `mon-${m.ma}`, style: `--mau:${m.mau || '#4cc9f0'}` }, o, h('span', {}, m.ten)));
+      vungChonMon.append(h('label', { class: 'dong-chon', for: `mon-${m.ma}`, style: mauMon(m.mau) }, o, h('span', {}, m.ten)));
     });
   };
 
@@ -206,7 +208,7 @@ export async function veNopCauHoi(goc: HTMLElement): Promise<void> {
   const veMon = (m: MonNop): HTMLElement => {
     const ds = (ban.cau[m.ma] ??= Array.from({ length: yc.soCauMoiMon }, cauTrong));
     while (ds.length < yc.soCauMoiMon) ds.push(cauTrong());
-    const hop = h('details', { class: 'card card-mon', open: true, style: `--mau:${m.mau || '#4cc9f0'}` }, h('summary', {}, `${m.ten} (${yc.soCauMoiMon} câu)`));
+    const hop = h('details', { class: 'card card-mon', open: true, style: mauMon(m.mau) }, h('summary', {}, `${m.ten} (${yc.soCauMoiMon} câu)`));
     ds.slice(0, yc.soCauMoiMon).forEach((c, i) => {
       const chuong = m.chuong.length
         ? (() => {

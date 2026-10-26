@@ -25,7 +25,7 @@ function theTongKet(tk: TongKetHocKy): HTMLElement {
     h('h3', {}, `Tổng kết ${tk.tenHocKy}`),
     h('p', { class: 'phu nho' }, `${tk.thongKe.soTuanDaChot} tuần · ${tk.thongKe.soThanhVien} thành viên · ${tk.thongKe.soCauHoi} câu hỏi · ${tk.thongKe.soLuotThi} lượt thi · ${tk.thongKe.soDeTuTao} đề tự tạo`),
     h('div', { class: 'card vinh-danh' }, h('div', { class: 'phu nho' }, 'Nhóm vô địch học kỳ'),
-      h('div', { class: 'mon-ten' }, tk.nhomVoDich.length ? `★ ${tk.nhomVoDich.map((n) => `${n.tenNhom} (${n.diem})`).join(', ')}` : 'Chưa có')),
+      h('div', { class: 'mon-ten' }, tk.nhomVoDich.length ? tk.nhomVoDich.map((n) => `${n.tenNhom} (${n.diem})`).join(', ') : 'Chưa có')),
     h('h4', {}, 'Xếp hạng nhóm (điểm lũy kế)'), bang(['Hạng', 'Nhóm', 'Điểm'], tk.bangNhom.map((n) => [n.hang, n.tenNhom, n.diem])),
     h('h4', {}, `Tham gia theo tuần (trung bình ${tk.thamGiaTrungBinh}%)`), bang(['Tuần', 'Đã thi', 'Tính', '%'], tk.tuan.map((t) => [t.soTuan, t.soThamGia, t.soTinh, t.tiLe])),
     h('h4', {}, 'Điểm thi trung bình cao nhất'), bang(['Tên', 'Điểm TB', 'Số tuần'], tk.topCaNhan.map((c) => [c.hoTen, c.diemTB, c.soTuan])),

@@ -7,7 +7,7 @@ export function theCap(cap: ThongTinCap, nhan = 'Cấp của tôi'): HTMLElement
   const phanTram = Math.min(100, Math.round((cap.diemTrongLevel / cap.diemMoiLevel) * 100));
   const conLai = cap.diemMoiLevel - cap.diemTrongLevel;
   return h('div', { class: 'card the-cap' },
-    h('div', { class: 'phu nho' }, nhan),
+    h('span', { class: 'nhan-muc' }, nhan),
     h('div', { class: 'hang' },
       h('div', { class: 'ten-cap' }, cap.tenCapLon),
       h('div', { class: 'level-cap' }, `Lv ${cap.level}`)),

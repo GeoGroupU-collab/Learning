@@ -1,4 +1,5 @@
 import { goi } from '../api';
+import { icon } from '../icon';
 import { h, xoaHet } from '../dom';
 import { dungDongHo } from '../gio';
 import { nutBaoSai } from '../cap';
@@ -19,17 +20,17 @@ function theCauKho(c: CauKho, i: number): HTMLElement {
 export async function veXemLai(goc: HTMLElement, soTuanYeuCau: number | null): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Xem lại'), h('p', { class: 'phu' }, 'Đang tải...'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Xem lại'), h('p', { class: 'phu' }, 'Đang tải...'));
   let kq: KetQuaXemLai;
   try {
     kq = await goi<KetQuaXemLai>('xemLai', soTuanYeuCau ? { soTuan: soTuanYeuCau } : {});
   } catch (e) {
     xoaHet(goc);
-    goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Xem lại'), h('div', { class: 'card' }, h('p', { class: 'phu' }, (e as Error).message)));
+    goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Xem lại'), h('div', { class: 'card' }, h('p', { class: 'phu' }, (e as Error).message)));
     return;
   }
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Xem lại'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Xem lại'));
   if (kq.cacTuan.length > 1) {
     goc.append(h('div', { class: 'tabs' }, ...kq.cacTuan.map((t) => h('a', { class: t === kq.soTuan ? 'tab tab-dang' : 'tab', href: `#/su-kien/xem-lai/${t}` }, `Tuần ${t}`))));
   }

@@ -1,4 +1,5 @@
 import { goi, LoiApi } from '../api';
+import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import type { MonQuanTri } from '../types';
 
@@ -46,7 +47,7 @@ export async function veChuong(noi: HTMLElement, laChu: boolean): Promise<void> 
       vungGop.append(h('p', { class: 'phu nho' }, `Đang có ${m.giaTriTrongNganHang.filter((g) => g.giaTri !== '').length} cách ghi chương do thành viên tự gõ: ${m.giaTriTrongNganHang.filter((g) => g.giaTri !== '').map((g) => `"${g.giaTri}" (${g.soCau})`).join(', ')}.`));
     }
 
-    noi.append(h('details', { class: 'card card-mon', open: true, style: `--mau:${m.mau || '#4cc9f0'}` },
+    noi.append(h('details', { class: 'card card-mon', open: true, style: mauMon(m.mau) },
       h('summary', {}, `${m.ten}`, h('span', { class: 'nhan' }, `${m.chuong.length} chương · ${m.soCau} câu`)),
       o,
       laChu ? h('button', { class: 'nut', onclick: async () => {

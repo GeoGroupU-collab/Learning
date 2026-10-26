@@ -1,4 +1,6 @@
 import { goi, LoiApi } from '../api';
+import { icon } from '../icon';
+import { mauMon } from '../mau';
 import { h, xoaHet, thongBao } from '../dom';
 import { bayGio, chayDinhKy, datGioMayChu, demNguoc, dungDongHo, khiRoiTrang } from '../gio';
 import { nutBaoSai } from '../cap';
@@ -7,7 +9,7 @@ import type { DuLieuThi, LuotThiTomTat, MonNop, TuanHienTai } from '../types';
 function veKetQua(goc: HTMLElement, kq: LuotThiTomTat): void {
   xoaHet(goc);
   goc.append(
-    h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'),
+    h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'),
     h('h1', {}, 'Kết quả'),
     h('div', { class: 'card card-giua' },
       h('div', { class: 'phu nho' }, 'Điểm của bạn'),
@@ -20,7 +22,7 @@ function veKetQua(goc: HTMLElement, kq: LuotThiTomTat): void {
 export async function vePhongThi(goc: HTMLElement): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Phòng thi'), h('p', { class: 'phu' }, 'Đang tải...'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Phòng thi'), h('p', { class: 'phu' }, 'Đang tải...'));
   const tt = await goi<TuanHienTai>('tuanHienTai');
   datGioMayChu(tt.now);
   const luot = tt.luotThi ?? null;
@@ -33,7 +35,7 @@ export async function vePhongThi(goc: HTMLElement): Promise<void> {
   }
 
   xoaHet(goc);
-  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, '← Sự kiện'), h('h1', {}, 'Phòng thi'));
+  goc.append(h('a', { class: 'quay-lai', href: '#/su-kien' }, icon('trai', 16) as unknown as HTMLElement, 'Sự kiện'), h('h1', {}, 'Phòng thi'));
   const t = tt.tuan;
   if (!t || t.trangThai !== 'mo') {
     goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Phòng thi hiện không mở.')));
@@ -86,7 +88,7 @@ export async function vePhongThi(goc: HTMLElement): Promise<void> {
       } else chon.splice(chon.indexOf(m.ma), 1);
       nutBatDau.disabled = chon.length !== cfg.soMonThi;
     });
-    vung.append(h('label', { class: 'dong-chon', for: `thi-${m.ma}`, style: `--mau:${m.mau || '#4cc9f0'}` }, o, h('span', {}, m.ten)));
+    vung.append(h('label', { class: 'dong-chon', for: `thi-${m.ma}`, style: mauMon(m.mau) }, o, h('span', {}, m.ten)));
   });
   nutBatDau.addEventListener('click', async () => {
     if (!confirm(`Bắt đầu thi ngay?\n\n${cfg.soMonThi * cfg.soCauMoiMonThi} câu trong ${cfg.thoiGianPhut} phút. Mỗi người chỉ thi một lần, đồng hồ chạy ngay và không dừng được.`)) return;

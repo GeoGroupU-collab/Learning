@@ -1,4 +1,6 @@
 import { goi, goiNhanh, LoiApi } from '../api';
+import { icon } from '../icon';
+import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { dungDongHo } from '../gio';
 import { nutBaoSai, theCap } from '../cap';
@@ -8,7 +10,7 @@ function veKetQua(goc: HTMLElement, kq: KetQuaTaoDe): void {
   xoaHet(goc);
   window.scrollTo(0, 0);
   goc.append(
-    h('a', { class: 'quay-lai', href: '#/tao-de' }, '← Tạo đề'),
+    h('a', { class: 'quay-lai', href: '#/tao-de' }, icon('trai', 16) as unknown as HTMLElement, 'Tạo đề'),
     h('h1', {}, 'Kết quả'),
     h('div', { class: 'card card-giua' },
       h('div', { class: 'diem-lon' }, `${kq.soDung}/${kq.soCau}`),
@@ -53,7 +55,7 @@ function lamDe(goc: HTMLElement, de: DeTaoDe): void {
     }
   });
   goc.append(
-    h('a', { class: 'quay-lai', href: '#/tao-de' }, '← Tạo đề'),
+    h('a', { class: 'quay-lai', href: '#/tao-de' }, icon('trai', 16) as unknown as HTMLElement, 'Tạo đề'),
     h('div', { class: 'card' }, h('div', { class: 'mon-ten' }, `${de.tenMon} · ${de.soCau} câu`),
       de.chuong.length ? h('div', { class: 'phu nho' }, `Chương: ${de.chuong.join(', ')}`) : h('div', { class: 'phu nho' }, 'Tất cả các chương')),
     h('div', { class: 'thanh-thi' }, h('div', { class: 'hang' }, dem, nutNop)),
@@ -102,14 +104,14 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
     goc.append(h('h2', {}, 'Đề do lớp trưởng phát hành'),
       h('p', { class: 'phu nho' }, 'Mỗi đề chỉ được cộng điểm ở lần làm đầu tiên.'),
       ...tt.dePhatHanh.map((d) => h('button', {
-        class: 'card card-mon nut-the', style: '--mau:#ffd166',
+        class: 'card card-mon nut-the', style: mauMon('#ffd166'),
         onclick: async (ev: Event) => {
           const nut = ev.currentTarget as HTMLButtonElement;
           nut.disabled = true;
           try { lamDe(goc, await goi<DeTaoDe>('taoDe.bat', { idDe: d.idDe })); } catch (e) { thongBao((e as LoiApi).message, 'loi'); nut.disabled = false; }
         },
-      }, h('div', { class: 'mon-ten' }, d.tenDe),
-        h('div', { class: 'phu nho' }, d.daLam ? `Đã làm: ${d.daLam.soDung}/${d.daLam.soCau} câu (${d.daLam.diem} điểm). Bấm để làm lại, không cộng thêm điểm.` : `${d.soCau} câu · làm lần đầu được +${tt.diemMoiDe} điểm`))));
+      }, h('div', {}, h('div', { class: 'mon-ten' }, d.tenDe),
+        h('div', { class: 'phu nho' }, d.daLam ? `Đã làm: ${d.daLam.soDung}/${d.daLam.soCau} câu (${d.daLam.diem} điểm). Bấm để làm lại, không cộng thêm điểm.` : `${d.soCau} câu · làm lần đầu được +${tt.diemMoiDe} điểm`)))));
   }
   let monChon = '';
   const chuongChon = new Set<string>();
@@ -135,7 +137,7 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
       m.chuong.forEach((c, i) => {
         const o = h('input', { type: 'checkbox', id: `ch-${i}`, disabled: c.soCau === 0 }) as HTMLInputElement;
         o.addEventListener('change', () => { if (o.checked) chuongChon.add(c.ma); else chuongChon.delete(c.ma); tinh(); });
-        vungChuong.append(h('label', { class: 'dong-chon', for: `ch-${i}`, style: `--mau:${m.mau || '#4cc9f0'}` }, o, h('span', {}, `${c.ten} (${c.soCau} câu)`)));
+        vungChuong.append(h('label', { class: 'dong-chon', for: `ch-${i}`, style: mauMon(m.mau) }, o, h('span', {}, `${c.ten} (${c.soCau} câu)`)));
       });
     }
     vungChuong.append(ghiChu);
@@ -148,14 +150,14 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
   tt.mon.forEach((m) => {
     const het = m.soCau < tt.soCauToiThieu;
     const nut = h('button', {
-      class: 'card card-mon nut-the', style: `--mau:${m.mau || '#4cc9f0'}`, disabled: het, 'aria-pressed': false,
+      class: 'card card-mon nut-the', style: mauMon(m.mau), disabled: het, 'aria-pressed': false,
       onclick: () => {
         monChon = m.ma;
         chuongChon.clear();
         cacNutMon.forEach((x) => x.setAttribute('aria-pressed', String(x === nut)));
         veChuong();
       },
-    }, h('div', { class: 'mon-ten' }, m.ten), h('div', { class: 'phu nho' }, het ? `Chưa đủ câu hỏi (${m.soCau})` : `${m.soCau} câu trong ngân hàng`)) as HTMLButtonElement;
+    }, h('div', {}, h('div', { class: 'mon-ten' }, m.ten), h('div', { class: 'phu nho' }, het ? `Chưa đủ câu hỏi (${m.soCau})` : `${m.soCau} câu trong ngân hàng`))) as HTMLButtonElement;
     cacNutMon.push(nut);
     goc.append(nut);
   });

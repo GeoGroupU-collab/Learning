@@ -1,4 +1,13 @@
+import '@fontsource/be-vietnam-pro/latin-400.css';
+import '@fontsource/be-vietnam-pro/vietnamese-400.css';
+import '@fontsource/be-vietnam-pro/latin-600.css';
+import '@fontsource/be-vietnam-pro/vietnamese-600.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
+import '@fontsource/ibm-plex-mono/vietnamese-500.css';
 import './style.css';
+import { icon, dauHieu, duongDongMuc } from './icon';
+import { datCheDo, docCheDo, type CheDo } from './theme';
+import { mauMon } from './mau';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from './config';
 import { docCache, ghiCache, goi, LoiApi, xoaCache } from './api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth';
@@ -50,12 +59,18 @@ function canhBaoTrinhDuyet(): void {
 
 function manHinhDangNhap(): void {
   const khungNut = h('div', { class: 'khung-nut' });
-  manHinhDon(
-    h('h1', {}, CONFIG.TEN_WEB),
-    h('p', { class: 'phu' }, 'Đăng nhập bằng tài khoản Google đã đăng ký với lớp trưởng.'),
-    khungNut,
-    h('p', { class: 'phu nho' }, 'Web chỉ đọc email, tên và ảnh đại diện. Xem thông báo quyền riêng tư ở Form đăng ký.')
-  );
+  xoaHet(goc);
+  goc.append(h('main', { class: 'man-giua' }, h('div', { class: 'dang-nhap' },
+    h('div', { class: 'dang-nhap-ban-do' },
+      duongDongMuc() as unknown as HTMLElement,
+      h('span', { class: 'nhan-muc' }, 'Câu lạc bộ học tập'),
+      h('h2', {}, 'Mỗi tuần một đề, cả lớp cùng ôn.')),
+    h('div', { class: 'dang-nhap-the' },
+      h('span', { class: 'logo' }, dauHieu(32) as unknown as HTMLElement, h('span', {}, CONFIG.TEN_WEB)),
+      h('h1', {}, 'Đăng nhập'),
+      h('p', { class: 'phu' }, 'Dùng tài khoản Google đã đăng ký với lớp trưởng.'),
+      khungNut,
+      h('p', { class: 'phu nho' }, 'Web chỉ đọc email, tên và ảnh đại diện. Chưa đăng ký thì hỏi lớp trưởng link Form.')))));
   if (DEV_MOCK) {
     khungNut.append(h('button', { class: 'nut', onclick: () => khoiDong() }, 'Đăng nhập thử (chế độ phát triển)'));
     return;
@@ -128,11 +143,11 @@ async function khoiDong(): Promise<void> {
 // ---------- Khung chính và định tuyến ----------
 
 const MUC_DUOI: [string, string, string][] = [
-  ['#/', 'Trang chủ', '⌂'],
-  ['#/bai-hoc', 'Bài học', '▤'],
-  ['#/su-kien', 'Sự kiện', '✦'],
-  ['#/nhom', 'Nhóm', '☰'],
-  ['#/xep-hang', 'Xếp hạng', '★'],
+  ['#/', 'Trang chủ', 'nha'],
+  ['#/bai-hoc', 'Bài học', 'sach'],
+  ['#/su-kien', 'Sự kiện', 'lich'],
+  ['#/nhom', 'Nhóm', 'nhom'],
+  ['#/xep-hang', 'Xếp hạng', 'cup'],
 ];
 
 let vungNoiDung: HTMLElement;
@@ -142,16 +157,17 @@ function veKhung(): void {
   xoaHet(goc);
   vungNoiDung = h('main', { class: 'noi-dung' });
   thanhDuoi = h('nav', { class: 'thanh-duoi', 'aria-label': 'Điều hướng chính' },
-    ...MUC_DUOI.map(([href, ten, bieuTuong]) => h('a', { href, 'data-href': href }, h('span', { class: 'bt', 'aria-hidden': 'true' }, bieuTuong), h('span', {}, ten))));
+    ...MUC_DUOI.map(([href, ten, bieuTuong]) => h('a', { href, 'data-href': href }, icon(bieuTuong, 22) as unknown as HTMLElement, h('span', {}, ten))));
   const laQuanTri = me!.vaiTro !== 'member';
+  const chuCai = (me!.hoTen || me!.email || '?').trim().charAt(0).toUpperCase();
   goc.append(
     h('header', { class: 'dau-trang' },
-      h('a', { class: 'logo', href: '#/' }, CONFIG.TEN_WEB),
-      h('div', { class: 'hang-nut' },
-        laQuanTri ? h('a', { class: 'nut nut-phu nho', href: '#/quan-tri/thanh-vien' }, 'Quản trị') : null,
-        h('a', { class: 'nut nut-phu nho', href: '#/cai-dat' }, 'Tài khoản'))),
-    vungNoiDung,
-    thanhDuoi
+      h('a', { class: 'logo', href: '#/' }, dauHieu(30) as unknown as HTMLElement, h('span', {}, CONFIG.TEN_WEB)),
+      thanhDuoi,
+      h('div', { class: 'dau-phai' },
+        laQuanTri ? h('a', { class: 'nut-dau', href: '#/quan-tri/thanh-vien' }, icon('khien', 16) as unknown as HTMLElement, h('span', {}, 'Quản trị')) : null,
+        h('a', { class: 'chu-cai', href: '#/cai-dat', 'aria-label': 'Tài khoản' }, chuCai))),
+    vungNoiDung
   );
 }
 
@@ -231,18 +247,19 @@ function veTrangChu(noi: HTMLElement): void {
   xoaHet(noi);
   const m = me!;
   const d = duLieuTrangChu;
+  const ten = (m.hoTen || '').trim().split(/\s+/).pop() || 'bạn';
+  const lienKet = (href: string, bieuTuong: string, tieuDe: string, mo: string, lop = ''): HTMLElement =>
+    h('a', { class: `card the-lien-ket ${lop}`.trim(), href }, icon(bieuTuong, 22) as unknown as HTMLElement,
+      h('div', {}, h('div', { class: 'mon-ten' }, tieuDe), h('div', { class: 'phu nho' }, mo)));
   noi.append(
-    h('h1', {}, `Chào ${m.hoTen || 'bạn'}`),
-    ...(m.hocKy ? [h('p', { class: 'phu' }, m.hocKy.tenHocKy)] : []),
-    h('a', { class: 'card', href: '#/nhom' },
-      h('div', { class: 'phu nho' }, 'Nhóm của tôi'),
-      h('div', { class: 'mon-ten' }, m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm'),
-      h('div', { class: 'phu nho' }, m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký')),
-    ...(d ? [theCap(d.cap)] : []),
-    h('a', { class: 'card', href: '#/tao-de' },
-      h('div', { class: 'mon-ten' }, 'Tự tạo đề luyện tập'),
-      h('div', { class: 'phu nho' }, 'Tự chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.')),
-    d ? theSuKien(d) : h('div', { class: 'card' }, h('div', { class: 'mon-ten' }, 'Đang tải...'))
+    h('div', { class: 'chao' },
+      h('span', { class: 'nhan-muc' }, m.hocKy ? m.hocKy.tenHocKy : 'Chưa có học kỳ đang mở'),
+      h('h1', {}, `Chào ${ten}`)),
+    h('div', { class: 'luoi-chu' },
+      d ? theSuKien(d) : h('div', { class: 'card rong' }, h('div', { class: 'mon-ten' }, 'Đang tải...')),
+      ...(d ? [theCap(d.cap)] : []),
+      lienKet('#/nhom', 'nhom', m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm', m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký'),
+      lienKet('#/tao-de', 'but', 'Tự tạo đề luyện tập', 'Chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.', 'rong'))
   );
   const vungMon = h('div', {});
   noi.append(vungMon);
@@ -251,16 +268,16 @@ function veTrangChu(noi: HTMLElement): void {
     if (!hk || !hk.mon.length) return;
     const luoi = h('div', { class: 'luoi' });
     hk.mon.forEach((mon) =>
-      luoi.append(h('a', { class: 'card card-mon', href: `#/bai-hoc/${hk.ma}/${mon.ma}`, style: `--mau:${mon.mau || '#4cc9f0'}` },
-        h('div', { class: 'mon-ten' }, mon.ten),
-        mon.baiHoc.some((b) => laMoi(b.capNhat)) ? h('span', { class: 'nhan-moi' }, 'Mới cập nhật') : null)));
+      luoi.append(h('a', { class: 'card card-mon', href: `#/bai-hoc/${hk.ma}/${mon.ma}`, style: mauMon(mon.mau) },
+        h('div', {}, h('div', { class: 'mon-ten' }, mon.ten), h('div', { class: 'mon-phu' }, `${mon.baiHoc.length} bài học`)),
+        mon.baiHoc.some((b) => laMoi(b.capNhat)) ? h('span', { class: 'nhan-moi' }, 'Mới') : null)));
     vungMon.append(h('h2', {}, 'Các môn'), luoi);
   });
 }
 
 function theSuKien(d: TrangChuData): HTMLElement {
   const tt = d.tuan;
-  const the = h('a', { class: 'card', href: '#/su-kien' }, h('div', { class: 'phu nho' }, 'Sự kiện tuần này'));
+  const the = h('a', { class: 'card the-su-kien rong', href: '#/su-kien' }, h('span', { class: 'nhan-muc' }, 'Sự kiện tuần này'));
   const t = tt.tuan;
   if (!t) {
     the.append(h('div', { class: 'mon-ten' }, 'Chưa có lịch sự kiện'));
@@ -298,8 +315,20 @@ async function thoat(): Promise<void> {
 
 function veCaiDat(noi: HTMLElement): void {
   xoaHet(noi);
+  const cheDo = docCheDo();
+  const nutCheDo = (gt: CheDo, nhan: string): HTMLElement => {
+    const b = h('button', { class: 'nut nut-phu nho', type: 'button', 'aria-pressed': cheDo === gt }, nhan);
+    b.addEventListener('click', () => {
+      datCheDo(gt);
+      veCaiDat(noi);
+    });
+    return b;
+  };
   noi.append(
     h('h1', {}, 'Tài khoản'),
+    h('div', { class: 'card' },
+      h('span', { class: 'nhan-muc' }, 'Giao diện'),
+      h('div', { class: 'hang-nut' }, nutCheDo('tu-dong', 'Theo thiết bị'), nutCheDo('sang', 'Sáng'), nutCheDo('toi', 'Tối'))),
     h('div', { class: 'card' },
       h('div', { class: 'mon-ten' }, me!.hoTen),
       h('div', { class: 'phu nho' }, me!.email),
