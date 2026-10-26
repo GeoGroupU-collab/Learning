@@ -12,7 +12,7 @@ function docTuan_(maHocKy) {
     .map(function (r) {
       return {
         soTuan: Number(r.soTuan), hanNop: msCua_(r.hanNopCauHoi), moCua: msCua_(r.moCua), dongCua: msCua_(r.dongCua), _dong: r._dong,
-        soMonThi: Number(r.soMonThi) || 0, soCauMoiMonThi: Number(r.soCauMoiMonThi) || 0, thoiGianPhut: Number(r.thoiGianPhut) || 0,
+        idDe: String(r.idDe || ''), soMonThi: Number(r.soMonThi) || 0, soCauMoiMonThi: Number(r.soCauMoiMonThi) || 0, thoiGianPhut: Number(r.thoiGianPhut) || 0,
       };
     });
 }
@@ -76,6 +76,10 @@ function hdTuanHienTai_(email) {
   res.mien = mien.some(function (m) { return Number(m.soTuan) === t.soTuan; });
   res.soMienDaDung = mien.length;
   res.thi = { soMonThi: t.soMonThi || Number(cauHinh.soMonThi) || 2, soCauMoiMonThi: t.soCauMoiMonThi || Number(cauHinh.soCauMoiMonThi) || 20, thoiGianPhut: t.thoiGianPhut || Number(cauHinh.thoiGianPhut) || 40 };
+  if (t.idDe) {
+    var deCD = docBang_('DeThi').filter(function (d) { return d.idDe === t.idDe; })[0];
+    res.deCoDinh = deCD ? { soCau: jsonAnToan_(deCD.dsIdCau, []).length, tenDe: deCD.tenDe } : null;
+  }
   var luot = luotThiCua_(hk.maHocKy, t.soTuan, email);
   res.luotThi = luot ? tomTatLuot_(luot, res.now, Number(cauHinh.graceGiay) || 30) : null;
   return res;
@@ -222,7 +226,7 @@ function hdDsTuan_() {
   var hk = hocKyDangMo_();
   if (!hk) return { maHocKy: null, tuan: [] };
   return { maHocKy: hk.maHocKy, tuan: docTuan_(hk.maHocKy).sort(function (a, b) { return a.soTuan - b.soTuan; }).map(function (t) {
-    return { soTuan: t.soTuan, hanNop: t.hanNop, moCua: t.moCua, dongCua: t.dongCua, trangThai: trangThaiTuan(t, Date.now()) };
+    return { soTuan: t.soTuan, hanNop: t.hanNop, moCua: t.moCua, dongCua: t.dongCua, trangThai: trangThaiTuan(t, Date.now()), idDe: t.idDe, thoiGianPhut: t.thoiGianPhut };
   }) };
 }
 
@@ -258,7 +262,13 @@ function hdSuaTuan_(email, tv, body) {
   return voiKhoa_(function () {
     var t = docTuan_(hk.maHocKy).filter(function (x) { return x.soTuan === Number(body.soTuan); })[0];
     if (!t) throw loi_('khong_thay', 'Không tìm thấy tuần.');
-    suaDong_('Tuan', t._dong, { hanNopCauHoi: new Date(hanNop), moCua: new Date(moCua), dongCua: new Date(dongCua) });
+    var ghi = { hanNopCauHoi: new Date(hanNop), moCua: new Date(moCua), dongCua: new Date(dongCua) };
+    var phut = Number(body.thoiGianPhut);
+    if (body.thoiGianPhut !== undefined && body.thoiGianPhut !== '') {
+      if (!(phut >= 5 && phut <= 300)) throw loi_('phut_sai', 'Thời gian làm bài từ 5 đến 300 phút.');
+      ghi.thoiGianPhut = Math.round(phut);
+    }
+    suaDong_('Tuan', t._dong, ghi);
     ghiNhatKy_(email, 'suaTuan', hk.maHocKy + '/' + t.soTuan, { hanNop: hanNop, moCua: moCua, dongCua: dongCua });
     return { soTuan: t.soTuan };
   });

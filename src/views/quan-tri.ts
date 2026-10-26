@@ -3,6 +3,7 @@ import { h, xoaHet, thongBao } from '../dom';
 import { dinhDangNgay } from '../gio';
 import { veNganHang } from './ngan-hang';
 import { veChuong } from './chuong';
+import { veDeThi } from './de-thi';
 import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
 const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', assistant: 'Trợ lý', member: 'Thành viên' };
@@ -17,7 +18,7 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   const laChu = me.vaiTro === 'owner';
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']];
+  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề thi']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi']];
   cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
   goc.append(tabs);
   const noiDung = h('div', {});
@@ -26,6 +27,7 @@ export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<
   else if (tab === 'tuan' && laChu) await veTuan(noiDung);
   else if (tab === 'chuong') await veChuong(noiDung, laChu);
   else if (tab === 'cau-hoi') await veNganHang(noiDung, laChu);
+  else if (tab === 'de-thi' && laChu) await veDeThi(noiDung);
   else await veThanhVien(noiDung, laChu);
 }
 
@@ -249,13 +251,16 @@ async function veTuan(noi: HTMLElement): Promise<void> {
     const a = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.hanNop) }) as HTMLInputElement;
     const b = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.moCua) }) as HTMLInputElement;
     const c = h('input', { class: 'o-nhap', type: 'datetime-local', value: sangO(t.dongCua) }) as HTMLInputElement;
+    const phut = h('input', { class: 'o-nhap', type: 'number', min: 5, max: 300, placeholder: 'Mặc định theo cấu hình', value: t.thoiGianPhut ? String(t.thoiGianPhut) : '' }) as HTMLInputElement;
     noi.append(h('details', { class: 'card' },
       h('summary', {}, `Tuần ${t.soTuan}: ${dinhDangNgay(t.moCua)}`, h('span', { class: 'nhan' }, t.trangThai)),
       h('label', { class: 'nhan-o' }, 'Hạn nộp câu hỏi', a),
       h('label', { class: 'nhan-o' }, 'Mở cửa phòng thi', b),
       h('label', { class: 'nhan-o' }, 'Đóng cửa phòng thi', c),
+      h('label', { class: 'nhan-o' }, 'Thời gian làm bài (phút)', phut),
+      t.idDe ? h('p', { class: 'tt-tot' }, 'Tuần này có đề cố định (gán ở tab Đề thi).') : null,
       h('button', { class: 'nut', onclick: async () => {
-        try { await goi('admin.suaTuan', { soTuan: t.soTuan, hanNop: tuO(a.value), moCua: tuO(b.value), dongCua: tuO(c.value) }); thongBao('Đã lưu'); await lamMoi(); } catch (e) { baoLoi(e); }
+        try { await goi('admin.suaTuan', { soTuan: t.soTuan, hanNop: tuO(a.value), moCua: tuO(b.value), dongCua: tuO(c.value), thoiGianPhut: phut.value ? Number(phut.value) : undefined }); thongBao('Đã lưu'); await lamMoi(); } catch (e) { baoLoi(e); }
       } }, 'Lưu giờ')));
   });
 }

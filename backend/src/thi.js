@@ -132,20 +132,34 @@ function hdBatDauThi_(email, tv, body) {
   var yeuCauNop = (Number(cauHinh.soMonNopCauHoi) || 3) * (Number(cauHinh.soCauNopMoiMon) || 5);
   if (cauHoiCuaEmailTuan_(hk.maHocKy, t.soTuan, email).length < yeuCauNop) throw loi_('chua_nop_cau', 'Bạn chưa nộp đủ câu hỏi nên chưa được thi tuần này.');
 
-  var monChon = Array.isArray(body.monChon) ? body.monChon.map(String) : [];
-  var monCuaKy = monCuaHocKy_(hk.maHocKy).map(function (m) { return m.ma; });
-  var khacNhau = {};
-  monChon.forEach(function (m) { khacNhau[m] = true; });
-  if (monChon.length !== soMon || Object.keys(khacNhau).length !== soMon || monChon.some(function (m) { return monCuaKy.indexOf(m) === -1; })) {
-    throw loi_('mon_sai', 'Hãy chọn đúng ' + soMon + ' môn khác nhau.');
+  var monChon;
+  var de;
+  if (t.idDe) {
+    // Tuần có đề cố định do chủ chọn: mọi người cùng bộ câu, chỉ khác thứ tự câu và thứ tự đáp án.
+    var deCD = docBang_('DeThi').filter(function (d) { return d.idDe === t.idDe; })[0];
+    if (!deCD) throw loi_('khong_du_cau', 'Đề cố định của tuần này không tồn tại. Báo lớp trưởng.');
+    var cauCD = cauHoiTheoId_(hk.maHocKy);
+    var idHopLe = jsonAnToan_(deCD.dsIdCau, []).filter(function (id) { return cauCD[id] && cauCD[id].trangThai !== 'removed'; });
+    if (!idHopLe.length) throw loi_('khong_du_cau', 'Đề cố định không còn câu hợp lệ. Báo lớp trưởng.');
+    de = dungDeCoDinh(idHopLe);
+    var monDe = {};
+    idHopLe.forEach(function (id) { monDe[cauCD[id].maMon] = true; });
+    monChon = Object.keys(monDe);
+  } else {
+    monChon = Array.isArray(body.monChon) ? body.monChon.map(String) : [];
+    var monCuaKy = monCuaHocKy_(hk.maHocKy).map(function (m) { return m.ma; });
+    var khacNhau = {};
+    monChon.forEach(function (m) { khacNhau[m] = true; });
+    if (monChon.length !== soMon || Object.keys(khacNhau).length !== soMon || monChon.some(function (m) { return monCuaKy.indexOf(m) === -1; })) {
+      throw loi_('mon_sai', 'Hãy chọn đúng ' + soMon + ' môn khác nhau.');
+    }
+    // Rút đề ngoài khóa để nhiều người bắt đầu cùng lúc không chờ nhau lâu.
+    var pool = docBang_('CauHoi')
+      .filter(function (c) { return c.maHocKy === hk.maHocKy; })
+      .map(function (c) { return { id: c.id, maMon: c.maMon, soTuan: Number(c.soTuan), tacGia: c.tacGia, trangThai: c.trangThai }; });
+    de = rutDe(pool, { email: email, monChon: monChon, soCauMoiMon: soCauMoiMon, soTuan: t.soTuan });
+    if (de.ds.length === 0) throw loi_('khong_du_cau', 'Chưa có đủ câu hỏi để ra đề. Báo lớp trưởng.');
   }
-
-  // Rút đề ngoài khóa để nhiều người bắt đầu cùng lúc không chờ nhau lâu.
-  var pool = docBang_('CauHoi')
-    .filter(function (c) { return c.maHocKy === hk.maHocKy; })
-    .map(function (c) { return { id: c.id, maMon: c.maMon, soTuan: Number(c.soTuan), tacGia: c.tacGia, trangThai: c.trangThai }; });
-  var de = rutDe(pool, { email: email, monChon: monChon, soCauMoiMon: soCauMoiMon, soTuan: t.soTuan });
-  if (de.ds.length === 0) throw loi_('khong_du_cau', 'Chưa có đủ câu hỏi để ra đề. Báo lớp trưởng.');
 
   return voiKhoa_(function () {
     var daCo = luotThiCua_(hk.maHocKy, t.soTuan, email);

@@ -144,16 +144,39 @@ function hdTaoDeThongTin_(email) {
     soCauMoiDe: Number(cauHinh.soCauDeTuTao) || 30,
     soCauToiThieu: Number(cauHinh.soCauToiThieuDeTuTao) || 10,
     mon: mon,
+    dePhatHanh: dePhatHanhChoToi_(email, hk),
     dangMo: !!luotTaoDeDangMo_(email),
   };
 }
 
+// Các đề do chủ phát hành kèm trạng thái đã làm của người này.
+function dePhatHanhChoToi_(email, hk) {
+  if (!hk) return [];
+  var cauTheoId = cauHoiTheoId_(hk.maHocKy);
+  var daLam = {};
+  docBang_('DeTuTao').forEach(function (r) {
+    if (r.idDe && chuanHoaEmail(r.email) === email && daNopLuot_(r) && (!daLam[r.idDe] || Number(r.diem) > daLam[r.idDe].diem)) {
+      daLam[r.idDe] = { diem: Number(r.diem), soDung: Number(r.soDung), soCau: Number(r.soCau) };
+    }
+  });
+  return docBang_('DeThi').filter(function (d) { return d.trangThai === 'phat_hanh'; }).map(function (d) {
+    var ids = jsonAnToan_(d.dsIdCau, []);
+    var conLai = ids.filter(function (id) { return cauTheoId[id] && cauTheoId[id].trangThai === 'active'; }).length;
+    return { idDe: d.idDe, tenDe: d.tenDe, soCau: conLai, daLam: daLam[d.idDe] || null };
+  });
+}
+
 function guiLuotTaoDe_(luot, maHocKy) {
   var dl = jsonAnToan_(luot.dsCau, { ds: [] });
+  var tenDe = '';
+  if (luot.idDe) {
+    var deP = docBang_('DeThi').filter(function (d) { return d.idDe === luot.idDe; })[0];
+    tenDe = 'Đề: ' + (deP ? deP.tenDe : luot.idDe);
+  }
   return {
     trangThai: 'dang_lam',
     maLuot: luot.maLuot,
-    tenMon: tenMonTheoMa_(maHocKy)[luot.maMon] || luot.maMon,
+    tenMon: tenDe || tenMonTheoMa_(maHocKy)[luot.maMon] || luot.maMon,
     chuong: jsonAnToan_(luot.chuong, []),
     cauHoi: dungDeGui_(luot, cauHoiTheoId_(maHocKy)),
     soCau: dl.ds.length,
@@ -165,6 +188,7 @@ function hdTaoDeBat_(email, tv, body) {
   if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
   var cu = luotTaoDeDangMo_(email);
   if (cu) return guiLuotTaoDe_(cu, hk.maHocKy);
+  if (body.idDe) return batDeDaPhatHanh_(email, hk, String(body.idDe));
 
   var cauHinh = layCauHinh_();
   var maMon = String(body.maMon || '');
@@ -199,6 +223,26 @@ function hdTaoDeBat_(email, tv, body) {
     themDong_('DeTuTao', {
       maLuot: maLuot, email: email, batDauLuc: new Date(), maMon: maMon, chuong: JSON.stringify(Array.isArray(body.chuong) ? body.chuong.slice(0, 60) : []),
       dsCau: JSON.stringify({ ds: de.ds, monChon: [maMon] }), traLoi: '{}', tuanKey: tuanKeVN(Date.now()),
+    });
+    return guiLuotTaoDe_(luotTaoDeDangMo_(email), hk.maHocKy);
+  });
+}
+
+// Làm một đề do chủ phát hành: mọi người cùng bộ câu, thứ tự khác nhau.
+function batDeDaPhatHanh_(email, hk, idDe) {
+  var de = docBang_('DeThi').filter(function (r) { return r.idDe === idDe && r.trangThai === 'phat_hanh'; })[0];
+  if (!de) throw loi_('khong_thay', 'Đề không tồn tại hoặc chưa được phát hành.');
+  var cauTheoId = cauHoiTheoId_(hk.maHocKy);
+  var ids = jsonAnToan_(de.dsIdCau, []).filter(function (id) { return cauTheoId[id] && cauTheoId[id].trangThai === 'active'; });
+  if (ids.length < 5) throw loi_('khong_du_cau', 'Đề này không còn đủ câu hợp lệ.');
+  var dd = dungDeCoDinh(ids);
+  return voiKhoa_(function () {
+    var daMo = luotTaoDeDangMo_(email);
+    if (daMo) return guiLuotTaoDe_(daMo, hk.maHocKy);
+    var maLuot = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
+    themDong_('DeTuTao', {
+      maLuot: maLuot, email: email, batDauLuc: new Date(), maMon: '', chuong: '[]', idDe: idDe,
+      dsCau: JSON.stringify({ ds: dd.ds, monChon: [] }), traLoi: '{}', tuanKey: tuanKeVN(Date.now()),
     });
     return guiLuotTaoDe_(luotTaoDeDangMo_(email), hk.maHocKy);
   });
@@ -246,14 +290,17 @@ function hdTaoDeNop_(email, tv, body) {
     var tuanKey = tuanKeVN(Date.now());
     var diemMoi = Number(cauHinh.diemMoiDeTuTao) || 20;
     var tran = Number(cauHinh.diemToiDaDeTuTaoTuan) || 120;
-    var thuong = hopLe ? diemThuongLuyenTap(diemTaoDeTuanKey_(email, tuanKey), diemMoi, tran) : 0;
+    var khoaDiem = moi.idDe ? 'dephat:' + moi.idDe + ':' + email : 'td:' + maLuot;
+    // Đề do chủ phát hành chỉ được cộng điểm lần làm đầu tiên của mỗi người.
+    var daNhan = moi.idDe && docBang_('Diem').some(function (r) { return r.khoa === khoaDiem; });
+    var thuong = hopLe && !daNhan ? diemThuongLuyenTap(diemTaoDeTuanKey_(email, tuanKey), diemMoi, tran) : 0;
 
     ghiCaDong_('DeTuTao', moi._dong, {
       nopLuc: new Date(), traLoi: JSON.stringify(traLoi), soDung: kq.soDung, soCau: kq.soCau,
       diem: diemCaNhan(kq.soDung, kq.soCau), diemThuong: thuong, tuanKey: tuanKey,
     });
     if (thuong > 0) {
-      themDiemNhieu_([{ email: email, loai: 'tao_de', soDiem: thuong, tuanKey: tuanKey, khoa: 'td:' + maLuot, ghiChu: moi.maMon }]);
+      themDiemNhieu_([{ email: email, loai: 'tao_de', soDiem: thuong, tuanKey: tuanKey, khoa: khoaDiem, ghiChu: moi.idDe || moi.maMon }]);
     }
     ghiNhatKy_(email, 'nopDeTuTao', maLuot, { soDung: kq.soDung, soCau: kq.soCau, thuong: thuong });
     return traVe(docMotDong_('DeTuTao', moi._dong), thuong);

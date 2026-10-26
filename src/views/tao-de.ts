@@ -98,6 +98,19 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
     return;
   }
 
+  if (tt.dePhatHanh.length) {
+    goc.append(h('h2', {}, 'Đề do lớp trưởng phát hành'),
+      h('p', { class: 'phu nho' }, 'Mỗi đề chỉ được cộng điểm ở lần làm đầu tiên.'),
+      ...tt.dePhatHanh.map((d) => h('button', {
+        class: 'card card-mon nut-the', style: '--mau:#ffd166',
+        onclick: async (ev: Event) => {
+          const nut = ev.currentTarget as HTMLButtonElement;
+          nut.disabled = true;
+          try { lamDe(goc, await goi<DeTaoDe>('taoDe.bat', { idDe: d.idDe })); } catch (e) { thongBao((e as LoiApi).message, 'loi'); nut.disabled = false; }
+        },
+      }, h('div', { class: 'mon-ten' }, d.tenDe),
+        h('div', { class: 'phu nho' }, d.daLam ? `Đã làm: ${d.daLam.soDung}/${d.daLam.soCau} câu (${d.daLam.diem} điểm). Bấm để làm lại, không cộng thêm điểm.` : `${d.soCau} câu · làm lần đầu được +${tt.diemMoiDe} điểm`))));
+  }
   let monChon = '';
   const chuongChon = new Set<string>();
   const vungChuong = h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chọn môn ở trên để chọn chương.'));

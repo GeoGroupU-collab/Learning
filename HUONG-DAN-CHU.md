@@ -402,3 +402,53 @@ Cảm giác "đang tải lâu" chủ yếu do mỗi lần bấm là một yêu c
 - **Khung chờ** thay cho chữ "Đang tải..." và nối sẵn tới máy chủ Google khi mở trang.
 
 Giới hạn còn lại: Apps Script thỉnh thoảng bị **"khởi động nguội"** (vài giây ở yêu cầu đầu tiên sau lúc không ai dùng). Đây là đặc điểm của Google, miễn phí thì không tránh hết được. Nhờ bản lưu trên máy, người dùng vẫn thấy giao diện ngay trong lúc chờ.
+
+---
+
+## Phần 7. Nhờ AI soạn câu hỏi, tạo đề thi, huy hiệu và biểu đồ (mốc M5)
+
+### Bước 29. Cập nhật Apps Script và web
+
+1. Dán `backend/dist/Code.gs` mới, chạy `khoiTao` (thêm cột `idDe` vào tab `Tuan` và `DeTuTao`), triển khai **Phiên bản mới**.
+2. Commit và push bản web bằng GitHub Desktop, chờ Actions tick xanh, **Ctrl+F5**.
+
+### Nhờ AI soạn câu hỏi (dành cho cả lớp, hướng dẫn gửi lớp được)
+
+Trong **Sự kiện**, **Nộp câu hỏi** có mục **Dùng AI soạn câu hỏi**:
+
+1. Chọn các môn bạn sẽ nộp ở Bước 1.
+2. Bấm **Tải file prompt mẫu (.md)**. File có sẵn hướng dẫn, quy tắc soạn câu, danh sách chương của từng môn và **mẫu 5 câu cho mỗi môn đã chọn**.
+3. Mở AI bất kỳ (ChatGPT, Claude, Gemini...), **bỏ file .md này vào**.
+4. **Đưa thêm tài liệu tham khảo** (PDF, slide, giáo trình) của đúng môn và chương.
+5. **Nói rõ môn và chương**, ví dụ: "Soạn câu hỏi theo file mẫu cho môn Khoa học dữ liệu, chương 2: Thống kê, chỉ dựa trên tài liệu đính kèm".
+6. Sao chép toàn bộ câu trả lời của AI, quay lại web, dán vào ô **Dán câu hỏi từ AI**, bấm **Nhập vào form**. Web tự điền nội dung, 4 đáp án, đáp án đúng, trang nguồn, giải thích và chọn đúng chương.
+7. Web báo các chỗ thiếu hoặc chương không khớp. **Kiểm tra từng câu với tài liệu gốc**, sửa nếu cần, rồi bấm **Nộp tất cả**.
+
+Lưu ý: AI có thể nhầm hoặc bịa, người nộp chịu trách nhiệm về câu mình nộp. Máy chủ vẫn kiểm tra lại (đủ 5 câu mỗi môn, 4 đáp án khác nhau, không trùng câu đã có). Nếu môn đã có danh sách chương (**Quản trị**, **Chương**), AI được cho biết tên chương đúng để ghi.
+
+### Tạo đề thi từ ngân hàng (chủ)
+
+**Quản trị**, tab **Đề thi**:
+
+1. **Chọn môn, số câu, chương:** tích môn muốn lấy, nhập số câu, và (nếu muốn) mở "Chỉ lấy một số chương".
+2. **Bộ lọc:** chỉ lấy câu của một số tuần, loại trừ tác giả (nhập email), và **Tránh câu đã dùng trong các đề trước**. Chỉ lấy câu đang dùng.
+3. Bấm **Rút ngẫu nhiên**. Xem từng câu, bấm **Thay câu khác** (cùng môn, cùng chương), **Bỏ**, hoặc dùng **Thêm câu thủ công từ ngân hàng**. Nếu ngân hàng không đủ câu, web báo rõ môn nào thiếu bao nhiêu.
+4. Đặt **Tên đề**, bấm **Lưu nháp** hoặc **Lưu và phát hành cho thành viên**.
+
+Với mỗi đề đã lưu bạn có:
+- **In đề** và **In đáp án:** mở trang in, chọn "Lưu dưới dạng PDF" trong hộp thoại in. Bản đáp án riêng, có giải thích, chương và trang nguồn.
+- **Tải đề .html**, **Tải đáp án .html**, **JSON**, **CSV**.
+- **Phát hành cho thành viên:** hiện trong mục **Tạo đề thi** của thành viên với tên "Đề do lớp trưởng phát hành". Mỗi người làm lần đầu được **+20 điểm** (tính vào trần 120 điểm mỗi tuần), các lần sau làm lại không cộng. **Gỡ phát hành** để ẩn.
+- **Gán làm đề sự kiện:** chọn tuần rồi bấm **Gán làm đề sự kiện**. Phòng thi tuần đó dùng đúng đề này, cả lớp cùng bộ câu (thứ tự câu và đáp án mỗi người khác nhau), không cần chọn môn. Dùng cho tuần chung kết. Chỉ gán được **trước giờ mở cửa** của tuần đó.
+- Thời gian làm bài của tuần đề cố định: **Quản trị**, **Tuần**, mục **Thời gian làm bài (phút)**.
+
+Lưu ý quan trọng cho đề sự kiện cố định:
+- Đề cố định **không loại câu do chính người thi nộp**. Nếu muốn tránh, dùng bộ lọc **Loại trừ tác giả** khi dựng đề.
+- Đề đang gán cho tuần đã mở cửa thì không sửa danh sách câu được. Câu bị xóa khỏi ngân hàng sau khi gán sẽ bị bỏ khỏi đề.
+
+### Huy hiệu và lịch sử điểm nhóm
+
+Mục **Xếp hạng**, tab **Nhóm**:
+- **Lịch sử điểm nhóm theo tuần:** biểu đồ đường, nhóm của bạn vẽ đậm.
+- **Huy hiệu:** **Đủ quân** (mọi thành viên tính trong mẫu số cùng thi trong tuần, cộng dồn số tuần) và **Hạng nhất liên tiếp** (đứng hạng 1 từ 2 tuần liền nhau trở lên, tính đến tuần gần nhất). Mục **Nhóm** cũng hiện huy hiệu của nhóm bạn.
+- Giải **nhóm tiến bộ nhất** đang **tắt** theo yêu cầu của bạn (khóa `giaiTienBo` trong `CauHinh`).

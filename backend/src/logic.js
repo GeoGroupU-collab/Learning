@@ -438,6 +438,36 @@ function soSanhCauHoi(cu, moi) {
   return diff;
 }
 
+// ---------- Tạo đề từ ngân hàng ----------
+
+// Dựng đề cố định từ danh sách id: mỗi người nhận cùng bộ câu nhưng thứ tự câu và thứ tự đáp án khác nhau.
+function dungDeCoDinh(ids, rng) {
+  var ds = xao_(ids, rng).map(function (id) {
+    return { id: id, tt: xao_(['A', 'B', 'C', 'D'], rng).join('') };
+  });
+  return { ds: ds, thieu: 0, canhBao: [] };
+}
+
+// Rút câu theo phân bổ. phanBo: [{maMon, chuong: [mã hoặc tên chương], soCau}]. Không rút trùng câu.
+// Trả {chon: [id], thieu: [{maMon, can, co}]}.
+function rutTheoPhanBo(cacCau, phanBo, rng) {
+  var da = {};
+  var chon = [];
+  var thieu = [];
+  phanBo.forEach(function (q) {
+    var chuong = (q.chuong || []).map(chuanHoaChu).filter(function (x) { return x !== ''; });
+    var set = {};
+    chuong.forEach(function (k) { set[k] = true; });
+    var ung = cacCau.filter(function (c) {
+      return !da[c.id] && c.maMon === q.maMon && (chuong.length === 0 || set[chuanHoaChu(c.maChuong)]);
+    });
+    var lay = xao_(ung, rng).slice(0, q.soCau);
+    lay.forEach(function (c) { da[c.id] = true; chon.push(c.id); });
+    if (lay.length < q.soCau) thieu.push({ maMon: q.maMon, can: q.soCau, co: lay.length });
+  });
+  return { chon: chon, thieu: thieu };
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     docGpa: docGpa, chiaNhom: chiaNhom, doLechGpa: doLechGpa, chuanHoaEmail: chuanHoaEmail, laLinkHopLe: laLinkHopLe,
@@ -446,6 +476,6 @@ if (typeof module !== 'undefined') {
     rutDe: rutDe, chamBai: chamBai, diemCaNhan: diemCaNhan, diemNhomTuan: diemNhomTuan, xepHangNhom: xepHangNhom, diemLuyKe: diemLuyKe,
     CAP_LON: CAP_LON, capTuDiem: capTuDiem, tuanKeVN: tuanKeVN, diemThuongLuyenTap: diemThuongLuyenTap, diemThuongNhom: diemThuongNhom,
     docBangDiemNhom: docBangDiemNhom, chonDanhHieuCaNhan: chonDanhHieuCaNhan, xepHangCaNhan: xepHangCaNhan, cauKhoNhat: cauKhoNhat,
-    trangThaiTheoBaoSai: trangThaiTheoBaoSai, kiemTraMotCau: kiemTraMotCau, soSanhCauHoi: soSanhCauHoi,
+    dungDeCoDinh: dungDeCoDinh, rutTheoPhanBo: rutTheoPhanBo, trangThaiTheoBaoSai: trangThaiTheoBaoSai, kiemTraMotCau: kiemTraMotCau, soSanhCauHoi: soSanhCauHoi,
   };
 }

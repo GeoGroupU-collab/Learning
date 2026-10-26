@@ -48,6 +48,28 @@ export async function vePhongThi(goc: HTMLElement): Promise<void> {
     return;
   }
   const cfg = tt.thi ?? { soMonThi: 2, soCauMoiMonThi: 20, thoiGianPhut: 40 };
+  if (tt.deCoDinh) {
+    const nutVao = h('button', { class: 'nut' }, 'Bắt đầu thi') as HTMLButtonElement;
+    nutVao.addEventListener('click', async () => {
+      if (!confirm(`Bắt đầu thi ngay?\n\n${tt.deCoDinh!.soCau} câu trong ${cfg.thoiGianPhut} phút. Mỗi người chỉ thi một lần, đồng hồ chạy ngay và không dừng được.`)) return;
+      nutVao.disabled = true;
+      try {
+        const r = await goi<DuLieuThi | LuotThiTomTat>('batDauThi', {});
+        if (r.trangThai === 'da_nop') veKetQua(goc, r as LuotThiTomTat);
+        else chayBaiThi(goc, r as DuLieuThi, tt.mon ?? []);
+      } catch (e) {
+        thongBao((e as LoiApi).message, 'loi');
+        nutVao.disabled = false;
+      }
+    });
+    goc.append(
+      h('div', { class: 'card' },
+        h('div', { class: 'mon-ten' }, tt.deCoDinh.tenDe),
+        h('p', {}, `Đề chung cho cả lớp: ${tt.deCoDinh.soCau} câu, ${cfg.thoiGianPhut} phút. Mọi người cùng bộ câu, thứ tự câu và đáp án khác nhau. Mỗi người thi một lần.`),
+        h('p', { class: 'phu nho' }, 'Bài tự lưu mỗi 30 giây. Nếu mất mạng hay tắt trang, mở lại phòng thi để làm tiếp; đồng hồ vẫn chạy.')),
+      nutVao);
+    return;
+  }
   const chon: string[] = [];
   const nutBatDau = h('button', { class: 'nut', disabled: true }, 'Bắt đầu thi') as HTMLButtonElement;
   const vung = h('div', { class: 'card' }, h('h3', {}, `Chọn ${cfg.soMonThi} môn để thi`));

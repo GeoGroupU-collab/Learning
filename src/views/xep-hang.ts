@@ -2,6 +2,8 @@ import { goiNhanh } from '../api';
 import { h, khungCho, xoaHet } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
 import { theCap } from '../cap';
+import { chuanBiBieuDo, veBieuDo } from '../bieu-do';
+import { nhanHuyHieu, tinhHuyHieu } from '../huy-hieu';
 import type { KetQuaXepHang, KetQuaXepHangCaNhan, NhomXepHang } from '../types';
 
 function bang(ds: NhomXepHang[], nhomToi: string | null, coThamGia: boolean): HTMLElement {
@@ -33,6 +35,17 @@ function ve(vung: HTMLElement, kq: KetQuaXepHang): void {
     vung.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chưa có lịch sự kiện.')));
   }
   if (kq.luyKe.length) vung.append(h('div', { class: 'card' }, h('h3', {}, 'Lũy kế học kỳ'), bang(kq.luyKe, kq.nhomToi, false)));
+  const bd = chuanBiBieuDo(kq.cacTuan, kq.nhomToi);
+  if (bd.tuan.length) {
+    vung.append(h('div', { class: 'card' }, h('h3', {}, 'Lịch sử điểm nhóm theo tuần'), veBieuDo(bd) as unknown as HTMLElement,
+      h('div', { class: 'chu-giai' }, ...bd.nhom.map((n) => h('span', { class: 'muc-giai' }, h('span', { class: 'cham-giai', style: `background:${n.mau}` }), n.laToi ? `${n.ten} (nhóm bạn)` : n.ten)))));
+    const hh = bd.nhom.map((n) => ({ ten: n.ten, laToi: n.laToi, nhan: nhanHuyHieu(tinhHuyHieu(kq.cacTuan, n.ma)) })).filter((x) => x.nhan.length);
+    if (hh.length) {
+      vung.append(h('div', { class: 'card' }, h('h3', {}, 'Huy hiệu'),
+        ...hh.map((x) => h('div', { class: 'hang huy-hieu-dong' }, h('span', { class: x.laToi ? 'mon-ten' : '' }, x.ten), h('span', { class: 'hang-nut' }, ...x.nhan.map((n) => h('span', { class: 'nhan nhan-vang' }, n))))),
+        h('p', { class: 'phu nho' }, 'Đủ quân: mọi thành viên trong mẫu số cùng thi trong tuần. Hạng nhất liên tiếp: đứng hạng 1 từ 2 tuần liền nhau trở lên.')));
+    }
+  }
   const daChot = kq.cacTuan.filter((c) => !t || c.soTuan !== t.soTuan || c.daChot);
   if (daChot.length) {
     vung.append(h('h2', {}, 'Các tuần đã chốt'));

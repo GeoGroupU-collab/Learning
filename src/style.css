@@ -167,3 +167,19 @@ summary { display: flex; align-items: center; justify-content: space-between; ga
 .dong-cho.ngan { width: 40%; }
 
 .gop-chuong { padding: 6px 0; border-top: 1px solid var(--vien); gap: 8px; flex-wrap: wrap; }
+
+/* Đề thi, huy hiệu, biểu đồ, AI */
+.bieu-do { width: 100%; height: auto; display: block; }
+.chu-giai { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 0.82rem; color: var(--chu-phu); }
+.muc-giai { display: inline-flex; align-items: center; gap: 6px; }
+.cham-giai { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.nhan-vang { color: #ffd166; border-color: rgba(255, 209, 102, 0.5); background: rgba(255, 209, 102, 0.12); margin: 2px; }
+.nhan-xam { color: var(--chu-phu); border-color: var(--vien); background: transparent; }
+.huy-hieu-dong { padding: 6px 0; border-top: 1px solid var(--vien); gap: 8px; flex-wrap: wrap; }
+.o-so-cau { max-width: 120px; }
+.chuong-chon { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; }
+.nhan-nho { display: flex; align-items: center; gap: 6px; min-height: 40px; font-size: 0.9rem; cursor: pointer; }
+.nhan-nho input { width: 20px; height: 20px; }
+.huong-dan { padding-left: 20px; margin: 8px 0; }
+.huong-dan li { margin: 4px 0; }
+.the-ai { border-color: #7b9cff; }

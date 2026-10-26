@@ -1,6 +1,8 @@
 import { goi, goiNhanh, LoiApi } from '../api';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { datGioMayChu, demNguoc, dinhDangNgay, dungDongHo } from '../gio';
+import { taiXuong } from '../csv';
+import { docCauHoiTuAi, taoPromptMd } from '../prompt-ai';
 import type { BanNhap, CauCuaToi, CauNhap, MonNop, TuanHienTai } from '../types';
 
 const NHAN_TRANG_THAI: Record<string, string> = {
@@ -259,9 +261,55 @@ export async function veNopCauHoi(goc: HTMLElement): Promise<void> {
     }
   };
 
+  // Nhờ AI soạn: tải file prompt mẫu, đưa cho AI cùng tài liệu, rồi dán câu trả lời vào đây.
+  const theAi = (): HTMLElement => {
+    const vungKq = h('div', {});
+    const o = h('textarea', { class: 'o-nhap', rows: 6, placeholder: 'Dán toàn bộ câu trả lời của AI vào đây' }) as HTMLTextAreaElement;
+    const tai = (): void => {
+      const chon = ban.monChon.map((ma) => mon.find((m) => m.ma === ma)).filter((m): m is MonNop => !!m);
+      const dung = chon.length ? chon : mon;
+      taiXuong('prompt-soan-cau-hoi.md', taoPromptMd(dung, yc.soCauMoiMon), 'text/markdown');
+      thongBao(chon.length ? `Đã tải file mẫu cho ${chon.length} môn bạn chọn` : 'Đã tải file mẫu cho tất cả các môn');
+    };
+    const nhap = (): void => {
+      xoaHet(vungKq);
+      const kq = docCauHoiTuAi(o.value, mon, yc.soCauMoiMon);
+      const canhBao = [...kq.canhBaoChung];
+      let daNhap = 0;
+      kq.mon.forEach((m) => {
+        if (!ban.monChon.includes(m.ma)) {
+          if (ban.monChon.length >= yc.soMon) { canhBao.push(`Môn "${m.ten}" bị bỏ qua vì bạn đã chọn đủ ${yc.soMon} môn khác.`); return; }
+          ban.monChon.push(m.ma);
+        }
+        const ds = m.cau.slice();
+        while (ds.length < yc.soCauMoiMon) ds.push(cauTrong());
+        ban.cau[m.ma] = ds;
+        daNhap += m.cau.length;
+        m.canhBao.forEach((c) => canhBao.push(`${m.ten}: ${c}`));
+      });
+      if (daNhap > 0) { veChonMon(); veCau(); luuNhap(); }
+      vungKq.append(
+        h('p', { class: daNhap ? 'tt-tot' : 'loi' }, daNhap ? `Đã nhập ${daNhap} câu vào form bên dưới. Hãy kiểm tra từng câu với tài liệu gốc rồi bấm Nộp tất cả.` : 'Chưa nhập được câu nào.'),
+        ...(canhBao.length ? [h('ul', { class: 'loi nho' }, ...canhBao.map((c) => h('li', {}, c)))] : []));
+    };
+    return h('details', { class: 'card the-ai' },
+      h('summary', {}, 'Dùng AI soạn câu hỏi (tải file mẫu, dán kết quả)'),
+      h('ol', { class: 'huong-dan' },
+        h('li', {}, 'Chọn môn ở Bước 1, rồi bấm "Tải file prompt mẫu". File .md có sẵn mẫu 5 câu mỗi môn.'),
+        h('li', {}, 'Mở AI (ChatGPT, Claude, Gemini...), bỏ file .md này vào.'),
+        h('li', {}, 'Đưa thêm tài liệu tham khảo (PDF, slide, giáo trình) của đúng môn và chương.'),
+        h('li', {}, 'Nói rõ môn và chương, ví dụ: "Soạn câu hỏi theo file mẫu cho môn Khoa học dữ liệu, chương 2, dựa trên tài liệu đính kèm".'),
+        h('li', {}, 'Sao chép câu trả lời của AI, dán vào ô bên dưới, bấm "Nhập vào form", rồi kiểm tra lại và nộp.')),
+      h('button', { class: 'nut', type: 'button', onclick: tai }, 'Tải file prompt mẫu (.md)'),
+      h('label', { class: 'nhan-o' }, 'Dán câu hỏi từ AI', o),
+      h('button', { class: 'nut nut-phu', type: 'button', onclick: nhap }, 'Nhập vào form'),
+      vungKq,
+      h('p', { class: 'phu nho' }, 'AI có thể nhầm hoặc bịa. Bạn chịu trách nhiệm đối chiếu từng câu với tài liệu trước khi nộp.'));
+  };
+
   goc.append(
     h('div', { class: 'card' }, h('p', {}, 'Mỗi câu gồm nội dung, 4 đáp án khác nhau, đáp án đúng và trang hoặc slide nguồn. Không trùng với câu đã có. Bản nháp tự lưu trên máy chủ, bạn thoát ra vào lại vẫn còn.')),
-    vungChonMon, vungCau);
+    vungChonMon, theAi(), vungCau);
   veChonMon();
   veCau();
 }

@@ -98,6 +98,7 @@ export interface TuanHienTai {
   mien?: boolean;
   soMienDaDung?: number;
   thi?: { soMonThi: number; soCauMoiMonThi: number; thoiGianPhut: number };
+  deCoDinh?: null | { soCau: number; tenDe: string };
   luotThi?: null | LuotThiTomTat;
 }
 
@@ -178,6 +179,8 @@ export interface CauCuaToi {
 }
 
 export interface TuanQuanTri {
+  idDe?: string;
+  thoiGianPhut?: number;
   soTuan: number;
   hanNop: number;
   moCua: number;
@@ -205,6 +208,7 @@ export interface ThongTinTaoDe {
   soCauMoiDe: number;
   soCauToiThieu: number;
   mon: { ma: string; ten: string; mau: string; soCau: number; chuong: { ma: string; ten: string; soCau: number }[] }[];
+  dePhatHanh: { idDe: string; tenDe: string; soCau: number; daLam: null | { diem: number; soDung: number; soCau: number } }[];
   dangMo: boolean;
 }
 
@@ -325,4 +329,39 @@ export interface XemTruocNhap {
   loi: { id: string; loi: string[] }[];
   khongCo: string[];
   khongDoi: number;
+}
+
+export interface CauDe {
+  id: string;
+  soTuan: number;
+  maMon: string;
+  tenMon: string;
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  giaiThich: string;
+  tacGia: string;
+  tenTacGia: string;
+  trangThai: string;
+}
+
+export interface DeThiTomTat {
+  idDe: string;
+  tenDe: string;
+  soCau: number;
+  trangThai: 'nhap' | 'phat_hanh' | 'luu_tru';
+  ngayTao: string;
+  tuanGan: number | null;
+}
+
+export interface DeThiDayDu {
+  idDe: string;
+  tenDe: string;
+  trangThai: string;
+  cau: CauDe[];
 }

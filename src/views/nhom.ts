@@ -1,6 +1,7 @@
 import { docCache, ghiCache, goi, LoiApi } from '../api';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
+import { nhanHuyHieu, tinhHuyHieu } from '../huy-hieu';
 import type { ChiTietNhom, KetQuaXepHang, Me, ThanhVienNhom } from '../types';
 
 const NHAN_TT: Record<string, string> = {
@@ -34,7 +35,8 @@ function veDiemNhom(vung: HTMLElement, xh: KetQuaXepHang | null): void {
       h('div', {}, h('div', { class: 'phu nho' }, `Tuần ${t.soTuan}${t.daChot ? '' : ' (tạm tính)'}`), h('div', { class: 'diem-vua' }, n.diem.toFixed(1))),
       h('div', {}, h('div', { class: 'phu nho' }, 'Hạng'), h('div', { class: 'diem-vua' }, `${n.hang}/${t.nhom.length}`)),
       h('div', {}, h('div', { class: 'phu nho' }, 'Lũy kế'), h('div', { class: 'diem-vua' }, lk ? lk.diem.toFixed(1) : '—'))),
-    h('p', { class: 'phu nho' }, `${n.soThamGia ?? 0}/${n.soTinh ?? 0} thành viên đã thi tuần này.`));
+    h('p', { class: 'phu nho' }, `${n.soThamGia ?? 0}/${n.soTinh ?? 0} thành viên đã thi tuần này.`),
+    ...(toi ? nhanHuyHieu(tinhHuyHieu(xh!.cacTuan, toi)).map((x) => h('span', { class: 'nhan nhan-vang' }, x)) : []));
 }
 
 export async function veNhom(goc: HTMLElement, me: Me): Promise<void> {

@@ -147,7 +147,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'cauHoiCuaToi':
       return cauDaNop;
     case 'admin.dsTuan':
-      return { maHocKy: 'hk1-2026-2027', tuan: [1, 2, 3, 4, 5].map((i) => ({ soTuan: i, hanNop: Date.now() + i * 86400000, moCua: Date.now() + (i + 1) * 86400000, dongCua: Date.now() + (i + 3) * 86400000, trangThai: 'nop_cau_hoi' })) };
+      return { maHocKy: 'hk1-2026-2027', tuan: [1, 2, 3, 4, 5].map((i) => ({ soTuan: i, hanNop: Date.now() + i * 86400000, moCua: Date.now() + (i + 1) * 86400000, dongCua: Date.now() + (i + 3) * 86400000, trangThai: 'nop_cau_hoi', idDe: i === 5 ? 'de-1' : '', thoiGianPhut: i === 5 ? 60 : undefined })) };
     case 'admin.taoLichTuan':
     case 'admin.suaTuan':
       return { soTuan: 5 };
@@ -174,12 +174,14 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     }
     case 'xepHang': {
       const nhom = (hang: number, ten: string, diem: number, thamGia: number) => ({ maNhom: 'n' + hang, tenNhom: ten, diem, hang, soTinh: 6, soThamGia: thamGia });
-      const tuan = [nhom(1, 'Nhóm 3', 78.5, 6), nhom(2, 'Nhóm 1', 64.2, 5), nhom(3, 'Nhóm 2', 41.7, 4)];
+      const tuan1 = [nhom(1, 'Nhóm 3', 78.5, 6), nhom(2, 'Nhóm 1', 64.2, 5), nhom(3, 'Nhóm 2', 41.7, 4)];
+      const tuan2 = [nhom(1, 'Nhóm 3', 82, 6), nhom(2, 'Nhóm 1', 70.4, 6), nhom(3, 'Nhóm 2', 52, 5)];
+      const tuan3 = [nhom(1, 'Nhóm 3', 88, 6), nhom(2, 'Nhóm 1', 66, 5), nhom(3, 'Nhóm 2', 60.5, 5)];
       return {
-        tuanHienTai: { soTuan: 1, daChot: false, nhom: tuan },
-        cacTuan: [],
-        luyKe: tuan.map((n) => ({ maNhom: n.maNhom, tenNhom: n.tenNhom, diem: n.diem, hang: n.hang })),
-        vinhDanh: { soTuan: 1, nhom: [{ tenNhom: 'Nhóm 3', diem: 78.5 }] },
+        tuanHienTai: { soTuan: 4, daChot: false, nhom: tuan3 },
+        cacTuan: [{ soTuan: 1, daChot: true, nhom: tuan1 }, { soTuan: 2, daChot: true, nhom: tuan2 }, { soTuan: 3, daChot: true, nhom: tuan3 }],
+        luyKe: tuan3.map((n) => ({ maNhom: n.maNhom, tenNhom: n.tenNhom, diem: n.diem, hang: n.hang })),
+        vinhDanh: { soTuan: 3, nhom: [{ tenNhom: 'Nhóm 3', diem: 88 }] },
         nhomToi: 'n2',
       };
     }
@@ -188,6 +190,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'taoDe.thongTin':
       return {
         cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
+        dePhatHanh: [{ idDe: 'de-2', tenDe: 'Đề ôn Triết chương 1', soCau: 20, daLam: null }, { idDe: 'de-9', tenDe: 'Đề ôn giữa kỳ', soCau: 25, daLam: { diem: 68, soDung: 17, soCau: 25 } }],
         mon: MON_GIA.map((m, i) => ({
           ma: m.ma, ten: m.ten, mau: m.mau, soCau: i === 3 ? 4 : 75,
           chuong: i === 0 ? [{ ma: 'c1', ten: 'Chương 1: Mở đầu', soCau: 40 }, { ma: 'c2', ten: 'Chương 2: Thống kê', soCau: 25 }, { ma: 'c3', ten: 'Chương 3: Học máy', soCau: 6 }, { ma: 'c4', ten: 'Chương 4: Trống', soCau: 0 }] : [],
@@ -206,6 +209,22 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       tongDiemGia += thuong;
       return { soDung: 18, soCau: 30, diem: 60, diemThuong: thuong, cauHoi: cauXemLaiGia(10), cap: capGia() };
     }
+    case 'admin.dsDeThi':
+      return [
+        { idDe: 'de-1', tenDe: 'Đề chung kết học kỳ 1', soCau: 40, trangThai: 'nhap', ngayTao: '2026-12-01T10:00:00Z', tuanGan: 5 },
+        { idDe: 'de-2', tenDe: 'Đề ôn Triết chương 1', soCau: 20, trangThai: 'phat_hanh', ngayTao: '2026-11-20T10:00:00Z', tuanGan: null },
+      ];
+    case 'admin.layDeThi':
+      return { idDe: 'de-1', tenDe: 'Đề chung kết học kỳ 1', trangThai: 'nhap', cau: nganHangGia.slice(0, 3).map((c) => ({ ...c, tenMon: 'Khoa học dữ liệu', maMon: 'khoa-hoc-du-lieu' })) };
+    case 'admin.xemTruocDeThi':
+      return { cau: nganHangGia.slice(0, 5).map((c) => ({ ...c, tenMon: 'Khoa học dữ liệu', maMon: 'khoa-hoc-du-lieu' })), thieu: [{ maMon: 'dia-chat-kien-truc', can: 20, co: 12 }], soUngVien: 60 };
+    case 'admin.thayCauDe':
+      return { cau: { ...nganHangGia[6], tenMon: 'Khoa học dữ liệu', maMon: 'khoa-hoc-du-lieu' } };
+    case 'admin.luuDeThi':
+      return { idDe: 'de-3' };
+    case 'admin.doiTrangThaiDe':
+    case 'admin.ganDeChoTuan':
+      return {};
     case 'admin.dsMon':
       return { mon: MON_GIA.map((m, i) => ({ ma: m.ma, ten: m.ten, mau: m.mau, chuong: i === 0 ? m.chuong : [], soCau: 40, giaTriTrongNganHang: [{ giaTri: 'c1', soCau: 30 }, { giaTri: i === 0 ? 'Chương hai' : 'Mở đầu', soCau: 10 }] })) };
     case 'admin.luuChuong':
