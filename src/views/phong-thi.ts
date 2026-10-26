@@ -1,6 +1,7 @@
 import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
 import { bayGio, chayDinhKy, datGioMayChu, demNguoc, dungDongHo, khiRoiTrang } from '../gio';
+import { nutBaoSai } from '../cap';
 import type { DuLieuThi, LuotThiTomTat, MonNop, TuanHienTai } from '../types';
 
 function veKetQua(goc: HTMLElement, kq: LuotThiTomTat): void {
@@ -162,7 +163,7 @@ function chayBaiThi(goc: HTMLElement, du: DuLieuThi, mon: MonNop[]): void {
     });
     const the = h('div', { class: 'card cau-thi', id: `cau-${i}` },
       h('div', { class: 'phu nho' }, `Câu ${i + 1}/${tong} · ${tenMon.get(c.maMon) ?? c.maMon}`),
-      h('p', { class: 'noi-dung-cau' }, c.noiDung), ...nutCac);
+      h('p', { class: 'noi-dung-cau' }, c.noiDung), ...nutCac, h('div', { class: 'phai' }, nutBaoSai(c.id)));
     theCau.push(the);
     danhSach.append(the);
     const so = h('button', { class: 'o-so', type: 'button', 'aria-label': `Câu ${i + 1}` }, String(i + 1));

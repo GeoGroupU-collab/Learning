@@ -9,6 +9,10 @@ import { veQuanTri } from './views/quan-tri';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
 import { vePhongThi } from './views/phong-thi';
 import { veXepHang } from './views/xep-hang';
+import { veLuyenTap } from './views/luyen-tap';
+import { veXemLai } from './views/xem-lai';
+import { theCap } from './cap';
+import type { KetQuaXepHangCaNhan } from './types';
 import { veCauHoiCuaToi } from './views/cau-hoi-cua-toi';
 import { dungDongHo, datGioMayChu, demNguoc, dinhDangNgay } from './gio';
 import type { TuanHienTai } from './types';
@@ -149,11 +153,14 @@ async function dinhTuyen(): Promise<void> {
         return await veNhom(vungNoiDung, me);
       case 'su-kien':
         if (a === 'thi') return await vePhongThi(vungNoiDung);
+        if (a === 'xem-lai') return await veXemLai(vungNoiDung, b ? Number(b) : null);
         return a === 'nop' ? await veNopCauHoi(vungNoiDung) : await veSuKien(vungNoiDung);
       case 'cau-hoi':
         return await veCauHoiCuaToi(vungNoiDung);
       case 'xep-hang':
-        return await veXepHang(vungNoiDung);
+        return await veXepHang(vungNoiDung, a === 'ca-nhan' ? 'ca-nhan' : 'nhom');
+      case 'luyen-tap':
+        return await veLuyenTap(vungNoiDung);
       case 'quan-tri':
         if (me.vaiTro === 'member') return veSapCo('Quản trị', 'Bạn không có quyền vào trang này.');
         return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
@@ -176,6 +183,7 @@ function veSapCo(tieuDe: string, noiDung: string): void {
 async function veTrangChu(noi: HTMLElement): Promise<void> {
   xoaHet(noi);
   const m = me!;
+  const theCapCuaToi = h('div', {});
   const theSuKien = h('a', { class: 'card', href: '#/su-kien' }, h('div', { class: 'phu nho' }, 'Sự kiện tuần này'), h('div', { class: 'mon-ten' }, 'Đang tải...'));
   noi.append(
     h('h1', {}, `Chào ${m.hoTen || 'bạn'}`),
@@ -184,8 +192,13 @@ async function veTrangChu(noi: HTMLElement): Promise<void> {
       h('div', { class: 'phu nho' }, 'Nhóm của tôi'),
       h('div', { class: 'mon-ten' }, m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm'),
       h('div', { class: 'phu nho' }, m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký')),
+    theCapCuaToi,
+    h('a', { class: 'card', href: '#/luyen-tap' },
+      h('div', { class: 'mon-ten' }, 'Luyện tập ngoài sự kiện'),
+      h('div', { class: 'phu nho' }, 'Làm đề luyện tập để tích điểm cấp bậc, mỗi lượt +20 điểm, tối đa 120 điểm mỗi tuần.')),
     theSuKien
   );
+  void goi<KetQuaXepHangCaNhan>('xepHangCaNhan').then((r) => theCapCuaToi.replaceWith(theCap(r.toi.cap))).catch(() => undefined);
   void capNhatTheSuKien(theSuKien);
   const mf = await layManifest();
   const hk = mf.hocKy.find((x) => x.ma === m.hocKy?.maHocKy) ?? mf.hocKy[0];

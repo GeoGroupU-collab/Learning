@@ -254,6 +254,7 @@ function chotMotTuan_(hk, t, grace) {
       soThamGia: n.soThamGia, tongGiayLam: n.tongGiay, hang: n.hang,
     });
   });
+  traoThuongTuan_(hk, t, bang);
   suaDong_('Tuan', t._dong, { trangThai: 'da_chot' });
   ghiNhatKy_('he_thong', 'chotTuan', hk.maHocKy + '/' + t.soTuan, { soNhom: bang.length });
   CacheService.getScriptCache().remove('xh_' + hk.maHocKy);

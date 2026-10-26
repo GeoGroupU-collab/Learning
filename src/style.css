@@ -143,3 +143,19 @@ summary { display: flex; align-items: center; justify-content: space-between; ga
 .bang th, .bang td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--vien); }
 .bang th { color: var(--chu-phu); font-weight: 500; border-top: 0; }
 .bang tr.hang-toi td { color: var(--nhan); font-weight: 600; }
+
+/* Cấp bậc, luyện tập, xem lại */
+.the-cap { border-color: #ffd166; }
+.ten-cap { font-size: 1.35rem; font-weight: 800; color: #ffd166; }
+.level-cap { font-weight: 700; color: var(--nhan); }
+.thanh-tien-do { height: 10px; border-radius: 999px; background: #0c0f2b; border: 1px solid var(--vien); overflow: hidden; margin: 8px 0; }
+.thanh-tien-do-day { height: 100%; background: linear-gradient(90deg, var(--nhan), #ffd166); }
+.nut-the { width: 100%; text-align: left; font: inherit; color: var(--chu); cursor: pointer; }
+.nut-the:disabled { opacity: 0.5; cursor: not-allowed; }
+.cau-dung { border-left: 4px solid #80ed99; }
+.cau-sai { border-left: 4px solid var(--nguy); }
+.ds-dap-an li.chon-sai { border-color: var(--nguy); }
+.phai { display: flex; justify-content: flex-end; }
+
+.form-sua { border-top: 1px solid var(--vien); margin-top: 10px; padding-top: 6px; }
+.tabs { flex-wrap: wrap; }

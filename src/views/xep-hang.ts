@@ -1,7 +1,8 @@
 import { goi } from '../api';
 import { h, xoaHet } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
-import type { KetQuaXepHang, NhomXepHang } from '../types';
+import { theCap } from '../cap';
+import type { KetQuaXepHang, KetQuaXepHangCaNhan, NhomXepHang } from '../types';
 
 function bang(ds: NhomXepHang[], nhomToi: string | null, coThamGia: boolean): HTMLElement {
   const t = h('table', { class: 'bang' }, h('thead', {}, h('tr', {}, h('th', {}, 'Hạng'), h('th', {}, 'Nhóm'), h('th', {}, 'Điểm'), coThamGia ? h('th', {}, 'Thi') : null)));
@@ -40,12 +41,45 @@ function ve(vung: HTMLElement, kq: KetQuaXepHang): void {
   }
 }
 
-export async function veXepHang(goc: HTMLElement): Promise<void> {
+function veCaNhan(vung: HTMLElement, kq: KetQuaXepHangCaNhan): void {
+  xoaHet(vung);
+  vung.append(theCap(kq.toi.cap, kq.toi.hang ? `Cấp của tôi · hạng ${kq.toi.hang}` : 'Cấp của tôi'));
+  if (kq.vinhDanh) {
+    vung.append(h('div', { class: 'card vinh-danh' },
+      h('div', { class: 'phu nho' }, `Danh hiệu tuần ${kq.vinhDanh.soTuan}`),
+      ...kq.vinhDanh.nguoi.map((n) => h('div', {}, h('div', { class: 'mon-ten' }, `★ ${n.hoTen}`), h('div', { class: 'phu nho' }, `${n.danhHieu} · ${n.diem} điểm`)))));
+  }
+  if (kq.toi.danhHieu.length) {
+    vung.append(h('div', { class: 'card' }, h('h3', {}, 'Danh hiệu của tôi'),
+      ...kq.toi.danhHieu.map((d) => h('div', { class: 'nhan' }, `${d.danhHieu} (${d.diem} điểm)`))));
+  }
+  const t = h('table', { class: 'bang' }, h('thead', {}, h('tr', {}, h('th', {}, 'Hạng'), h('th', {}, 'Tên'), h('th', {}, 'Cấp'), h('th', {}, 'Điểm'))));
+  const tb = h('tbody', {});
+  kq.bang.forEach((x) =>
+    tb.append(h('tr', { class: x.laToi ? 'hang-toi' : '' },
+      h('td', {}, String(x.hang)),
+      h('td', {}, x.hoTen + (x.soDanhHieu ? ` ★${x.soDanhHieu}` : '')),
+      h('td', {}, `${x.tenCapLon} · Lv ${x.level}`),
+      h('td', {}, String(x.tong)))));
+  t.append(tb);
+  vung.append(h('div', { class: 'card' }, h('h3', {}, 'Bảng xếp hạng cá nhân'), h('div', { class: 'cuon-ngang' }, t),
+    h('p', { class: 'phu nho' }, 'Điểm cấp bậc: luyện tập ngoài sự kiện và thưởng nhóm cuối tuần. ★ là số danh hiệu cá nhân cao điểm nhất tuần.')));
+}
+
+export async function veXepHang(goc: HTMLElement, tab = 'nhom'): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Xếp hạng'));
+  goc.append(h('h1', {}, 'Xếp hạng'),
+    h('div', { class: 'tabs' },
+      h('a', { class: tab === 'nhom' ? 'tab tab-dang' : 'tab', href: '#/xep-hang' }, 'Nhóm'),
+      h('a', { class: tab === 'ca-nhan' ? 'tab tab-dang' : 'tab', href: '#/xep-hang/ca-nhan' }, 'Cá nhân')));
   const vung = h('div', {}, h('p', { class: 'phu' }, 'Đang tải...'));
   goc.append(vung);
+  if (tab === 'ca-nhan') {
+    veCaNhan(vung, await goi<KetQuaXepHangCaNhan>('xepHangCaNhan'));
+    chayDinhKy(() => { void goi<KetQuaXepHangCaNhan>('xepHangCaNhan').then((kq) => veCaNhan(vung, kq)).catch(() => undefined); }, 15000);
+    return;
+  }
   ve(vung, await goi<KetQuaXepHang>('xepHang'));
   chayDinhKy(() => { void goi<KetQuaXepHang>('xepHang').then((kq) => ve(vung, kq)).catch(() => undefined); }, 15000);
 }

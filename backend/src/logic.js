@@ -287,11 +287,165 @@ function diemLuyKe(diemCacTuan) {
   return Math.round((tong / diemCacTuan.length) * 100) / 100;
 }
 
+// ---------- Điểm cá nhân, cấp, danh hiệu ----------
+
+// Các cấp lớn (cảnh giới). Mỗi cấp lớn gồm nhiều level; level = floor(tổng điểm / diemMoiCap) + 1.
+// 5 cấp đầu mỗi cấp 5 level, các cấp sau dài hơn. Chủ có thể đổi tên và khoảng level ở đây.
+var CAP_LON = [
+  { ten: 'Võ Sĩ', tu: 1, den: 5 },
+  { ten: 'Võ Sư', tu: 6, den: 10 },
+  { ten: 'Đại Võ Sư', tu: 11, den: 15 },
+  { ten: 'Tông Sư', tu: 16, den: 20 },
+  { ten: 'Đại Tông Sư', tu: 21, den: 25 },
+  { ten: 'Võ Vương', tu: 26, den: 35 },
+  { ten: 'Võ Hoàng', tu: 36, den: 45 },
+  { ten: 'Võ Đế', tu: 46, den: 55 },
+  { ten: 'Võ Thánh', tu: 56, den: 70 },
+  { ten: 'Võ Thần', tu: 71, den: 90 },
+  { ten: 'Thiên Tôn', tu: 91, den: 120 },
+  { ten: 'Đạo Tổ', tu: 121, den: null },
+];
+
+// Từ tổng điểm tính ra level, cấp lớn và tiến độ.
+function capTuDiem(tong, diemMoiCap) {
+  var moi = diemMoiCap > 0 ? diemMoiCap : 100;
+  var diem = Math.max(0, Math.floor(tong || 0));
+  var level = Math.floor(diem / moi) + 1;
+  var chi = 0;
+  for (var i = 0; i < CAP_LON.length; i++) {
+    if (level >= CAP_LON[i].tu && (CAP_LON[i].den === null || level <= CAP_LON[i].den)) { chi = i; break; }
+  }
+  var c = CAP_LON[chi];
+  var ke = CAP_LON[chi + 1] || null;
+  return {
+    tong: diem,
+    level: level,
+    diemTrongLevel: diem % moi,
+    diemMoiLevel: moi,
+    tenCapLon: c.ten,
+    levelDauCap: c.tu,
+    levelCuoiCap: c.den,
+    capKe: ke ? ke.ten : null,
+    levelConLaiDenCapKe: ke ? ke.tu - level : null,
+  };
+}
+
+// Số tuần ISO theo giờ Việt Nam, dạng '2026-W45'. Dùng để giới hạn điểm luyện tập mỗi tuần.
+function tuanKeVN(ms) {
+  var d = new Date(ms + 7 * 3600000);
+  var thu = (d.getUTCDay() + 6) % 7;
+  var thuNamCuaTuan = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - thu + 3));
+  var nam = thuNamCuaTuan.getUTCFullYear();
+  var mung4 = new Date(Date.UTC(nam, 0, 4));
+  var tuan = 1 + Math.round(((thuNamCuaTuan - mung4) / 86400000 - 3 + ((mung4.getUTCDay() + 6) % 7)) / 7);
+  return nam + '-W' + (tuan < 10 ? '0' : '') + tuan;
+}
+
+// Điểm thưởng cho một lượt luyện tập: tối đa diemMoi, không vượt trần mỗi tuần.
+function diemThuongLuyenTap(daDungTuan, diemMoi, tranTuan) {
+  return Math.max(0, Math.min(diemMoi, tranTuan - daDungTuan));
+}
+
+// Điểm thưởng nhóm theo hạng, ví dụ [50, 30, 10]: hạng 1 được 50, hạng 2 được 30, còn lại 10.
+function diemThuongNhom(hang, bang) {
+  if (!bang.length || !(hang >= 1)) return 0;
+  return bang[Math.min(hang, bang.length) - 1];
+}
+
+// Đọc cấu hình '50,30,10' thành mảng số.
+function docBangDiemNhom(chuoi) {
+  var kq = String(chuoi == null ? '' : chuoi).split(',').map(function (s) { return Number(s.trim()); }).filter(function (n) { return isFinite(n) && n >= 0; });
+  return kq.length ? kq : [50, 30, 10];
+}
+
+// Người đạt điểm cao nhất tuần: điểm cao nhất, bằng điểm thì thời gian ngắn nhất; bằng cả hai thì cùng nhận.
+function chonDanhHieuCaNhan(luots) {
+  if (!luots.length) return [];
+  var tot = luots.slice().sort(function (a, b) {
+    if (b.diem !== a.diem) return b.diem - a.diem;
+    return a.giay - b.giay;
+  })[0];
+  return luots.filter(function (l) { return l.diem === tot.diem && l.giay === tot.giay; });
+}
+
+// Xếp hạng cá nhân theo tổng điểm; bằng điểm thì cùng hạng.
+function xepHangCaNhan(ds) {
+  var s = ds.slice().sort(function (a, b) { return b.tong - a.tong; });
+  var kq = [];
+  s.forEach(function (x, i) {
+    var o = {};
+    Object.keys(x).forEach(function (k) { o[k] = x[k]; });
+    o.hang = i > 0 && kq[i - 1].tong === x.tong ? kq[i - 1].hang : i + 1;
+    kq.push(o);
+  });
+  return kq;
+}
+
+// Câu khó nhất: tỉ lệ sai cao nhất trong các lượt đã nộp, chỉ xét câu có ít nhất minLuot lượt làm.
+function cauKhoNhat(luots, dapAnGoc, minLuot, top) {
+  var dem = {};
+  luots.forEach(function (l) {
+    l.ds.forEach(function (c) {
+      var d = dem[c.id] || (dem[c.id] = { id: c.id, soLuot: 0, soSai: 0 });
+      d.soLuot++;
+      var idx = 'ABCD'.indexOf(l.traLoi && l.traLoi[c.id]);
+      if (!(idx !== -1 && c.tt.charAt(idx) === dapAnGoc[c.id])) d.soSai++;
+    });
+  });
+  return Object.keys(dem).map(function (k) {
+    dem[k].tyLeSai = dem[k].soSai / dem[k].soLuot;
+    return dem[k];
+  }).filter(function (d) { return d.soLuot >= minLuot; }).sort(function (a, b) {
+    if (b.tyLeSai !== a.tyLeSai) return b.tyLeSai - a.tyLeSai;
+    return b.soLuot - a.soLuot;
+  }).slice(0, top);
+}
+
+// Trạng thái câu hỏi theo số người khác nhau đã báo sai. Câu đã bị xóa giữ nguyên.
+function trangThaiTheoBaoSai(soNguoi, nguongTam, nguongXoa, hienTai) {
+  if (hienTai === 'removed') return 'removed';
+  if (soNguoi >= nguongXoa) return 'removed';
+  if (soNguoi >= nguongTam && hienTai === 'active') return 'suspended';
+  return hienTai;
+}
+
+// ---------- Sửa câu hỏi hàng loạt (nhập bản đã rà soát) ----------
+
+var TRUONG_SUA_ = ['noiDung', 'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'trangNguon', 'maChuong', 'trangThai'];
+
+// Kiểm tra một câu sau khi sửa. Trả mảng lỗi (rỗng là hợp lệ).
+function kiemTraMotCau(c) {
+  var loi = [];
+  ['noiDung', 'A', 'B', 'C', 'D'].forEach(function (k) { if (String(c[k] == null ? '' : c[k]).trim() === '') loi.push('thiếu ' + k); });
+  if (['A', 'B', 'C', 'D'].indexOf(String(c.dapAn)) === -1) loi.push('đáp án đúng phải là A, B, C hoặc D');
+  if (['active', 'suspended', 'removed'].indexOf(String(c.trangThai)) === -1) loi.push('trạng thái phải là active, suspended hoặc removed');
+  var k4 = {};
+  ['A', 'B', 'C', 'D'].forEach(function (k) { k4[chuanHoaChu(c[k])] = true; });
+  if (Object.keys(k4).length < 4) loi.push('bốn đáp án phải khác nhau');
+  if (String(c.noiDung || '').length > 600) loi.push('nội dung quá dài');
+  return loi;
+}
+
+// So sánh câu hiện có với bản mới, chỉ xét các trường cho phép. Trả {} nếu không đổi.
+function soSanhCauHoi(cu, moi) {
+  var diff = {};
+  TRUONG_SUA_.forEach(function (k) {
+    if (moi[k] === undefined) return;
+    var a = String(cu[k] == null ? '' : cu[k]).trim();
+    var b = String(moi[k] == null ? '' : moi[k]).trim();
+    if (a !== b) diff[k] = { tu: a, den: b };
+  });
+  return diff;
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
     docGpa: docGpa, chiaNhom: chiaNhom, doLechGpa: doLechGpa, chuanHoaEmail: chuanHoaEmail, laLinkHopLe: laLinkHopLe,
     taoLichTuan: taoLichTuan, trangThaiTuan: trangThaiTuan, chonTuanHienTai: chonTuanHienTai, mocKeTiep: mocKeTiep,
     chuanHoaChu: chuanHoaChu, kiemTraBoCauHoi: kiemTraBoCauHoi,
     rutDe: rutDe, chamBai: chamBai, diemCaNhan: diemCaNhan, diemNhomTuan: diemNhomTuan, xepHangNhom: xepHangNhom, diemLuyKe: diemLuyKe,
+    CAP_LON: CAP_LON, capTuDiem: capTuDiem, tuanKeVN: tuanKeVN, diemThuongLuyenTap: diemThuongLuyenTap, diemThuongNhom: diemThuongNhom,
+    docBangDiemNhom: docBangDiemNhom, chonDanhHieuCaNhan: chonDanhHieuCaNhan, xepHangCaNhan: xepHangCaNhan, cauKhoNhat: cauKhoNhat,
+    trangThaiTheoBaoSai: trangThaiTheoBaoSai, kiemTraMotCau: kiemTraMotCau, soSanhCauHoi: soSanhCauHoi,
   };
 }

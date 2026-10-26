@@ -41,6 +41,9 @@ export async function veSuKien(goc: HTMLElement): Promise<void> {
         h('li', {}, `Phòng thi đóng: ${dinhDangNgay(t.dongCua)}`)))
   );
 
+  goc.append(h('a', { class: 'card', href: '#/su-kien/xem-lai' },
+    h('div', { class: 'mon-ten' }, 'Xem lại bài và câu khó nhất'),
+    h('div', { class: 'phu nho' }, 'Đáp án, giải thích và 5 câu cả lớp sai nhiều nhất, mở sau khi mỗi tuần đóng cửa.')));
   const yc = tt.yeuCau!;
   const canNop = tt.soCauCanNop ?? yc.soMon * yc.soCauMoiMon;
 

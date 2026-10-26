@@ -68,6 +68,25 @@ function tuanGia() {
   };
 }
 
+let tongDiemGia = 230;
+let diemLuyenTapTuan = 40;
+const capGia = () => {
+  const level = Math.floor(tongDiemGia / 100) + 1;
+  return { tong: tongDiemGia, level, diemTrongLevel: tongDiemGia % 100, diemMoiLevel: 100, tenCapLon: level <= 5 ? 'Võ Sĩ' : 'Võ Sư', levelDauCap: 1, levelCuoiCap: 5, capKe: 'Võ Sư', levelConLaiDenCapKe: Math.max(0, 6 - level) };
+};
+const cauXemLaiGia = (n: number) => Array.from({ length: n }, (_, i) => ({
+  id: 'q' + i, tenMon: 'Khoa học dữ liệu', maChuong: 'c1', trangNguon: 'tr.' + (i + 3),
+  noiDung: `Câu hỏi mẫu số ${i + 1}: chọn đáp án đúng nhất.`,
+  dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Đáp án ${k} của câu ${i + 1}` })),
+  chon: i % 3 === 0 ? 'B' : 'A', dung: i % 3 === 0 ? 'B' : 'C', laDung: i % 3 === 0,
+  giaiThich: 'Đáp án đúng vì theo slide 12, khái niệm này được định nghĩa như vậy.',
+}));
+const nganHangGia = Array.from({ length: 7 }, (_, i) => ({
+  id: 'ch' + i, maHocKy: 'hk1-2026-2027', soTuan: 1, maMon: 'khoa-hoc-du-lieu', maChuong: 'c1', trangNguon: 'tr.' + i,
+  noiDung: `Nội dung câu hỏi trong ngân hàng số ${i + 1}`, A: 'a' + i, B: 'b' + i, C: 'c' + i, D: 'd' + i, dapAn: 'A', giaiThich: '',
+  tacGia: `sv${i}@example.test`, tenTacGia: `Bạn ${i}`, trangThai: (i === 2 ? 'suspended' : 'active') as 'active' | 'suspended' | 'removed', ngayNop: '2026-11-05T10:00:00Z', soBaoSai: i === 2 ? 2 : 0,
+}));
+
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 export async function mockGoi(action: string, payload: Record<string, unknown>): Promise<unknown> {
@@ -164,6 +183,55 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
         nhomToi: 'n2',
       };
     }
+    case 'luyenTap.thongTin':
+      return {
+        cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiLuot: 20, soCauMoiLuot: 10, dangMo: false,
+        mon: MON_GIA.map((m, i) => ({ ma: m.ma, ten: m.ten, mau: m.mau, soCauCoSan: i === 3 ? 0 : 60 })),
+      };
+    case 'luyenTap.bat':
+      return {
+        trangThai: 'dang_lam', maLuot: 'lt1',
+        cauHoi: Array.from({ length: 10 }, (_, i) => ({ id: 'q' + i, maMon: String(payload.maMon), noiDung: `Câu luyện tập số ${i + 1}`, dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Đáp án ${k}` })) })),
+      };
+    case 'luyenTap.nop': {
+      const thuong = Math.max(0, Math.min(20, 120 - diemLuyenTapTuan));
+      diemLuyenTapTuan += thuong;
+      tongDiemGia += thuong;
+      return { soDung: 6, soCau: 10, diem: 60, diemThuong: thuong, cauHoi: cauXemLaiGia(10), cap: capGia() };
+    }
+    case 'xepHangCaNhan':
+      return {
+        bang: [
+          { hang: 1, hoTen: 'Nguyễn Văn A', tong: 520, level: 6, tenCapLon: 'Võ Sư', soDanhHieu: 2, laToi: false },
+          { hang: 2, hoTen: 'Lớp trưởng (thử)', tong: tongDiemGia, level: capGia().level, tenCapLon: capGia().tenCapLon, soDanhHieu: 1, laToi: true },
+          { hang: 3, hoTen: 'Trần Thị B', tong: 90, level: 1, tenCapLon: 'Võ Sĩ', soDanhHieu: 0, laToi: false },
+        ],
+        vinhDanh: { soTuan: 1, nguoi: [{ hoTen: 'Nguyễn Văn A', diem: 97.5, danhHieu: 'Thiên Kiêu Tuần 1' }] },
+        toi: { hang: 2, cap: capGia(), danhHieu: [{ soTuan: 1, danhHieu: 'Thiên Kiêu Tuần 1', diem: 92.5 }] },
+      };
+    case 'baoSai':
+      return { daBao: true };
+    case 'xemLai':
+      return { cacTuan: [1, 2], soTuan: 1, diem: 62.5, soDung: 25, soCau: 40, cauHoi: cauXemLaiGia(6) };
+    case 'cauKhoNhat':
+      return {
+        soTuan: 1,
+        cauHoi: [0, 1, 2].map((i) => ({
+          id: 'k' + i, tenMon: 'Địa chất kiến trúc', maChuong: 'c2', trangNguon: 'slide ' + (10 + i), noiDung: `Câu khó số ${i + 1} mà cả lớp hay chọn sai?`,
+          dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Phương án ${k}` })), dung: 'C', giaiThich: 'Vì quá trình này xảy ra ở điều kiện áp suất cao.', soLuot: 12 - i, tyLeSai: 80 - i * 10,
+        })),
+      };
+    case 'admin.nganHang':
+      return { tong: nganHangGia.length, trang: 1, coTrang: 50, cauHoi: nganHangGia };
+    case 'admin.suaCauHoi':
+    case 'admin.doiTrangThaiCau':
+      return {};
+    case 'admin.xuatNganHang':
+      return nganHangGia;
+    case 'admin.xemTruocNhap':
+      return { thayDoi: [{ id: 'ch0', diff: { giaiThich: { tu: '', den: 'Đã rà soát theo PDF' } } }], loi: [{ id: 'ch1', loi: ['bốn đáp án phải khác nhau'] }], khongCo: ['abc'], khongDoi: 5 };
+    case 'admin.nhapNganHang':
+      return { daSua: 1, boQuaViLoi: 1, khongCo: 1 };
     case 'admin.dsThanhVien':
       return thanhVien;
     case 'admin.nhapDangKy':

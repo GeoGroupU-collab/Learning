@@ -23,6 +23,12 @@ var TABS = [
       'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop',
     ],
   },
+  { name: 'Diem', headers: ['thoiGian', 'email', 'loai', 'soDiem', 'maHocKy', 'soTuan', 'tuanKey', 'khoa', 'ghiChu'] },
+  {
+    name: 'LuyenTap',
+    headers: ['maLuot', 'email', 'batDauLuc', 'nopLuc', 'maMon', 'dsCau', 'traLoi', 'soDung', 'soCau', 'diem', 'diemThuong', 'tuanKey'],
+  },
+  { name: 'DanhHieu', headers: ['maHocKy', 'soTuan', 'email', 'danhHieu', 'diem', 'giayLam'] },
   { name: 'PhienDangNhap', headers: ['hashPhien', 'email', 'taoLuc', 'hetHan'] },
   { name: 'NhapCauHoi', headers: ['maHocKy', 'soTuan', 'email', 'duLieu', 'capNhat'] },
   { name: 'BaoSai', headers: ['idCauHoi', 'email', 'lyDo', 'thoiGian'] },
@@ -62,6 +68,13 @@ var CAU_HINH_MAC_DINH = [
   ['hienCauKhoNhat', true, 'Hiện 5 câu khó nhất tuần sau khi đóng cửa'],
   ['giaiTienBo', false, 'Bật giải nhóm tiến bộ nhất'],
   ['xoaGpaSauChiaNhom', false, 'Tự nhắc xóa cột GPA sau khi chia nhóm'],
+  ['soCauLuyenTap', 10, 'Số câu mỗi lượt luyện tập (một môn, ngoài sự kiện)'],
+  ['diemMoiLuyenTap', 20, 'Điểm cá nhân cộng cho mỗi lượt luyện tập hợp lệ'],
+  ['diemToiDaLuyenTapTuan', 120, 'Trần điểm luyện tập cộng trong một tuần (Thứ Hai đến Chủ nhật)'],
+  ['luyenTapToiThieuTraLoi', 0.5, 'Tỉ lệ câu phải trả lời để lượt luyện tập được cộng điểm'],
+  ['diemMoiLevel', 100, 'Số điểm cho mỗi level cá nhân'],
+  ['diemThuongNhom', '50,30,10', 'Điểm thưởng cho thành viên đã thi của nhóm hạng 1, hạng 2, các hạng còn lại'],
+  ['cauKhoToiThieuLuot', 3, 'Số lượt làm tối thiểu để một câu được xét vào câu khó nhất'],
   ['graceGiay', 30, 'Số giây gia hạn khi nộp bài trễ do mạng'],
 ];
 

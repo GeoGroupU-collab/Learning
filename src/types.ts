@@ -184,3 +184,126 @@ export interface TuanQuanTri {
   dongCua: number;
   trangThai: string;
 }
+
+export interface ThongTinCap {
+  tong: number;
+  level: number;
+  diemTrongLevel: number;
+  diemMoiLevel: number;
+  tenCapLon: string;
+  levelDauCap: number;
+  levelCuoiCap: number | null;
+  capKe: string | null;
+  levelConLaiDenCapKe: number | null;
+}
+
+export interface ThongTinLuyenTap {
+  cap: ThongTinCap;
+  diemTuanNay: number;
+  diemToiDaTuan: number;
+  diemMoiLuot: number;
+  soCauMoiLuot: number;
+  mon: { ma: string; ten: string; mau: string; soCauCoSan: number }[];
+  dangMo: boolean;
+}
+
+export interface CauXemLai {
+  id: string;
+  tenMon: string;
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  giaiThich: string;
+  dapAn: { k: string; text: string }[];
+  chon: string;
+  dung: string;
+  laDung: boolean;
+}
+
+export interface KetQuaLuyenTap {
+  soDung: number;
+  soCau: number;
+  diem: number;
+  diemThuong: number;
+  cauHoi: CauXemLai[];
+  cap: ThongTinCap;
+}
+
+export interface DeLuyenTap {
+  trangThai: 'dang_lam';
+  maLuot: string;
+  cauHoi: CauThi[];
+}
+
+export interface DongXepHangCaNhan {
+  hang: number;
+  hoTen: string;
+  tong: number;
+  level: number;
+  tenCapLon: string;
+  soDanhHieu: number;
+  laToi: boolean;
+}
+
+export interface KetQuaXepHangCaNhan {
+  bang: DongXepHangCaNhan[];
+  vinhDanh: null | { soTuan: number; nguoi: { hoTen: string; diem: number; danhHieu: string }[] };
+  toi: { hang: number | null; cap: ThongTinCap; danhHieu: { soTuan: number; danhHieu: string; diem: number }[] };
+}
+
+export interface KetQuaXemLai {
+  cacTuan: number[];
+  soTuan: number | null;
+  diem?: number;
+  soDung?: number;
+  soCau?: number;
+  cauHoi: CauXemLai[];
+}
+
+export interface CauKho {
+  id: string;
+  tenMon: string;
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  dapAn: { k: string; text: string }[];
+  dung: string;
+  giaiThich: string;
+  soLuot: number;
+  tyLeSai: number;
+}
+
+export interface CauNganHang {
+  id: string;
+  maHocKy: string;
+  soTuan: number;
+  maMon: string;
+  maChuong: string;
+  trangNguon: string;
+  noiDung: string;
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+  dapAn: string;
+  giaiThich: string;
+  tacGia: string;
+  tenTacGia: string;
+  trangThai: 'active' | 'suspended' | 'removed';
+  ngayNop: string;
+  soBaoSai: number;
+}
+
+export interface KetQuaNganHang {
+  tong: number;
+  trang: number;
+  coTrang: number;
+  cauHoi: CauNganHang[];
+}
+
+export interface XemTruocNhap {
+  thayDoi: { id: string; diff: Record<string, { tu: string; den: string }> }[];
+  loi: { id: string; loi: string[] }[];
+  khongCo: string[];
+  khongDoi: number;
+}

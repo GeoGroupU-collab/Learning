@@ -290,3 +290,79 @@ Chuẩn bị: 3 tài khoản Google thử (ví dụ `thu1`, `thu2`, `thu3`) và 
 ### Giới hạn cần biết
 - Phòng thi chưa có nút **Báo sai câu hỏi** (mốc M4). Nếu có câu sai trong tuần đầu, chủ sửa trực tiếp trong tab `CauHoi` hoặc đổi cột `trangThai` thành `suspended`.
 - Nếu nhiều người cùng bấm **Bắt đầu thi** đúng lúc mở cửa, mỗi người có thể chờ vài giây. Nên nhắc lớp vào thi rải rác, không cùng một giây.
+
+---
+
+## Phần 5. Điểm cá nhân và cấp bậc, báo sai, xem lại, quản lý ngân hàng (mốc M4)
+
+Bản này thêm 3 tab mới trong Sheet (`Diem`, `LuyenTap`, `DanhHieu`) và nhiều khóa trong `CauHinh`. Phải cập nhật Apps Script.
+
+### Bước 24. Cập nhật Apps Script và web
+
+1. Mở `backend/dist/Code.gs` mới, **Ctrl+A**, **Ctrl+C**. Dán đè vào `Code.gs` trong Apps Script, **Ctrl+S**.
+2. Chạy hàm `khoiTao` (thêm tab `Diem`, `LuyenTap`, `DanhHieu` và các khóa cấu hình mới). Không cần chạy `datTrigger` lại.
+3. **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
+4. GitHub Desktop: Summary `Thêm điểm cấp bậc, xem lại, ngân hàng`, **Commit to main**, **Push origin**, chờ Actions tick xanh, rồi **Ctrl+F5**.
+
+Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Võ Sĩ, Lv 1) và thẻ **Luyện tập ngoài sự kiện**.
+
+### Cách tính điểm cá nhân
+
+- **Luyện tập ngoài sự kiện:** mục **Luyện tập** (từ trang chủ). Chọn một môn, làm 10 câu rút ngẫu nhiên từ ngân hàng (không có câu của chính mình, ưu tiên câu chưa gặp), nộp xong xem đáp án và giải thích. Mỗi lượt hợp lệ **+20 điểm**, tối đa **120 điểm mỗi tuần** (tuần tính từ Thứ Hai đến Chủ nhật). Lượt hợp lệ là trả lời ít nhất một nửa số câu.
+- **Thưởng nhóm cuối tuần:** khi tuần được chốt, thành viên **đã thi** của nhóm hạng 1 được **+50**, hạng 2 được **+30**, các nhóm còn lại **+10**. Người vắng hoặc được miễn không được thưởng.
+- **Danh hiệu cá nhân của tuần:** người có điểm thi cao nhất tuần nhận danh hiệu **Thiên Kiêu Tuần N** (bằng điểm thì ai làm nhanh hơn; bằng cả hai thì cùng nhận), hiện ở mục **Xếp hạng**, tab **Cá nhân**.
+- **Level:** cứ **100 điểm** lên 1 level, bắt đầu từ Lv 1. **Cấp lớn** đổi theo level:
+
+| Cấp lớn | Level |
+|---|---|
+| Võ Sĩ | 1 đến 5 |
+| Võ Sư | 6 đến 10 |
+| Đại Võ Sư | 11 đến 15 |
+| Tông Sư | 16 đến 20 |
+| Đại Tông Sư | 21 đến 25 |
+| Võ Vương | 26 đến 35 |
+| Võ Hoàng | 36 đến 45 |
+| Võ Đế | 46 đến 55 |
+| Võ Thánh | 56 đến 70 |
+| Võ Thần | 71 đến 90 |
+| Thiên Tôn | 91 đến 120 |
+| Đạo Tổ | từ 121 |
+
+Muốn đổi các con số (điểm mỗi lượt, trần tuần, điểm mỗi level, điểm thưởng nhóm) hãy sửa trong tab `CauHinh`: `diemMoiLuyenTap`, `diemToiDaLuyenTapTuan`, `diemMoiLevel`, `diemThuongNhom` (dạng `50,30,10`), `soCauLuyenTap`. Muốn đổi tên cấp lớn hoặc khoảng level, nhờ mình sửa (nằm trong `backend/src/logic.js`).
+
+### Báo sai, tạm loại, xóa câu hỏi
+
+- Trong phòng thi, màn hình xem lại và luyện tập, mỗi câu có nút **Báo sai** (chỉ báo được câu đã gặp trong đề của mình, mỗi người một lần mỗi câu, tối đa 30 lần mỗi giờ).
+- **2 người khác nhau** báo thì câu bị **tạm loại** (không rút cho đề mới nữa). **5 người** báo thì câu bị **xóa** (cũng không rút nữa). Các lượt thi đã nộp **giữ nguyên điểm**.
+- Chủ khôi phục một câu thì các báo sai cũ của câu đó bị xóa để đếm lại từ đầu.
+- Chưa có nút "Chấm lại tuần" (loại câu sai khỏi mẫu số); nếu cần, báo mình làm ở mốc sau.
+
+### Xem lại bài và câu khó nhất
+
+Sau khi một tuần đóng cửa: **Sự kiện**, **Xem lại bài và câu khó nhất**. Thấy toàn bộ câu mình được giao, đáp án mình chọn, đáp án đúng, giải thích, chương, trang nguồn, cùng **5 câu cả lớp sai nhiều nhất** (chỉ xét câu có ít nhất 3 lượt làm). Tắt phần câu khó bằng cách đặt `hienCauKhoNhat` thành `FALSE` trong `CauHinh`.
+
+### Bước 25. Quản lý ngân hàng câu hỏi
+
+**Quản trị**, tab **Câu hỏi** (chủ và trợ lý đều thấy):
+- Lọc theo tuần, môn, trạng thái, tác giả, từ khóa, hoặc chỉ câu bị báo sai. Câu bị báo sai nhiều hiện lên đầu.
+- Trợ lý được **Tạm loại** và **Khôi phục**. Chủ có thêm **Sửa** và **Xóa**.
+
+**Xuất và nhập bản rà soát (chủ):**
+1. Mở **Xuất và nhập ngân hàng**, bấm **Xuất CSV** hoặc **Xuất JSON** (kèm trang nguồn).
+2. Đưa file cho Claude Code cùng PDF bài giảng để đối chiếu và sửa.
+3. Chọn lại file đã sửa ở ô **Nhập bản đã sửa**. Hệ thống khớp theo `id` và cho **xem trước** từng thay đổi, danh sách câu lỗi (sẽ bị bỏ qua) và các id không có trong ngân hàng.
+4. Bấm **Áp dụng**. Chỉ sửa được: nội dung, 4 đáp án, đáp án đúng, giải thích, trang nguồn, chương, trạng thái. Không đổi được `id` hay tác giả.
+
+Làm đúng khi thấy: sau khi áp dụng, tab `NhatKy` có dòng `nhapNganHang`.
+
+### Bước 26. Thử nhanh
+
+1. Tài khoản thử: vào **Luyện tập**, làm một lượt. Làm đúng khi thấy "+20 điểm cấp bậc" và thẻ cấp có 20 điểm.
+2. Làm tiếp tới lượt thứ 7 trong cùng tuần: lượt thứ 7 không được cộng thêm (đạt trần 120).
+3. Sau khi chốt tuần thử (`chotTuanTuDong`): kiểm tra tab `Diem` có dòng thưởng nhóm, tab `DanhHieu` có dòng danh hiệu, mục **Xếp hạng**, tab **Cá nhân** hiện đủ.
+4. Dọn dữ liệu thử trong `Diem`, `LuyenTap`, `DanhHieu`, `BaoSai`, `LuotThi`, `KetQuaTuan`.
+
+### Lưu ý
+- Bảng xếp hạng cá nhân hiện **họ tên, cấp bậc, điểm** của mọi thành viên cho cả lớp xem. Thông báo quyền riêng tư đã được cập nhật.
+- Luyện tập làm lộ đáp án của các câu đó cho người làm, đúng với thiết kế (xem đáp án sau khi nộp).
+- Tuần luyện tập tính theo Thứ Hai đến Chủ nhật nên có thể lệch với tuần sự kiện (Thứ Bảy, Chủ nhật).

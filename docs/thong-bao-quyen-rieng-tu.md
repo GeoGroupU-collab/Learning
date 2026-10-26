@@ -16,6 +16,7 @@ Trang này giải thích web Learning Group thu thập gì và dùng vào việc
 | Email, họ tên | Lớp trưởng và trợ lý (nếu có); thành viên cùng nhóm thấy tên nhau |
 | Điểm từng người | Lớp trưởng, trợ lý và các thành viên cùng nhóm |
 | Điểm nhóm | Mọi thành viên |
+| Họ tên, cấp bậc, tổng điểm cấp bậc và danh hiệu cá nhân (bảng xếp hạng cá nhân) | Mọi thành viên |
 | Câu hỏi bạn nộp | Lớp trưởng và trợ lý. Các bạn khác chỉ thấy câu mình được giao khi thi và 5 câu khó nhất tuần sau khi đóng cửa, không kèm tên tác giả |
 
 ## Dùng vào việc gì
