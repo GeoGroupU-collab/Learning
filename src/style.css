@@ -583,3 +583,5 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 .cau-gon[open] > summary { border-bottom: 1px solid var(--vien); }
 .cau-gon > .cau-xem { padding: var(--k4); }
 @media (max-width: 600px) { .cau-gon-meta { display: none; } }
+
+.luoi-loc { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0 var(--k3); }

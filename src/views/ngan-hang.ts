@@ -211,19 +211,27 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
       c.ghiChuDuyet ? h('p', { class: 'phu nho' }, `Ghi chú duyệt: ${c.ghiChuDuyet}`) : null,
       c.daKiemTra ? h('p', { class: 'phu nho' }, 'Bạn đã kiểm tra câu này là đúng: báo sai không tự tạm loại nữa.') : null,
-      h('p', { class: 'phu nho' }, `Tác giả: ${c.tenTacGia || c.tacGia} (${c.tacGia}) · ${c.soBaoSai} lượt báo sai`),
+      // Câu thêm thẳng vào ngân hàng (tác giả chung) không cần ghi nguồn, chỉ hiện số lượt báo sai.
+      h('p', { class: 'phu nho' }, c.tacGia === 'ngan-hang-chung' ? `${c.soBaoSai} lượt báo sai` : `Tác giả: ${c.tenTacGia || c.tacGia} (${c.tacGia}) · ${c.soBaoSai} lượt báo sai`),
       h('div', { class: 'hang-nut' }, ...nut), vungSua);
   };
+
+  // Các ô chọn (môn, chương, trạng thái, học kỳ) lọc ngay khi đổi; đổi môn thì chương về "Tất cả" vì mỗi môn có chương riêng.
+  const apDungLoc = (): void => {
+    Object.assign(loc, { maHocKy: hocKy.value, soTuan: soTuan.value, maMon: maMon.value, maChuong: maChuong.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
+    void tai();
+  };
+  maMon.addEventListener('change', () => { maChuong.value = ''; loc.maChuong = ''; apDungLoc(); });
+  [maChuong, trangThai, hocKy].forEach((el) => el.addEventListener('change', apDungLoc));
+  [tacGia, tuKhoa].forEach((el) => el.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') apDungLoc(); }));
 
   noi.append(
     vungDuyet,
     h('div', { class: 'card' }, h('h3', {}, 'Bộ lọc'),
-      o('Học kỳ', hocKy), o('Tuần', soTuan), o('Môn', maMon), o('Chương', maChuong), o('Trạng thái', trangThai), o('Tác giả', tacGia), o('Từ khóa', tuKhoa),
+      h('div', { class: 'luoi-loc' }, o('Môn', maMon), o('Chương', maChuong), o('Trạng thái', trangThai), o('Học kỳ', hocKy), o('Tuần', soTuan)),
+      h('div', { class: 'luoi-loc' }, o('Tác giả', tacGia), o('Từ khóa', tuKhoa)),
       h('label', { class: 'dong-chon', for: 'chi-bao-sai' }, chiBaoSai, h('span', {}, 'Chỉ câu đã bị báo sai')),
-      h('button', { class: 'nut', onclick: () => {
-        Object.assign(loc, { maHocKy: hocKy.value, soTuan: soTuan.value, maMon: maMon.value, maChuong: maChuong.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
-        void tai();
-      } }, 'Lọc')));
+      h('button', { class: 'nut', onclick: () => apDungLoc() }, 'Lọc')));
 
   if (laChu) {
     const tep = h('input', { type: 'file', accept: '.json,.csv', class: 'o-nhap' }) as HTMLInputElement;
