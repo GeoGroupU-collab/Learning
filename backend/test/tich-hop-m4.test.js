@@ -454,12 +454,12 @@ describe('quản trị ngân hàng', () => {
     expect(goiAs(CHU, 'admin.nganHang', { trang: 3 }).data.cauHoi).toHaveLength(20);
   });
 
-  it('trợ lý tạm loại và khôi phục được nhưng không xóa, không sửa được', () => {
+  it('không còn vai trò trợ lý: tài khoản vai trò cũ bị cấm mọi thao tác quản trị', () => {
     const id = mt.docTab('CauHoi')[0].id;
-    expect(goiAs(TRO_LY, 'admin.doiTrangThaiCau', { id, trangThai: 'suspended' }).ok).toBe(true);
-    expect(goiAs(TRO_LY, 'admin.doiTrangThaiCau', { id, trangThai: 'removed' })).toMatchObject({ ok: false, error: 'cam' });
+    expect(goiAs(TRO_LY, 'admin.doiTrangThaiCau', { id, trangThai: 'suspended' })).toMatchObject({ ok: false, error: 'cam' });
     expect(goiAs(TRO_LY, 'admin.suaCauHoi', { id, thayDoi: { A: 'x' } })).toMatchObject({ ok: false, error: 'cam' });
-    expect(goiAs(TRO_LY, 'admin.doiTrangThaiCau', { id, trangThai: 'active' }).ok).toBe(true);
+    expect(goiAs(TRO_LY, 'admin.nganHang', {})).toMatchObject({ ok: false, error: 'cam' });
+    expect(goiAs(TRO_LY, 'me').data.vaiTro).toBe('member');
   });
 
   it('chủ sửa câu hỏi; sửa sai bị từ chối và không thay đổi gì', () => {
@@ -509,7 +509,7 @@ describe('quản trị ngân hàng', () => {
   it('mọi thao tác quản trị ghi vào nhật ký', () => {
     const id = mt.docTab('CauHoi')[0].id;
     goiAs(CHU, 'admin.suaCauHoi', { id, thayDoi: { giaiThich: 'g' } });
-    goiAs(TRO_LY, 'admin.doiTrangThaiCau', { id, trangThai: 'suspended' });
+    goiAs(CHU, 'admin.doiTrangThaiCau', { id, trangThai: 'suspended' });
     const nk = mt.docTab('NhatKy').map((n) => n.hanhDong);
     expect(nk).toContain('suaCauHoi');
     expect(nk).toContain('doiTrangThaiCau');

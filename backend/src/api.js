@@ -29,7 +29,6 @@ function doGet() {
 }
 
 var CHU_ = ['owner'];
-var CHU_TRO_LY_ = ['owner', 'assistant'];
 
 var HANH_DONG_ = {
   dangNhap: { chay: hdDangNhap_ },
@@ -37,6 +36,11 @@ var HANH_DONG_ = {
   me: { chay: hdMe_ },
   capNhatHoTen: { chay: hdCapNhatHoTen_ },
   trangChu: { chay: hdTrangChu_ },
+  thongBao: { chay: hdThongBaoCuaToi_ },
+  'admin.guiThongBao': { vaiTro: CHU_, chay: hdGuiThongBao_ },
+  'admin.dsThongBao': { vaiTro: CHU_, chay: hdDsThongBao_ },
+  'admin.xoaThongBao': { vaiTro: CHU_, chay: hdXoaThongBao_ },
+  'admin.tongQuan': { vaiTro: CHU_, chay: hdTongQuan_ },
   batDauThi: { chay: hdBatDauThi_ },
   'thi.luu': { choPhienThi: true, chay: hdThiLuu_ },
   'thi.nop': { choPhienThi: true, chay: hdThiNop_ },
@@ -46,16 +50,16 @@ var HANH_DONG_ = {
   'taoDe.bat': { chay: hdTaoDeBat_ },
   'taoDe.nop': { chay: hdTaoDeNop_ },
   'taoDe.huy': { chay: hdTaoDeHuy_ },
-  'admin.dsHocKy': { vaiTro: CHU_TRO_LY_, chay: hdDsHocKy_ },
+  'admin.dsHocKy': { vaiTro: CHU_, chay: hdDsHocKy_ },
   'admin.themMon': { vaiTro: CHU_, chay: hdThemMon_ },
   'admin.ketThucHocKy': { vaiTro: CHU_, chay: hdKetThucHocKy_ },
-  'admin.tongKet': { vaiTro: CHU_TRO_LY_, chay: hdTongKet_ },
+  'admin.tongKet': { vaiTro: CHU_, chay: hdTongKet_ },
   'admin.taoHocKy': { vaiTro: CHU_, chay: hdTaoHocKy_ },
-  'admin.bangDiem': { vaiTro: CHU_TRO_LY_, chay: hdBangDiem_ },
+  'admin.bangDiem': { vaiTro: CHU_, chay: hdBangDiem_ },
   'admin.chamLaiTuan': { vaiTro: CHU_, chay: hdChamLaiTuan_ },
-  'admin.nhatKy': { vaiTro: CHU_TRO_LY_, chay: hdNhatKy_ },
+  'admin.nhatKy': { vaiTro: CHU_, chay: hdNhatKy_ },
   'admin.saoLuuNgay': { vaiTro: CHU_, chay: hdSaoLuuNgay_ },
-  'admin.dsSaoLuu': { vaiTro: CHU_TRO_LY_, chay: hdDsSaoLuu_ },
+  'admin.dsSaoLuu': { vaiTro: CHU_, chay: hdDsSaoLuu_ },
   'admin.xemTruocDeThi': { vaiTro: CHU_, chay: hdXemTruocDeThi_ },
   'admin.thayCauDe': { vaiTro: CHU_, chay: hdThayCauDe_ },
   'admin.luuDeThi': { vaiTro: CHU_, chay: hdLuuDeThi_ },
@@ -63,16 +67,16 @@ var HANH_DONG_ = {
   'admin.layDeThi': { vaiTro: CHU_, chay: hdLayDeThi_ },
   'admin.doiTrangThaiDe': { vaiTro: CHU_, chay: hdDoiTrangThaiDe_ },
   'admin.ganDeChoTuan': { vaiTro: CHU_, chay: hdGanDeChoTuan_ },
-  'admin.dsMon': { vaiTro: CHU_TRO_LY_, chay: hdDsMon_ },
+  'admin.dsMon': { vaiTro: CHU_, chay: hdDsMon_ },
   'admin.luuChuong': { vaiTro: CHU_, chay: hdLuuChuong_ },
   'admin.doiChuongCau': { vaiTro: CHU_, chay: hdDoiChuongCau_ },
   baoSai: { chay: hdBaoSai_ },
   xemLai: { chay: hdXemLai_ },
   cauKhoNhat: { chay: hdCauKhoNhat_ },
-  'admin.nganHang': { vaiTro: CHU_TRO_LY_, chay: hdNganHang_ },
+  'admin.nganHang': { vaiTro: CHU_, chay: hdNganHang_ },
   'admin.suaCauHoi': { vaiTro: CHU_, chay: hdSuaCauHoi_ },
-  'admin.doiTrangThaiCau': { vaiTro: CHU_TRO_LY_, chay: hdDoiTrangThaiCau_ },
-  'admin.duyetCau': { vaiTro: CHU_TRO_LY_, chay: hdDuyetCau_ },
+  'admin.doiTrangThaiCau': { vaiTro: CHU_, chay: hdDoiTrangThaiCau_ },
+  'admin.duyetCau': { vaiTro: CHU_, chay: hdDuyetCau_ },
   'admin.xuatChoDuyet': { vaiTro: CHU_, chay: hdXuatChoDuyet_ },
   'admin.donCauTuChoi': { vaiTro: CHU_, chay: hdDonCauTuChoi_ },
   'admin.xuatNganHang': { vaiTro: CHU_, chay: hdXuatNganHang_ },
@@ -89,13 +93,12 @@ var HANH_DONG_ = {
   xinMien: { chay: hdXinMien_ },
   huyMien: { chay: hdHuyMien_ },
   cauHoiCuaToi: { chay: hdCauHoiCuaToi_ },
-  'admin.dsTuan': { vaiTro: CHU_TRO_LY_, chay: hdDsTuan_ },
+  'admin.dsTuan': { vaiTro: CHU_, chay: hdDsTuan_ },
   'admin.taoLichTuan': { vaiTro: CHU_, chay: hdTaoLichTuan_ },
   'admin.suaTuan': { vaiTro: CHU_, chay: hdSuaTuan_ },
-  'admin.dsThanhVien': { vaiTro: CHU_TRO_LY_, chay: hdDsThanhVien_ },
+  'admin.dsThanhVien': { vaiTro: CHU_, chay: hdDsThanhVien_ },
   'admin.nhapDangKy': { vaiTro: CHU_, chay: hdNhapDangKy_ },
   'admin.themThanhVien': { vaiTro: CHU_, chay: hdThemThanhVien_ },
-  'admin.doiVaiTro': { vaiTro: CHU_, chay: hdDoiVaiTro_ },
   'admin.goThanhVien': { vaiTro: CHU_, chay: hdGoThanhVien_ },
   'admin.moLaiThanhVien': { vaiTro: CHU_, chay: hdMoLaiThanhVien_ },
   'admin.xemTruocChiaNhom': { vaiTro: CHU_, chay: hdXemTruocChiaNhom_ },
@@ -147,11 +150,18 @@ function hdCapNhatHoTen_(email, tv, body) {
 // Gom mọi thứ trang chủ cần vào một yêu cầu để mở web nhanh hơn: thông tin cá nhân, tuần hiện tại, cấp bậc.
 function hdTrangChu_(email, tv) {
   var kq = { me: hdMe_(email, tv), tuan: hdTuanHienTai_(email), cap: thongTinCapCuaToi_(email, layCauHinh_()) };
-  if (tv.vaiTro !== 'member') {
+  kq.tbMoiNhat = thongBaoMoiNhat_(email); // thời điểm thông báo mới nhất dành cho người này, để hiện chấm báo chưa đọc
+  if (tv.vaiTro === 'owner') {
     var hk = hocKyDangMo_();
     kq.choDuyet = hk ? demChoDuyet_(hk.maHocKy) : 0; // số câu đang chờ duyệt, hiện trên nút Quản trị
   }
   return kq;
+}
+
+// Cho web quản trị: số câu đang chờ duyệt để hiện trên nút.
+function hdTongQuan_() {
+  var hk = hocKyDangMo_();
+  return { choDuyet: hk ? demChoDuyet_(hk.maHocKy) : 0 };
 }
 
 function hdMe_(email, tv) {
@@ -160,7 +170,7 @@ function hdMe_(email, tv) {
   return {
     email: email,
     hoTen: tv.hoTen,
-    vaiTro: tv.vaiTro,
+    vaiTro: tv.vaiTro === 'owner' ? 'owner' : 'member', // không còn vai trò trợ lý
     hocKy: hk ? { maHocKy: hk.maHocKy, tenHocKy: hk.tenHocKy } : null,
     nhom: nhom ? { maNhom: nhom.maNhom, tenNhom: nhom.tenNhom } : null,
   };
@@ -285,18 +295,6 @@ function canThanhVienKhongPhaiChu_(emailMuc) {
   if (!t) throw loi_('khong_thay', 'Không tìm thấy thành viên.');
   if (t.vaiTro === 'owner') throw loi_('cam', 'Không thể thay đổi chủ.');
   return t;
-}
-
-function hdDoiVaiTro_(email, tv, body) {
-  var vaiTro = body.vaiTro;
-  if (vaiTro !== 'member' && vaiTro !== 'assistant') throw loi_('vai_tro_sai', 'Vai trò chỉ là member hoặc assistant.');
-  var emailMuc = chuanHoaEmail(body.email);
-  return voiKhoa_(function () {
-    var t = canThanhVienKhongPhaiChu_(emailMuc);
-    suaDong_('ThanhVien', t._dong, { vaiTro: vaiTro });
-    ghiNhatKy_(email, 'doiVaiTro', emailMuc, vaiTro);
-    return { email: emailMuc, vaiTro: vaiTro };
-  });
 }
 
 function hdGoThanhVien_(email, tv, body) {

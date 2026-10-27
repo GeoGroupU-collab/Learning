@@ -39,7 +39,7 @@ scripts/            build backend, sinh manifest
 npm install
 npm run build:backend   # gom backend/src/*.js thành backend/dist/Code.gs
 npm test                # Vitest (máy chủ qua giả lập Apps Script, logic thuần, giao diện thuần)
-npm run dev:mock        # xem giao diện với dữ liệu giả, không cần Google (thêm ?tt=nop|cho|mo|dong, ?vai=member|assistant)
+npm run dev:mock        # xem giao diện với dữ liệu giả, không cần Google (thêm ?tt=nop|cho|mo|dong, ?vai=member|owner; trang quản trị ở /admin/)
 npm run build           # sinh manifest, kiểm tra kiểu, build web vào dist/
 node scripts/tao-pdf-thanh-vien.mjs "<link Google Form>"   # tạo phat-cho-lop/HUONG-DAN-THANH-VIEN.pdf kèm mã QR (cần Chrome; thư mục này không đưa lên GitHub)
 ```

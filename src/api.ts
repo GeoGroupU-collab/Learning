@@ -42,7 +42,7 @@ export async function goi<T>(action: string, payload: Record<string, unknown> = 
 // và xóa khi đăng xuất hoặc hết phiên.
 
 const TIEN_TO_CACHE = 'lg_c:';
-const DUOC_LUU = new Set(['trangChu', 'tuanHienTai', 'xepHang', 'xepHangCaNhan', 'nhomCuaToi', 'taoDe.thongTin']);
+const DUOC_LUU = new Set(['trangChu', 'tuanHienTai', 'xepHang', 'xepHangCaNhan', 'nhomCuaToi', 'taoDe.thongTin', 'thongBao']);
 
 const khoaCache = (action: string, payload: Record<string, unknown>): string => TIEN_TO_CACHE + action + ':' + JSON.stringify(payload);
 

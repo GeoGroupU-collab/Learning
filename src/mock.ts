@@ -7,7 +7,7 @@ const EMAIL_TOI = 'toi@example.test';
 
 const ten = ['An', 'Bình', 'Chi', 'Dũng', 'Giang', 'Hà', 'Khoa', 'Lan', 'Minh', 'Nam', 'Oanh', 'Phúc', 'Quân', 'Thảo'];
 const thanhVien: ThanhVienDs[] = [
-  { email: EMAIL_TOI, hoTen: 'Lớp trưởng (thử)', vaiTro: vai, trangThai: 'active', ngayThamGia: '2026-10-28' },
+  { email: EMAIL_TOI, hoTen: 'Minh Anh', vaiTro: vai, trangThai: 'active', ngayThamGia: '2026-10-28' },
   ...ten.map((t, i) => ({
     email: `sv${i}@example.test`,
     hoTen: `${t} (thử)`,
@@ -87,6 +87,16 @@ const nganHangGia = Array.from({ length: 7 }, (_, i) => ({
   tacGia: `sv${i}@example.test`, tenTacGia: `Bạn ${i}`, trangThai: (i === 2 ? 'suspended' : i >= 5 ? 'cho_duyet' : 'active') as 'active' | 'suspended' | 'removed' | 'cho_duyet' | 'tu_choi', ngayNop: '2026-11-05T10:00:00Z', soBaoSai: i === 2 ? 2 : 0,
 }));
 
+// ?nhomMau trong địa chỉ: có sẵn nhóm để xem trang Nhóm khi chụp hình giới thiệu.
+if (new URLSearchParams(location.search).has('nhomMau')) {
+  nhoms = chiaThu(3).map((g, i) => ({ tenNhom: g.tenNhom, maNhom: `n${i + 1}`, thanhVien: g.thanhVien.map((t) => nguoiGpa().find((p) => p.email === t.email)!) }));
+}
+
+let thongBaoGia = [
+  { id: 'tb-2', ngay: Date.now() - 2 * 3600000, tieuDe: 'Họp lớp tối thứ Sáu', noiDung: 'Tối thứ Sáu 20h họp lớp online, cả lớp nhớ vào nhé.\nLink gửi ở nhóm Zalo.', nguoiNhan: 'Cả lớp' },
+  { id: 'tb-1', ngay: Date.now() - 30 * 3600000, tieuDe: 'Nhóm 1 được cộng điểm', noiDung: 'Chúc mừng nhóm 1 đứng đầu tuần trước, +50 điểm cấp bậc.', nguoiNhan: 'Nhóm: Nhóm 1' },
+];
+
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 export async function mockGoi(action: string, payload: Record<string, unknown>): Promise<unknown> {
@@ -101,7 +111,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       const n = tuiTrong();
       return {
         email: EMAIL_TOI,
-        hoTen: 'Lớp trưởng (thử)',
+        hoTen: 'Minh Anh',
         vaiTro: vai,
         hocKy: { maHocKy: 'hk1-2026-2027', tenHocKy: 'Học kỳ 1 năm học 2026-2027' },
         nhom: n ? { maNhom: n.maNhom, tenNhom: n.tenNhom } : null,
@@ -188,7 +198,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       };
     }
     case 'trangChu':
-      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), ...(vai !== 'member' ? { choDuyet: nganHangGia.filter((c) => c.trangThai === 'cho_duyet').length } : {}) };
+      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), tbMoiNhat: thongBaoGia.length ? Math.max(...thongBaoGia.map((t) => t.ngay)) : 0 };
     case 'taoDe.thongTin':
       return {
         cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
@@ -300,6 +310,20 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
           dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Phương án ${k}` })), dung: 'C', giaiThich: 'Vì quá trình này xảy ra ở điều kiện áp suất cao.', soLuot: 12 - i, tyLeSai: 80 - i * 10,
         })),
       };
+    case 'thongBao':
+      return thongBaoGia.map((t) => ({ id: t.id, ngay: t.ngay, tieuDe: t.tieuDe, noiDung: t.noiDung, rieng: t.nguoiNhan !== 'Cả lớp' }));
+    case 'admin.tongQuan':
+      return { choDuyet: nganHangGia.filter((c) => c.trangThai === 'cho_duyet').length };
+    case 'admin.dsThongBao':
+      return thongBaoGia;
+    case 'admin.guiThongBao': {
+      if (!String(payload.tieuDe ?? '').trim()) throw new LoiApi('thieu_tieu_de', 'Hãy nhập tiêu đề.');
+      thongBaoGia = [{ id: 'tb-' + Date.now(), ngay: Date.now(), tieuDe: String(payload.tieuDe), noiDung: String(payload.noiDung), nguoiNhan: payload.loai === 'all' ? 'Cả lớp' : payload.loai === 'nhom' ? 'Một nhóm' : 'Từng người' }, ...thongBaoGia];
+      return { id: thongBaoGia[0].id };
+    }
+    case 'admin.xoaThongBao':
+      thongBaoGia = thongBaoGia.filter((t) => t.id !== payload.id);
+      return { daXoa: true };
     case 'admin.nganHang':
       return { soChoDuyet: nganHangGia.filter((c) => c.trangThai === 'cho_duyet').length, tong: nganHangGia.length, trang: 1, coTrang: 50, cauHoi: nganHangGia };
     case 'admin.suaCauHoi':

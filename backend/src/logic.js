@@ -5,7 +5,7 @@ function docGpa(giaTri) {
   var s = String(giaTri == null ? '' : giaTri).trim().replace(',', '.');
   if (s === '') return NaN;
   var n = Number(s);
-  return isFinite(n) && n >= 0 && n <= 10 ? n : NaN;
+  return isFinite(n) && n >= 0 && n <= 4 ? n : NaN; // thang 4
 }
 
 function trungBinhGpa_(nhom) {

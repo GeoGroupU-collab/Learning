@@ -97,7 +97,7 @@ describe('kết thúc học kỳ', () => {
 
   it('xem lại tổng kết và danh sách học kỳ có đánh dấu đã tổng kết', () => {
     goiAs(CHU, 'admin.ketThucHocKy', { xacNhan: true });
-    const tk = goiAs(TRO_LY, 'admin.tongKet', { maHocKy: 'hk1-2026-2027' });
+    const tk = goiAs(CHU, 'admin.tongKet', { maHocKy: 'hk1-2026-2027' });
     expect(tk.data.nhomVoDich[0].tenNhom).toBe('Nhóm B');
     const ds = goiAs(CHU, 'admin.dsHocKy').data;
     expect(ds[0]).toMatchObject({ maHocKy: 'hk1-2026-2027', trangThai: 'dong', coTongKet: true });
@@ -301,9 +301,9 @@ describe('chấm lại tuần', () => {
 describe('bảng điểm', () => {
   beforeEach(dungDenTuan1DaChot);
 
-  it('chủ và trợ lý xem được, thành viên thì không', () => {
+  it('chỉ chủ xem được, thành viên và vai trò trợ lý cũ thì không', () => {
     expect(goiAs(CHU, 'admin.bangDiem').ok).toBe(true);
-    expect(goiAs(TRO_LY, 'admin.bangDiem').ok).toBe(true);
+    expect(goiAs(TRO_LY, 'admin.bangDiem').error).toBe('cam');
     expect(goiAs(NGUOI[0], 'admin.bangDiem').error).toBe('cam');
   });
 
@@ -317,14 +317,14 @@ describe('bảng điểm', () => {
     expect(ng[NGUOI[2]].diemTB).toBeNull();
     expect(ng[NGUOI[4]].diemTuan[1]).toBe(75);
     expect(ng[NGUOI[4]]).toMatchObject({ tongCapBac: 50, tenCapLon: 'Võ Sĩ', level: 1 });
-    expect(r.nguoi.some((x) => x.email === TRO_LY)).toBe(true);
+    expect(r.nguoi.some((x) => x.email === TRO_LY)).toBe(true); // vẫn là một thành viên của lớp
     expect(r.nhom.map((n) => [n.nhom, n.hang])).toEqual(expect.arrayContaining([['Nhóm B', 1], ['Nhóm A', 2]]));
   });
 
   it('không lộ GPA hay dữ liệu đăng ký', () => {
     mt.ss.insertSheet('DangKy').appendRow(['Địa chỉ email', 'Họ và tên', 'GPA hiện tại']);
     mt.ss.getSheetByName('DangKy').appendRow([NGUOI[0], 'Người 0', 3.99]);
-    expect(JSON.stringify(goiAs(TRO_LY, 'admin.bangDiem'))).not.toContain('3.99');
+    expect(JSON.stringify(goiAs(CHU, 'admin.bangDiem'))).not.toContain('3.99');
   });
 
   it('người được miễn hiện là "mien"', () => {
@@ -339,8 +339,8 @@ describe('bảng điểm', () => {
 describe('nhật ký', () => {
   beforeEach(dungDenTuan1DaChot);
 
-  it('chủ và trợ lý xem được, mới nhất lên đầu, có phân trang', () => {
-    const r = goiAs(TRO_LY, 'admin.nhatKy', {}).data;
+  it('chủ xem được, mới nhất lên đầu, có phân trang', () => {
+    const r = goiAs(CHU, 'admin.nhatKy', {}).data;
     expect(r.tong).toBeGreaterThan(10);
     expect(r.dong.length).toBeLessThanOrEqual(50);
     for (let i = 1; i < r.dong.length; i++) expect(r.dong[i - 1].thoiGian >= r.dong[i].thoiGian).toBe(true);
@@ -361,9 +361,10 @@ describe('nhật ký', () => {
 describe('sao lưu', () => {
   beforeEach(dungDenTuan1DaChot);
 
-  it('chỉ chủ sao lưu được, trợ lý xem được danh sách', () => {
+  it('chỉ chủ sao lưu và xem danh sách sao lưu', () => {
     expect(goiAs(TRO_LY, 'admin.saoLuuNgay').error).toBe('cam');
-    expect(goiAs(TRO_LY, 'admin.dsSaoLuu').ok).toBe(true);
+    expect(goiAs(TRO_LY, 'admin.dsSaoLuu').error).toBe('cam');
+    expect(goiAs(CHU, 'admin.dsSaoLuu').ok).toBe(true);
     expect(goiAs(NGUOI[0], 'admin.dsSaoLuu').error).toBe('cam');
   });
 

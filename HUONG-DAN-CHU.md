@@ -175,7 +175,7 @@ Trước khi đẩy lên, kiểm tra thư mục không có file nào chứa mậ
 
 ### Bước 15. Thử vòng đầu tiên
 
-1. Mở trang web, bấm **Đăng nhập bằng Google** bằng tài khoản dự án. Phải vào được trang chủ và thấy nút **Quản trị**.
+1. Mở trang web, bấm **Đăng nhập bằng Google** bằng tài khoản dự án. Phải vào được trang chủ. Phần quản trị nằm ở web riêng `/admin/` (xem Phụ lục 3 ở cuối).
 2. Thử đăng nhập bằng một tài khoản Google khác chưa có trong `ThanhVien`: phải thấy "Email này chưa được duyệt, liên hệ lớp trưởng."
 3. Đăng nhập lại tài khoản dự án, vào **Quản trị**, **Chia nhóm**. Sau khi Form đóng (5/11) làm theo thứ tự: **Nhập đăng ký**, **Xem trước chia nhóm**, chuyển người nếu cần, **Chốt**.
 4. Vào tab **Nhóm** để xem nhóm của mình, dán thử link nhóm Zalo.
@@ -355,9 +355,9 @@ Sau khi một tuần đóng cửa: **Sự kiện**, **Xem lại bài và câu kh
 
 ### Bước 25. Quản lý ngân hàng câu hỏi
 
-**Quản trị**, tab **Câu hỏi** (chủ và trợ lý đều thấy):
+**Quản trị** (web riêng, xem Phụ lục 3), tab **Câu hỏi**:
 - Lọc theo tuần, môn, trạng thái, tác giả, từ khóa, hoặc chỉ câu bị báo sai. Câu bị báo sai nhiều hiện lên đầu.
-- Trợ lý được **Tạm loại** và **Khôi phục**. Chủ có thêm **Sửa** và **Xóa**.
+- Bạn có thể **Tạm loại**, **Khôi phục**, **Sửa** và **Xóa**.
 
 **Xuất và nhập bản rà soát (chủ):**
 1. Mở **Xuất và nhập ngân hàng**, bấm **Xuất CSV** hoặc **Xuất JSON** (kèm trang nguồn).
@@ -487,8 +487,8 @@ Làm đúng khi thấy: trong Apps Script, biểu tượng đồng hồ (**Trìn
 
 ### Bước 32. Bảng điểm, nhật ký
 
-- **Quản trị**, **Điểm** (chủ và trợ lý đều xem): điểm thi từng người theo tuần, điểm trung bình, nhóm, cấp bậc, kèm điểm nhóm các tuần đã chốt. **Xuất CSV (báo cáo cho thầy)**: mở bằng Excel được, tiếng Việt đúng dấu. Không có GPA.
-- **Nhật ký** (chủ và trợ lý): mọi thao tác quản trị (nhập đăng ký, chia nhóm, sửa câu hỏi, chấm lại, kết thúc học kỳ, sao lưu...), mới nhất ở trên, lọc theo hành động, người làm, từ khóa.
+- **Quản trị**, **Điểm**: điểm thi từng người theo tuần, điểm trung bình, nhóm, cấp bậc, kèm điểm nhóm các tuần đã chốt. **Xuất CSV (báo cáo cho thầy)**: mở bằng Excel được, tiếng Việt đúng dấu. Không có GPA.
+- **Nhật ký**: mọi thao tác quản trị (nhập đăng ký, chia nhóm, sửa câu hỏi, chấm lại, kết thúc học kỳ, sao lưu...), mới nhất ở trên, lọc theo hành động, người làm, từ khóa.
 
 ### Chấm lại tuần
 
@@ -525,10 +525,6 @@ Sheet càng nhiều dòng thì web càng chậm một chút. Cuối mỗi năm h
 ### Thêm thành viên ở các năm sau
 
 Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viên**, **Thêm người đăng ký muộn**, rồi **Chia nhóm** (hoặc chuyển nhóm tại mục Nhóm hiện tại). Không cần đụng đến mã.
-
-### Quyền trợ lý
-
-Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được điểm mọi người, bảng điểm, nhật ký, ngân hàng câu hỏi (duyệt, tạm loại, khôi phục), danh sách sao lưu. Trợ lý **không** gỡ người, không đổi cấu hình, không xóa hay sửa câu hỏi, không xem GPA, không kết thúc học kỳ.
 
 ---
 
@@ -599,7 +595,7 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
 **Từ giờ câu hỏi chạy thế nào:**
 1. Thành viên nộp câu, câu ở trạng thái **Chờ duyệt**. Việc nộp vẫn tính đủ để mở khóa phòng thi, nhưng câu chưa được rút vào đề nào (đề sự kiện, đề tự tạo).
 2. Nút **Quản trị** hiện số đỏ là số câu đang chờ duyệt.
-3. Bạn hoặc trợ lý vào **Quản trị, Câu hỏi**. Khung **Duyệt câu hỏi** ở trên cùng cho phép:
+3. Bạn vào **Quản trị, Câu hỏi**. Khung **Duyệt câu hỏi** ở trên cùng cho phép:
    - **Chỉ xem câu chờ duyệt**, rồi bấm **Duyệt** hoặc **Từ chối** từng câu (từ chối thì nhập lý do, người nộp sẽ thấy lý do ở **Câu hỏi của tôi**).
    - **Duyệt cả bộ lọc hiện tại**: lọc theo tuần, môn hoặc người nộp rồi duyệt cả loạt.
 4. Câu bị từ chối không vào đề. Câu được duyệt chuyển sang **Đang dùng**.
@@ -616,3 +612,22 @@ Cấp bằng **Làm trợ lý** ở tab Thành viên. Trợ lý xem được đi
 - **Phải duyệt trước tối Thứ Sáu.** Đề chỉ rút câu đã duyệt. Nếu chưa duyệt kịp, đề thiếu câu (hệ thống lấy bù từ tuần khác hoặc làm đề ngắn hơn).
 - Câu **đã duyệt vẫn nằm trong Sheet**, vì đề thi và bảng điểm cần chúng. Chỉ câu bị từ chối mới bị dọn đi.
 - Muốn tắt hẳn bước duyệt (câu nộp vào ngân hàng ngay): ở tab `CauHinh` đặt `duyetCauHoiTruoc` thành `FALSE`.
+
+---
+
+## Phụ lục 3. Web quản trị riêng, thông báo, GPA thang 4, giao diện mới
+
+**Làm gì (theo thứ tự):**
+1. Dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**. Chạy hàm `khoiTao` một lần (thêm tab `ThongBao`). **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
+2. Sửa Google Form đăng ký cho đúng thang 4 (Form cũ chưa tự đổi): mở Form, câu **GPA hiện tại**, bấm ba chấm, **Xác thực câu trả lời**, chọn **Số**, **Từ 0 đến 4**, thông báo lỗi "Hãy nhập GPA thang 4, từ 0 đến 4". Sửa luôn phần mô tả câu hỏi thành "Nhập theo thang 4, dùng dấu chấm. Ví dụ 3.25". Form tạo mới bằng `taoFormDangKy` đã đúng thang 4 sẵn.
+3. Commit và push bản web bằng GitHub Desktop, chờ Actions tick xanh, **Ctrl+F5**.
+
+**Có gì mới:**
+- **GPA thang 4:** máy chủ chỉ nhận GPA từ 0 đến 4. Người nào trong tab `DangKy` ghi theo thang 10 (ví dụ 7.8) sẽ nằm trong danh sách "chưa có GPA hợp lệ" khi chia nhóm; sửa số đó trong Sheet rồi chia lại. Màn hình chia nhóm ghi rõ "GPA thang 4".
+- **Web quản trị riêng:** địa chỉ `https://geogroupu-collab.github.io/Learning/admin/`. Chỉ lớp trưởng vào được (tài khoản khác thấy thông báo không có quyền). Đăng nhập một lần ở web lớp thì web quản trị tự nhận, vì cùng một trình duyệt. Web lớp không còn nút Quản trị và không còn tải mã quản trị, nên nhẹ hơn cho các bạn. Số đỏ trên tab **Câu hỏi** là số câu đang chờ duyệt.
+- **Bỏ vai trò trợ lý:** không còn nút Làm trợ lý. Ai từng được đặt là trợ lý bị coi là thành viên thường (Sheet vẫn ghi cũ, không ảnh hưởng).
+- **Thông báo:** vào web quản trị, tab **Thông báo**. Chọn **Cả lớp**, **Một nhóm** hoặc **Từng người** (tick tên), nhập tiêu đề và nội dung, **Gửi thông báo**. Thành viên thấy ở trang **Sự kiện**, tab **Thông báo**, có chấm đỏ khi có tin mới, và thẻ "Có thông báo mới" ở trang chủ. Thông báo gửi riêng chỉ người nhận thấy, không ai thấy danh sách người nhận. Bạn xóa thông báo ở mục **Đã gửi** thì mọi người không còn thấy.
+- **Trang chủ:** khối chào đẹp hơn, dải chữ chạy **Vinh danh** (nhóm cao điểm nhất của tuần gần nhất đã chốt và cá nhân nhận danh hiệu), thẻ sự kiện nổi bật. Thẻ **Tự tạo đề luyện tập** đã chuyển sang trang **Bài học**.
+- **Sự kiện:** khối đếm ngược lớn và ba chặng của tuần (Nộp câu hỏi, Phòng thi, Kết quả) cho biết đang ở chặng nào.
+
+**Làm đúng khi thấy:** mở trang admin bằng tài khoản chủ thấy các tab Thành viên, Chia nhóm, Tuần, **Thông báo**...; mở bằng tài khoản thành viên thấy "Trang này chỉ dành cho lớp trưởng". Gửi một thông báo thử cho riêng một tài khoản, đăng nhập tài khoản đó thấy chấm đỏ ở **Sự kiện**.

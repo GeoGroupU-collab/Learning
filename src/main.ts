@@ -9,9 +9,9 @@ import { icon, dauHieu, duongDongMuc } from './icon';
 import { datCheDo, docCheDo, type CheDo } from './theme';
 import { mauMon } from './mau';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from './config';
-import { docCache, ghiCache, goi, LoiApi, xoaCache } from './api';
+import { docCache, ghiCache, goi, goiNhanh, LoiApi, xoaCache } from './api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from './auth';
-import { datHuyHieuDuyet, h, khungCho, xoaHet, thongBao } from './dom';
+import { h, khungCho, xoaHet, thongBao } from './dom';
 import { layManifest, veBaiHoc, veDanhSachBai, veDanhSachMon, laMoi } from './views/bai-hoc';
 import { veNhom } from './views/nhom';
 import { veSuKien, veNopCauHoi } from './views/su-kien';
@@ -19,10 +19,11 @@ import { vePhongThi } from './views/phong-thi';
 import { veXepHang } from './views/xep-hang';
 import { veTaoDe } from './views/tao-de';
 import { veXemLai } from './views/xem-lai';
+import { veThongBao, datThongBaoMoiNhat, coThongBaoMoi, capNhatCham } from './views/thong-bao';
 import { veCauHoiCuaToi } from './views/cau-hoi-cua-toi';
 import { theCap } from './cap';
 import { dungDongHo, datGioMayChu, demNguoc, dinhDangNgay } from './gio';
-import type { Me, TrangChuData } from './types';
+import type { KetQuaXepHang, KetQuaXepHangCaNhan, Me, TrangChuData } from './types';
 
 // Tên để hiển thị. Tên trống hoặc đã bị xóa dữ liệu thì dùng phần đầu của email.
 function tenHienThi(m: Me): string {
@@ -144,6 +145,7 @@ async function khoiDong(): Promise<void> {
   if (cu) {
     me = cu.me;
     duLieuTrangChu = cu;
+    datThongBaoMoiNhat(cu.tbMoiNhat);
     veKhung();
     void dinhTuyen();
     daVe = true;
@@ -159,7 +161,7 @@ async function khoiDong(): Promise<void> {
     duLieuTrangChu = moi;
     thoiDiemTaiTrangChu = Date.now();
     datGioMayChu(moi.tuan.now);
-    datHuyHieuDuyet(moi.choDuyet ?? 0);
+    datThongBaoMoiNhat(moi.tbMoiNhat);
     taiTruocCacMuc();
     if (!daVe || doiVaiTro) {
       veKhung();
@@ -197,23 +199,21 @@ function veKhung(): void {
   vungNoiDung = h('main', { class: 'noi-dung' });
   thanhDuoi = h('nav', { class: 'thanh-duoi', 'aria-label': 'Điều hướng chính' },
     ...MUC_DUOI.map(([href, ten, bieuTuong]) => h('a', { href, 'data-href': href }, icon(bieuTuong, 22) as unknown as HTMLElement, h('span', {}, ten))));
-  const laQuanTri = me!.vaiTro !== 'member';
   const chuCai = chuCaiDau(me!);
   goc.append(
     h('header', { class: 'dau-trang' },
       h('a', { class: 'logo', href: '#/' }, dauHieu(30) as unknown as HTMLElement, h('span', {}, CONFIG.TEN_WEB)),
       thanhDuoi,
       h('div', { class: 'dau-phai' },
-        laQuanTri ? h('a', { class: 'nut-dau', href: '#/quan-tri/thanh-vien' }, icon('khien', 16) as unknown as HTMLElement, h('span', {}, 'Quản trị'),
-          h('span', { class: 'dau-so', id: 'dau-so-duyet', hidden: !duLieuTrangChu?.choDuyet }, String(duLieuTrangChu?.choDuyet ?? 0))) : null,
         h('a', { class: 'chu-cai', href: '#/cai-dat', 'aria-label': 'Tài khoản' }, chuCai))),
     vungNoiDung
   );
+  capNhatCham();
 }
 
 function danhDauMuc(hash: string): void {
   const goc2 = hash.split('/').slice(0, 2).join('/') || '#/';
-  const khop = hash.startsWith('#/doc') ? '#/bai-hoc' : goc2 === '#' ? '#/' : goc2;
+  const khop = hash.startsWith('#/doc') || hash.startsWith('#/tao-de') ? '#/bai-hoc' : goc2 === '#' ? '#/' : goc2;
   thanhDuoi.querySelectorAll('a').forEach((a) => a.classList.toggle('dang', a.getAttribute('data-href') === khop));
 }
 
@@ -239,6 +239,7 @@ async function dinhTuyen(): Promise<void> {
         return await veNhom(vungNoiDung, me);
       case 'su-kien':
         if (a === 'thi') return await vePhongThi(vungNoiDung);
+        if (a === 'thong-bao') return await veThongBao(vungNoiDung);
         if (a === 'xem-lai') return await veXemLai(vungNoiDung, b ? Number(b) : null);
         return a === 'nop' ? await veNopCauHoi(vungNoiDung) : await veSuKien(vungNoiDung);
       case 'cau-hoi':
@@ -247,12 +248,6 @@ async function dinhTuyen(): Promise<void> {
         return await veXepHang(vungNoiDung, a === 'ca-nhan' ? 'ca-nhan' : 'nhom');
       case 'tao-de':
         return await veTaoDe(vungNoiDung);
-      case 'quan-tri':
-        if (me.vaiTro === 'member') return veSapCo('Quản trị', 'Bạn không có quyền vào trang này.');
-        {
-          const { veQuanTri } = await import('./views/quan-tri'); // chỉ tải khi quản trị viên mở trang này
-          return await veQuanTri(vungNoiDung, me, a || 'thanh-vien');
-        }
       case 'cai-dat':
         return veCaiDat(vungNoiDung);
       default:
@@ -278,33 +273,51 @@ async function lamMoiTrangChu(): Promise<void> {
     duLieuTrangChu = moi;
     thoiDiemTaiTrangChu = Date.now();
     datGioMayChu(moi.tuan.now);
-    datHuyHieuDuyet(moi.choDuyet ?? 0);
+    datThongBaoMoiNhat(moi.tbMoiNhat);
     if ((location.hash || '#/') === '#/') veTrangChu(vungNoiDung);
   } catch {
     /* giữ dữ liệu cũ */
   }
 }
 
-// Vẽ trang chủ ngay từ dữ liệu đã có, không cần chờ mạng (trừ danh sách bài học, tải riêng bên dưới).
+// Vẽ trang chủ ngay từ dữ liệu đã có, không cần chờ mạng (trừ danh sách bài học và dải vinh danh, tải riêng bên dưới).
 function veTrangChu(noi: HTMLElement): void {
   dungDongHo();
   xoaHet(noi);
   const m = me!;
   const d = duLieuTrangChu;
-  const ten = tenHienThi(m).split(/\s+/).pop() || 'bạn';
+  const ten = tenNganHienThi(m);
   const lienKet = (href: string, bieuTuong: string, tieuDe: string, mo: string, lop = ''): HTMLElement =>
     h('a', { class: `card the-lien-ket ${lop}`.trim(), href }, icon(bieuTuong, 22) as unknown as HTMLElement,
       h('div', {}, h('div', { class: 'mon-ten' }, tieuDe), h('div', { class: 'phu nho' }, mo)));
+  const vungChay = h('div', { class: 'chay' });
+  dungDaiVinhDanh(vungChay, [], []);
   noi.append(
-    h('div', { class: 'chao' },
-      h('span', { class: 'nhan-muc' }, m.hocKy ? m.hocKy.tenHocKy : 'Chưa có học kỳ đang mở'),
-      h('h1', {}, `Chào ${ten}`)),
+    h('section', { class: 'hero hero-chu' },
+      h('span', { class: 'hero-nhan' }, m.hocKy ? m.hocKy.tenHocKy : 'Chưa có học kỳ đang mở'),
+      h('h1', { class: 'hero-tieu-de' }, `Chào ${ten}`),
+      h('p', { class: 'hero-phu' }, 'Mỗi tuần một đề, cả lớp cùng ôn. Hôm nay bạn làm gì cho nhóm mình?')),
+    vungChay,
     h('div', { class: 'luoi-chu' },
       d ? theSuKien(d) : h('div', { class: 'card rong' }, h('div', { class: 'mon-ten' }, 'Đang tải...')),
+      ...(coThongBaoMoi() ? [lienKet('#/su-kien/thong-bao', 'chuong', 'Có thông báo mới', 'Bấm để đọc tin từ lớp trưởng', 'the-tb-moi rong')] : []),
       ...(d ? [theCap(d.cap)] : []),
-      lienKet('#/nhom', 'nhom', m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm', m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký'),
-      lienKet('#/tao-de', 'but', 'Tự tạo đề luyện tập', 'Chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.', 'rong'))
+      lienKet('#/nhom', 'nhom', m.nhom ? m.nhom.tenNhom : 'Chưa có nhóm', m.nhom ? 'Xem thành viên và link Zalo' : 'Lớp trưởng sẽ chia nhóm sau khi đóng Form đăng ký'))
   );
+
+  // Dải chữ chạy vinh danh: nhóm cao điểm nhất tuần gần nhất đã chốt, và cá nhân xuất sắc. Hiện ngay từ bản lưu nếu có.
+  let nhomVd: string[] = [];
+  let nguoiVd: string[] = [];
+  const ve = (): void => { if (vungChay.isConnected) dungDaiVinhDanh(vungChay, nhomVd, nguoiVd); };
+  void goiNhanh<KetQuaXepHang>('xepHang', {}, (kq) => {
+    nhomVd = kq.vinhDanh ? kq.vinhDanh.nhom.map((n) => `${n.tenNhom} dẫn đầu tuần ${kq.vinhDanh!.soTuan} với ${n.diem.toFixed(1)} điểm`) : [];
+    ve();
+  }).catch(() => undefined);
+  void goiNhanh<KetQuaXepHangCaNhan>('xepHangCaNhan', {}, (kq) => {
+    nguoiVd = kq.vinhDanh ? kq.vinhDanh.nguoi.map((n) => `${n.hoTen} nhận danh hiệu ${n.danhHieu} (${n.diem.toFixed(1)} điểm)`) : [];
+    ve();
+  }).catch(() => undefined);
+
   const vungMon = h('div', {});
   noi.append(vungMon);
   void layManifest().then((mf) => {
@@ -319,12 +332,27 @@ function veTrangChu(noi: HTMLElement): void {
   });
 }
 
+function tenNganHienThi(m: Me): string {
+  return tenHienThi(m).split(/\s+/).pop() || 'bạn';
+}
+
+// Dải chữ chạy ngang. Nội dung được lặp hai lần để vòng lặp liền mạch. Chỉ dùng textContent nên tên người không thể chèn mã.
+function dungDaiVinhDanh(vung: HTMLElement, nhom: string[], nguoi: string[]): void {
+  xoaHet(vung);
+  const cau = [...nhom, ...nguoi];
+  const noiDung = cau.length ? cau : ['Tuần đầu tiên chưa chốt điểm. Nhóm nào sẽ là nhóm đầu bảng?'];
+  const doan = (): HTMLElement => h('div', { class: 'chay-doan' }, ...noiDung.map((c) => h('span', { class: 'chay-muc' }, c)));
+  vung.append(
+    h('span', { class: 'chay-nhan' }, icon('cup', 14) as unknown as HTMLElement, 'Vinh danh'),
+    h('div', { class: 'chay-khung' }, h('div', { class: cau.length ? 'chay-dai' : 'chay-dai chay-tinh' }, doan(), doan())));
+}
+
 function theSuKien(d: TrangChuData): HTMLElement {
   const tt = d.tuan;
-  const the = h('a', { class: 'card the-su-kien rong', href: '#/su-kien' }, h('span', { class: 'nhan-muc' }, 'Sự kiện tuần này'));
+  const the = h('a', { class: 'the-su-kien-lon rong', href: '#/su-kien' });
   const t = tt.tuan;
   if (!t) {
-    the.append(h('div', { class: 'mon-ten' }, 'Chưa có lịch sự kiện'));
+    the.append(h('span', { class: 'nhan-muc' }, 'Sự kiện tuần này'), h('div', { class: 'mon-ten' }, 'Chưa có lịch sự kiện'));
     return the;
   }
   const canNop = tt.soCauCanNop ?? 0;
@@ -333,7 +361,8 @@ function theSuKien(d: TrangChuData): HTMLElement {
     : t.trangThai === 'cho_mo_cua' ? 'Chờ mở phòng thi'
     : t.trangThai === 'mo' ? 'Phòng thi đang mở'
     : 'Tuần này đã đóng';
-  the.append(h('div', { class: 'mon-ten' }, `Tuần ${t.soTuan}: ${viec}`));
+  the.append(h('div', { class: 'hang' }, h('span', { class: 'nhan-muc' }, `Sự kiện tuần ${t.soTuan}`), icon('phai', 18) as unknown as HTMLElement),
+    h('div', { class: 'su-kien-viec' }, viec));
   if (t.moc) {
     const so = h('div', { class: 'dem-nguoc nho-dem' });
     demNguoc(so, t.moc.luc);

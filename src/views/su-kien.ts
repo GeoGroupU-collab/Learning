@@ -5,6 +5,7 @@ import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { datGioMayChu, demNguoc, dinhDangNgay, dungDongHo } from '../gio';
 import { taiXuong } from '../csv';
 import { docCauHoiTuAi, taoPromptMd } from '../prompt-ai';
+import { thanhTabSuKien } from './thong-bao';
 import type { BanNhap, CauCuaToi, CauNhap, MonNop, TuanHienTai } from '../types';
 
 const NHAN_TRANG_THAI: Record<string, string> = {
@@ -23,7 +24,7 @@ function khungDemNguoc(luc: number, nhan: string, khiHet: () => void): HTMLEleme
 export async function veSuKien(goc: HTMLElement): Promise<void> {
   dungDongHo();
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Sự kiện'), khungCho(2));
+  goc.append(h('h1', {}, 'Sự kiện'), thanhTabSuKien('tuan'), khungCho(2));
   await goiNhanh<TuanHienTai>('tuanHienTai', {}, (tt) => {
     dungDongHo();
     dungSuKien(goc, tt);
@@ -33,7 +34,7 @@ export async function veSuKien(goc: HTMLElement): Promise<void> {
 function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   datGioMayChu(tt.now);
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Sự kiện'));
+  goc.append(h('h1', {}, 'Sự kiện'), thanhTabSuKien('tuan'));
   const t = tt.tuan;
   if (!t) {
     goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chưa có lịch sự kiện. Lớp trưởng sẽ tạo lịch trong trang Quản trị.')));
@@ -41,14 +42,24 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   }
   const lamMoi = (): Promise<void> => veSuKien(goc);
 
+  // Ba chặng của một tuần: chặng đang diễn ra sáng lên, chặng đã qua có dấu tick.
+  const chang = t.trangThai === 'nop_cau_hoi' ? 0 : t.trangThai === 'dong' ? 2 : 1;
+  const dsChang: [string, string, string][] = [
+    ['1', 'Nộp câu hỏi', `Hạn ${dinhDangNgay(t.hanNop)}`],
+    ['2', 'Phòng thi', `${dinhDangNgay(t.moCua)} đến ${dinhDangNgay(t.dongCua)}`],
+    ['3', 'Kết quả', 'Xem điểm, hạng và đáp án'],
+  ];
   goc.append(
-    h('div', { class: 'card' },
-      h('div', { class: 'hang' }, h('h2', { class: 'ten-nhom' }, `Tuần ${t.soTuan}`), h('span', { class: 'nhan' }, NHAN_TRANG_THAI[t.trangThai])),
-      t.moc ? khungDemNguoc(t.moc.luc, `Còn lại đến: ${t.moc.nhan.toLowerCase()}`, () => void lamMoi()) : null,
-      h('ul', { class: 'moc' },
-        h('li', {}, `Hạn nộp câu hỏi: ${dinhDangNgay(t.hanNop)}`),
-        h('li', {}, `Phòng thi mở: ${dinhDangNgay(t.moCua)}`),
-        h('li', {}, `Phòng thi đóng: ${dinhDangNgay(t.dongCua)}`)))
+    h('div', { class: 'hero hero-su-kien' },
+      h('div', { class: 'hang' },
+        h('span', { class: 'hero-nhan' }, `Tuần ${t.soTuan}`),
+        h('span', { class: 'hero-chip' }, NHAN_TRANG_THAI[t.trangThai])),
+      t.moc ? khungDemNguoc(t.moc.luc, `Còn lại đến: ${t.moc.nhan.toLowerCase()}`, () => void lamMoi()) : h('div', { class: 'hero-lon' }, 'Tuần đã khép lại')),
+    h('div', { class: 'chang' }, ...dsChang.map(([so, ten, mo], i) =>
+      h('div', { class: i < chang ? 'chang-o xong' : i === chang ? 'chang-o dang' : 'chang-o' },
+        h('span', { class: 'chang-so' }, i < chang ? (icon('tick', 14) as unknown as HTMLElement) : so),
+        h('div', { class: 'mon-ten' }, ten),
+        h('div', { class: 'phu nho' }, mo))))
   );
 
   goc.append(h('a', { class: 'card', href: '#/su-kien/xem-lai' },

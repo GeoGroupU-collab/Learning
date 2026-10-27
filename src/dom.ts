@@ -35,8 +35,13 @@ export function khungCho(soThe = 3): HTMLElement {
   return goc;
 }
 
-// Cập nhật số câu chờ duyệt trên nút Quản trị (nếu có).
+// Số câu chờ duyệt, hiện trên tab Câu hỏi của web quản trị.
+let soChoDuyet = 0;
+export function laySoChoDuyet(): number {
+  return soChoDuyet;
+}
 export function datHuyHieuDuyet(n: number): void {
+  soChoDuyet = n;
   const el = document.getElementById('dau-so-duyet');
   if (!el) return;
   el.textContent = String(n);

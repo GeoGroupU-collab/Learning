@@ -9,7 +9,13 @@ const taoNguoi = (n, gpaFn) =>
 describe('docGpa', () => {
   it('chấp nhận dấu phẩy và dấu chấm', () => {
     expect(docGpa('3,25')).toBe(3.25);
-    expect(docGpa(' 7.8 ')).toBe(7.8);
+    expect(docGpa(' 3.8 ')).toBe(3.8);
+  });
+  it('thang 4: 0 đến 4, điểm thang 10 bị từ chối', () => {
+    expect(docGpa('4')).toBe(4);
+    expect(docGpa('0')).toBe(0);
+    expect(docGpa('4.01')).toBeNaN();
+    expect(docGpa('7.8')).toBeNaN();
   });
   it('từ chối giá trị sai', () => {
     expect(docGpa('')).toBeNaN();

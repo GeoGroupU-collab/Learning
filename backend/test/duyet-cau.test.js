@@ -80,9 +80,10 @@ describe('duyệt hàng loạt', () => {
     NGUOI.slice(0, 3).forEach((e) => goiAs(e, 'nopCauHoi', { cauHoi: taoBoCau(e) }));
   });
 
-  it('trợ lý duyệt được, thành viên thì không', () => {
+  it('chỉ chủ duyệt được, thành viên và vai trò trợ lý cũ thì không', () => {
     expect(goiAs(NGUOI[0], 'admin.duyetCau', { quyetDinh: 'duyet', loc: {} })).toMatchObject({ ok: false, error: 'cam' });
-    const r = goiAs(TRO_LY, 'admin.duyetCau', { quyetDinh: 'duyet', loc: { maMon: MON[1] } });
+    expect(goiAs(TRO_LY, 'admin.duyetCau', { quyetDinh: 'duyet', loc: {} })).toMatchObject({ ok: false, error: 'cam' });
+    const r = goiAs(CHU, 'admin.duyetCau', { quyetDinh: 'duyet', loc: { maMon: MON[1] } });
     expect(r.data).toMatchObject({ soCau: 15, trangThai: 'active' });
     expect(trangThaiDem()).toEqual({ cho_duyet: 30, active: 15 });
   });

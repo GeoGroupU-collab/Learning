@@ -34,7 +34,10 @@ function theMon(hocKy: string, m: MonHoc): HTMLElement {
 
 export async function veDanhSachMon(goc: HTMLElement, maHocKyDangMo: string | null): Promise<void> {
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Bài học'));
+  goc.append(h('h1', {}, 'Bài học'),
+    h('a', { class: 'card the-lien-ket', href: '#/tao-de' }, icon('but', 22) as unknown as HTMLElement,
+      h('div', {}, h('div', { class: 'mon-ten' }, 'Tự tạo đề luyện tập'),
+        h('div', { class: 'phu nho' }, 'Chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.'))));
   const mf = await layManifest();
   const hk = mf.hocKy.find((x) => x.ma === maHocKyDangMo) ?? mf.hocKy[0];
   if (!hk || hk.mon.length === 0) {

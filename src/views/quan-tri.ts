@@ -1,15 +1,17 @@
 import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
 import { dinhDangNgay } from '../gio';
+import { laySoChoDuyet } from '../dom';
 import { veNganHang } from './ngan-hang';
 import { veChuong } from './chuong';
 import { veDeThi } from './de-thi';
 import { veHocKy } from './hoc-ky';
 import { veBangDiem } from './bang-diem';
 import { veNhatKy, veSaoLuu } from './he-thong';
+import { veThongBaoQuanTri } from './thong-bao-quan-tri';
 import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
-const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', assistant: 'Trợ lý', member: 'Thành viên' };
+const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', member: 'Thành viên' };
 const NHAN_TRANG_THAI: Record<string, string> = { active: 'Đang hoạt động', pending: 'Chờ duyệt', withdrawn: 'Đã rút', removed: 'Đã gỡ' };
 
 function baoLoi(e: unknown): void {
@@ -18,17 +20,19 @@ function baoLoi(e: unknown): void {
 
 export async function veQuanTri(goc: HTMLElement, me: Me, tab: string): Promise<void> {
   xoaHet(goc);
-  const laChu = me.vaiTro === 'owner';
+  const laChu = me.vaiTro === 'owner'; // web quản trị chỉ mở cho chủ, giữ biến để các màn hình con dùng chung
   goc.append(h('h1', {}, 'Quản trị'));
   const tabs = h('div', { class: 'tabs' });
-  const cacTab: [string, string][] = laChu ? [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề sự kiện'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']] : [['thanh-vien', 'Thành viên'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
-  cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten)));
+  const cacTab: [string, string][] = [['thanh-vien', 'Thành viên'], ['chia-nhom', 'Chia nhóm'], ['tuan', 'Tuần'], ['thong-bao', 'Thông báo'], ['chuong', 'Chương'], ['cau-hoi', 'Câu hỏi'], ['de-thi', 'Đề sự kiện'], ['diem', 'Điểm'], ['hoc-ky', 'Học kỳ'], ['nhat-ky', 'Nhật ký'], ['sao-luu', 'Sao lưu']];
+  cacTab.forEach(([k, ten]) => tabs.append(h('a', { class: k === tab ? 'tab tab-dang' : 'tab', href: `#/quan-tri/${k}` }, ten,
+    k === 'cau-hoi' ? h('span', { class: 'dau-so', id: 'dau-so-duyet', hidden: laySoChoDuyet() <= 0 }, String(laySoChoDuyet())) : null)));
   goc.append(tabs);
   requestAnimationFrame(() => tabs.querySelector('.tab-dang')?.scrollIntoView({ inline: 'center', block: 'nearest' }));
   const noiDung = h('div', {});
   goc.append(noiDung);
   if (tab === 'chia-nhom' && laChu) await veChiaNhom(noiDung);
   else if (tab === 'tuan' && laChu) await veTuan(noiDung);
+  else if (tab === 'thong-bao') await veThongBaoQuanTri(noiDung);
   else if (tab === 'chuong') await veChuong(noiDung, laChu);
   else if (tab === 'cau-hoi') await veNganHang(noiDung, laChu);
   else if (tab === 'de-thi' && laChu) await veDeThi(noiDung);
@@ -64,9 +68,6 @@ async function veThanhVien(noi: HTMLElement, laChu: boolean): Promise<void> {
       if (laChu && t.vaiTro !== 'owner') {
         if (t.trangThai === 'active') {
           hanhDong.append(
-            h('button', { class: 'nut nut-phu', onclick: async () => {
-              try { await goi('admin.doiVaiTro', { email: t.email, vaiTro: t.vaiTro === 'assistant' ? 'member' : 'assistant' }); await lamMoi(); } catch (e) { baoLoi(e); }
-            } }, t.vaiTro === 'assistant' ? 'Bỏ trợ lý' : 'Làm trợ lý'),
             h('button', { class: 'nut nut-nguy', onclick: async () => {
               const loai = confirm(`Gỡ ${t.hoTen}?\n\nOK = gỡ (removed). Hủy = không làm gì.`) ? 'removed' : null;
               if (!loai) return;
@@ -155,7 +156,7 @@ async function xemTruoc(vung: HTMLElement, vungHienTai: HTMLElement): Promise<vo
   const nhoms = kq.nhoms;
   const ve = (): void => {
     xoaHet(vung);
-    vung.append(h('p', { class: 'phu' }, `${nhoms.length} nhóm. Chênh lệch GPA trung bình giữa nhóm cao nhất và thấp nhất: ${kq.doLech.toFixed(2)}`));
+    vung.append(h('p', { class: 'phu' }, `${nhoms.length} nhóm. Chênh lệch GPA trung bình (thang 4) giữa nhóm cao nhất và thấp nhất: ${kq.doLech.toFixed(2)}`));
     if (kq.thieuGpa.length)
       vung.append(h('p', { class: 'loi' }, `${kq.thieuGpa.length} người chưa có GPA hợp lệ nên chưa được xếp: ${kq.thieuGpa.map((t) => t.hoTen || t.email).join(', ')}`));
     nhoms.forEach((g, gi) => {

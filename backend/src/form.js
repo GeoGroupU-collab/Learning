@@ -42,12 +42,12 @@ function taoFormDangKy() {
 
   var gpa = form.addTextItem()
     .setTitle('GPA hiện tại')
-    .setHelpText('Nhập số, dùng dấu chấm. Ví dụ 3.25 (thang 4) hoặc 7.8 (thang 10). Chỉ lớp trưởng xem được.')
+    .setHelpText('Nhập theo thang 4, dùng dấu chấm. Ví dụ 3.25. Chỉ lớp trưởng xem được.')
     .setRequired(true);
   gpa.setValidation(
     FormApp.createTextValidation()
-      .setHelpText('Hãy nhập GPA là số từ 0 đến 10, dùng dấu chấm.')
-      .requireNumberBetween(0, 10)
+      .setHelpText('Hãy nhập GPA thang 4, là số từ 0 đến 4, dùng dấu chấm.')
+      .requireNumberBetween(0, 4)
       .build()
   );
 

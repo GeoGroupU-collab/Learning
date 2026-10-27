@@ -16,7 +16,7 @@ function loi_(ma, thongBao) {
 var BO_NHO_ = { bang: {}, tieuDe: {} };
 
 // Các tab nhỏ, ít đổi, được cache thêm 30 giây giữa các yêu cầu. Sửa tay trong Sheet có hiệu lực sau tối đa 30 giây.
-var TAB_CACHE_ = { CauHinh: true, HocKy: true, Mon: true, Tuan: true };
+var TAB_CACHE_ = { CauHinh: true, HocKy: true, Mon: true, Tuan: true, ThongBao: true };
 var GIAY_CACHE_TAB_ = 30;
 
 function datLaiBoNho_() {

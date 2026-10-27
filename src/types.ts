@@ -1,7 +1,7 @@
 export interface Me {
   email: string;
   hoTen: string;
-  vaiTro: 'owner' | 'assistant' | 'member';
+  vaiTro: 'owner' | 'member';
   hocKy: { maHocKy: string; tenHocKy: string } | null;
   nhom: { maNhom: string; tenNhom: string } | null;
 }
@@ -218,7 +218,23 @@ export interface TrangChuData {
   me: Me;
   tuan: TuanHienTai;
   cap: ThongTinCap;
-  choDuyet?: number; // chỉ quản trị viên: số câu đang chờ duyệt
+  tbMoiNhat?: number; // thời điểm thông báo mới nhất dành cho mình (0 nếu chưa có)
+}
+
+export interface ThongBaoCuaToi {
+  id: string;
+  ngay: number;
+  tieuDe: string;
+  noiDung: string;
+  rieng: boolean; // gửi riêng cho mình hoặc cho nhóm mình, không phải cả lớp
+}
+
+export interface ThongBaoQuanTri {
+  id: string;
+  ngay: number;
+  tieuDe: string;
+  noiDung: string;
+  nguoiNhan: string;
 }
 
 export interface CauXemLai {
