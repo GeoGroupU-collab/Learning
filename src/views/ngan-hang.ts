@@ -1,5 +1,5 @@
 import { goi, LoiApi } from '../api';
-import { vanBanCau, vanBanDapAn } from '../van-ban-cau';
+import { chuTomTat, vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { datHuyHieuDuyet, h, xoaHet, thongBao } from '../dom';
 import { docCsv, taiXuong, taoCsv } from '../csv';
 import { taoMarkdownChoDuyet } from '../xuat-cho-duyet';
@@ -38,7 +38,7 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
   } catch {
     /* không có danh sách học kỳ thì chỉ lọc theo học kỳ đang mở */
   }
-  const loc = { maHocKy: '', soTuan: '', maMon: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
+  const loc = { maHocKy: '', soTuan: '', maMon: '', maChuong: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
   const danhSach = h('div', {});
   const vungDuyet = h('div', {});
   const phanTrang = h('div', { class: 'hang' });
@@ -47,6 +47,7 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
   const hocKy = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Học kỳ đang mở'), h('option', { value: '*' }, 'Tất cả học kỳ'),
     ...dsHocKy.filter((x) => x.trangThai === 'dong').map((x) => h('option', { value: x.maHocKy }, x.tenHocKy))) as HTMLSelectElement;
   const soTuan = h('input', { class: 'o-nhap', type: 'number', min: 1, placeholder: 'Tất cả' }) as HTMLInputElement;
+  const maChuong = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Tất cả chương')) as HTMLSelectElement;
   const maMon = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Tất cả môn'), ...mon.map((m) => h('option', { value: m.ma }, m.ten))) as HTMLSelectElement;
   const trangThai = h('select', { class: 'o-chon o-day' }, h('option', { value: '' }, 'Mọi trạng thái'),
     ...Object.entries(NHAN_TT).map(([k, v]) => h('option', { value: k }, v))) as HTMLSelectElement;
@@ -63,7 +64,10 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       xoaHet(phanTrang);
       veVungDuyet(kq.soChoDuyet, kq.soTamLoai ?? 0);
       if (!loc.maHocKy) datHuyHieuDuyet(kq.soChoDuyet); // số trên nút Quản trị chỉ tính học kỳ đang mở
-      danhSach.append(h('p', { class: 'phu' }, `${kq.tong} câu hỏi`));
+      capNhatChuong(kq.chuong ?? []);
+      danhSach.append(h('p', { class: 'phu' }, kq.tong > kq.cauHoi.length
+        ? `${kq.tong} câu hỏi, đang hiện ${kq.cauHoi.length} câu của trang này. Dùng bộ lọc để thu hẹp. Bấm vào câu để xem chi tiết.`
+        : `${kq.tong} câu hỏi. Bấm vào câu để xem chi tiết.`));
       kq.cauHoi.forEach((c) => danhSach.append(theCau(c)));
       const soTrang = Math.max(1, Math.ceil(kq.tong / kq.coTrang));
       phanTrang.append(
@@ -163,7 +167,32 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       } }, 'Lưu thay đổi'));
   };
 
+  // Danh sách chương lấy từ ngân hàng theo môn đang chọn; giữ lựa chọn hiện tại nếu còn.
+  const capNhatChuong = (ds: { ten: string; soCau: number }[]): void => {
+    const dang = loc.maChuong;
+    xoaHet(maChuong);
+    maChuong.append(h('option', { value: '' }, 'Tất cả chương'), ...ds.map((x) => h('option', { value: x.ten }, `${x.ten} (${x.soCau})`)));
+    if (dang && !ds.some((x) => x.ten === dang)) maChuong.append(h('option', { value: dang }, dang));
+    maChuong.value = dang;
+  };
+
+  // Thẻ gọn: chỉ hiện một dòng tóm tắt. Nội dung đầy đủ chỉ dựng khi bấm mở, nên 20 hay 200 câu cũng nhẹ.
   const theCau = (c: CauNganHang): HTMLElement => {
+    const chiTiet = h('details', { class: `card cau-gon ${c.trangThai !== 'active' ? 'cau-sai' : ''}` },
+      h('summary', {},
+        h('span', { class: c.trangThai === 'active' ? 'nhan' : c.trangThai === 'cho_duyet' ? 'nhan nhan-vang' : 'nhan nhan-loi' }, NHAN_TT[c.trangThai] ?? c.trangThai),
+        h('span', { class: 'cau-gon-chu' }, chuTomTat(c.noiDung, 90)),
+        h('span', { class: 'phu nho cau-gon-meta' }, [c.maChuong, c.soBaoSai ? `${c.soBaoSai} báo sai` : ''].filter(Boolean).join(' · '))));
+    let daDung = false;
+    chiTiet.addEventListener('toggle', () => {
+      if (!(chiTiet as HTMLDetailsElement).open || daDung) return;
+      daDung = true;
+      chiTiet.append(noiDungDayDu(c));
+    });
+    return chiTiet;
+  };
+
+  const noiDungDayDu = (c: CauNganHang): HTMLElement => {
     const vungSua = h('div', {});
     const nut: HTMLElement[] = [];
     if (c.trangThai === 'cho_duyet') {
@@ -175,10 +204,8 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       nut.push(h('button', { class: 'nut nut-phu nho', onclick: () => { if (vungSua.firstChild) xoaHet(vungSua); else vungSua.append(theSua(c)); } }, 'Sửa'));
       if (c.trangThai !== 'removed') nut.push(h('button', { class: 'nut nut-nguy nho', onclick: () => void doiTrangThai(c, 'removed') }, 'Xóa'));
     }
-    return h('div', { class: `card cau-xem ${c.trangThai !== 'active' ? 'cau-sai' : ''}` },
-      h('div', { class: 'hang' },
-        h('span', { class: 'phu nho' }, `Tuần ${c.soTuan} · ${c.maMon}${c.maChuong ? ` · ${c.maChuong}` : ''}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
-        h('span', { class: c.trangThai === 'active' ? 'nhan' : c.trangThai === 'cho_duyet' ? 'nhan nhan-vang' : 'nhan nhan-loi' }, NHAN_TT[c.trangThai] ?? c.trangThai)),
+    return h('div', { class: 'cau-xem' },
+      h('div', { class: 'phu nho' }, `Tuần ${c.soTuan} · ${c.maMon}${c.maChuong ? ` · ${c.maChuong}` : ''}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
       vanBanCau(c.noiDung),
       h('ul', { class: 'ds-dap-an' }, ...(['A', 'B', 'C', 'D'] as const).map((k) => h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. `, vanBanDapAn(c[k])))),
       c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
@@ -191,10 +218,10 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
   noi.append(
     vungDuyet,
     h('div', { class: 'card' }, h('h3', {}, 'Bộ lọc'),
-      o('Học kỳ', hocKy), o('Tuần', soTuan), o('Môn', maMon), o('Trạng thái', trangThai), o('Tác giả', tacGia), o('Từ khóa', tuKhoa),
+      o('Học kỳ', hocKy), o('Tuần', soTuan), o('Môn', maMon), o('Chương', maChuong), o('Trạng thái', trangThai), o('Tác giả', tacGia), o('Từ khóa', tuKhoa),
       h('label', { class: 'dong-chon', for: 'chi-bao-sai' }, chiBaoSai, h('span', {}, 'Chỉ câu đã bị báo sai')),
       h('button', { class: 'nut', onclick: () => {
-        Object.assign(loc, { maHocKy: hocKy.value, soTuan: soTuan.value, maMon: maMon.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
+        Object.assign(loc, { maHocKy: hocKy.value, soTuan: soTuan.value, maMon: maMon.value, maChuong: maChuong.value, trangThai: trangThai.value, tacGia: tacGia.value, tuKhoa: tuKhoa.value, chiBaoSai: chiBaoSai.checked, trang: 1 });
         void tai();
       } }, 'Lọc')));
 

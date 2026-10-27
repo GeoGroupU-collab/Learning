@@ -572,3 +572,14 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 .ma-dong { font-family: var(--font-so); font-size: 0.86rem; font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; }
 .dap-an-nut .doan-chu, .dap-an-nut .ma-dong { text-align: left; }
 .ds-dap-an li { overflow-wrap: anywhere; }
+
+/* Danh sách câu hỏi gọn ở web quản trị */
+.cau-gon { padding: 0; }
+.cau-gon > summary { display: flex; align-items: center; gap: var(--k3); padding: var(--k3) var(--k4); cursor: pointer; list-style: none; }
+.cau-gon > summary::-webkit-details-marker { display: none; }
+.cau-gon > summary:hover { background: var(--mat-2); }
+.cau-gon-chu { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.cau-gon-meta { flex: none; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cau-gon[open] > summary { border-bottom: 1px solid var(--vien); }
+.cau-gon > .cau-xem { padding: var(--k4); }
+@media (max-width: 600px) { .cau-gon-meta { display: none; } }

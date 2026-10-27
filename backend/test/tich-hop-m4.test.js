@@ -464,7 +464,7 @@ describe('quản trị ngân hàng', () => {
   it('lọc theo môn, tác giả, từ khóa và phân trang', () => {
     const tat = goiAs(CHU, 'admin.nganHang', {}).data;
     expect(tat.tong).toBe(8 * 15);
-    expect(tat.cauHoi).toHaveLength(50);
+    expect(tat.cauHoi).toHaveLength(20);
     expect(goiAs(CHU, 'admin.nganHang', { maMon: MON[0] }).data.tong).toBe(8 * 5);
     expect(goiAs(CHU, 'admin.nganHang', { tacGia: 'u3@x.vn' }).data.tong).toBe(15);
     expect(goiAs(CHU, 'admin.nganHang', { tuKhoa: 'số 4' }).data.tong).toBe(8 * 3);

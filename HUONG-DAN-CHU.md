@@ -669,3 +669,5 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 - Muốn bỏ "tạm thời": ở tab Câu hỏi lọc theo tác giả `ngan-hang-chung` rồi xóa hoặc tạm loại.
 - Tệp nằm trong `ngan-hang-luu-tru/`, thư mục **không bao giờ lên GitHub** vì có đáp án.
 - Viết câu có code: đặt code giữa hai dòng ```` ``` ````. Đáp án là code thì bọc trong dấu ` (ví dụ `` `[An   ][8.5]` ``).
+
+**Ngân hàng lớn không làm lag (cập nhật):** tab Câu hỏi giờ chia **20 câu mỗi trang**, mỗi câu chỉ hiện **một dòng tóm tắt**, bấm vào mới mở nội dung đầy đủ (nội dung chỉ được dựng lúc mở). Có thêm bộ lọc **Chương** (danh sách chương lấy từ ngân hàng theo môn đang chọn, kèm số câu) cùng các bộ lọc cũ: học kỳ, tuần, môn, trạng thái, tác giả, từ khóa, câu bị báo sai. Dùng bộ lọc để chỉ hiện đúng nhóm câu cần xem. Cần dán `Code.gs` mới và push web.

@@ -140,10 +140,12 @@ function hdNganHang_(email, tv, body) {
   // Mặc định chỉ hiện ngân hàng của học kỳ đang mở; '*' là mọi học kỳ; hoặc một mã học kỳ cụ thể.
   var hkMo = hocKyDangMo_();
   var maHk = body.maHocKy === '*' ? '' : String(body.maHocKy || (hkMo ? hkMo.maHocKy : ''));
+  var chuongLoc = chuanHoaChu(body.maChuong);
   var ds = docBang_('CauHoi').filter(function (c) {
     if (maHk && c.maHocKy !== maHk) return false;
     if (body.soTuan && Number(c.soTuan) !== Number(body.soTuan)) return false;
     if (body.maMon && c.maMon !== body.maMon) return false;
+    if (chuongLoc && chuanHoaChu(c.maChuong) !== chuongLoc) return false;
     if (body.trangThai && c.trangThai !== body.trangThai) return false;
     if (tacGia && chuanHoaEmail(c.tacGia).indexOf(tacGia) === -1 && String(ten[chuanHoaEmail(c.tacGia)] || '').toLowerCase().indexOf(tacGia) === -1) return false;
     if (tuKhoa && String(c.noiDung).toLowerCase().indexOf(tuKhoa) === -1) return false;
@@ -155,12 +157,20 @@ function hdNganHang_(email, tv, body) {
     if (b.soBaoSai !== a.soBaoSai) return b.soBaoSai - a.soBaoSai;
     return a.ngayNop < b.ngayNop ? 1 : -1;
   });
-  var coKichThuoc = 50;
+  var coKichThuoc = 20; // trang nhỏ để máy nhẹ khi ngân hàng lên hàng nghìn câu
   var trang = Math.max(1, Number(body.trang) || 1);
   var trongKy = docBang_('CauHoi').filter(function (c) { return !maHk || c.maHocKy === maHk; });
   var soChoDuyet = trongKy.filter(function (c) { return c.trangThai === 'cho_duyet'; }).length;
   var soTamLoai = trongKy.filter(function (c) { return c.trangThai === 'suspended'; }).length;
-  return { soChoDuyet: soChoDuyet, soTamLoai: soTamLoai, tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
+  // Các chương đang có (theo môn đang lọc) để chọn nhanh, kèm số câu.
+  var demChuong = {};
+  trongKy.forEach(function (c) {
+    if (body.maMon && c.maMon !== body.maMon) return;
+    var k = String(c.maChuong || '').trim();
+    if (k) demChuong[k] = (demChuong[k] || 0) + 1;
+  });
+  var chuong = Object.keys(demChuong).sort().slice(0, 200).map(function (k) { return { ten: k, soCau: demChuong[k] }; });
+  return { chuong: chuong, soChoDuyet: soChoDuyet, soTamLoai: soTamLoai, tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
 }
 
 function hdSuaCauHoi_(email, tv, body) {

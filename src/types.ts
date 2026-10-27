@@ -339,6 +339,7 @@ export interface CauNganHang {
 }
 
 export interface KetQuaNganHang {
+  chuong?: { ten: string; soCau: number }[];
   soChoDuyet: number;
   soTamLoai?: number;
   tong: number;

@@ -69,3 +69,27 @@ describe('chủ thêm câu mới vào ngân hàng', () => {
     expect(JSON.stringify(r.data)).not.toContain('"dapAn":"A"'); // không lộ đáp án đúng khi đang làm
   });
 });
+
+describe('lọc ngân hàng theo chương, trang nhỏ', () => {
+  const nhieuCau = (soCau, chuong) => Array.from({ length: soCau }, (_, i) => cau(i, { maChuong: chuong, noiDung: `Câu hỏi ${chuong} số ${i} có chữ riêng ${'x'.repeat(i)}` }));
+
+  it('lọc theo chương (không phân biệt hoa thường), trả danh sách chương kèm số câu', () => {
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: nhieuCau(3, 'Chương 2') });
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: nhieuCau(2, 'Chương 3') });
+    const tat = goiAs(CHU, 'admin.nganHang', {}).data;
+    expect(tat.tong).toBe(5);
+    expect(tat.chuong).toEqual([{ ten: 'Chương 2', soCau: 3 }, { ten: 'Chương 3', soCau: 2 }]);
+    const c3 = goiAs(CHU, 'admin.nganHang', { maChuong: 'chương 3' }).data;
+    expect(c3.tong).toBe(2);
+    expect(c3.cauHoi.every((c) => c.maChuong === 'Chương 3')).toBe(true);
+  });
+
+  it('mỗi trang 20 câu, chuyển trang được; danh sách chương chỉ tính theo môn đang lọc', () => {
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: nhieuCau(45, 'Chương 1') });
+    const t1 = goiAs(CHU, 'admin.nganHang', {}).data;
+    expect(t1).toMatchObject({ tong: 45, trang: 1, coTrang: 20 });
+    expect(t1.cauHoi).toHaveLength(20);
+    expect(goiAs(CHU, 'admin.nganHang', { trang: 3 }).data.cauHoi).toHaveLength(5);
+    expect(goiAs(CHU, 'admin.nganHang', { maMon: 'mon-khac' }).data.chuong).toEqual([]);
+  });
+});

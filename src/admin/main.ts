@@ -68,7 +68,7 @@ function manHinhLoi(thongDiep: string): void {
 // Gọi sẵn các danh sách hay mở ngay lúc vào web, song song với việc kiểm tra quyền, để bấm sang tab nào cũng hiện liền.
 // Người không phải chủ chỉ nhận lỗi, bỏ qua.
 function goiSan(): void {
-  const dsTrong = { maHocKy: '', soTuan: '', maMon: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
+  const dsTrong = { maHocKy: '', soTuan: '', maMon: '', maChuong: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
   const lenh: [string, Record<string, unknown>][] = [['admin.dsThanhVien', {}], ['admin.dsThongBao', {}], ['admin.nhomHienTai', {}], ['admin.dsTuan', {}], ['admin.dsHocKy', {}], ['admin.dsMon', {}], ['admin.nganHang', dsTrong]];
   lenh.forEach(([a, p]) => { void goi(a, p).catch(() => undefined); });
 }
