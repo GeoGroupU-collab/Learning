@@ -1,4 +1,5 @@
 import { goi } from '../api';
+import { vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { icon } from '../icon';
 import { h, xoaHet } from '../dom';
 import { dungDongHo } from '../gio';
@@ -10,8 +11,8 @@ function theCauKho(c: CauKho, i: number): HTMLElement {
   return h('div', { class: 'card cau-xem' },
     h('div', { class: 'hang' }, h('span', { class: 'phu nho' }, `#${i + 1} · ${c.tenMon}${c.maChuong ? ` · ${c.maChuong}` : ''}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
       h('span', { class: 'nhan nhan-loi' }, `${c.tyLeSai}% làm sai`)),
-    h('p', { class: 'noi-dung-cau' }, c.noiDung),
-    h('ul', { class: 'ds-dap-an' }, ...c.dapAn.map((d) => h('li', { class: d.k === c.dung ? 'dung' : '' }, `${d.k}. ${d.text}${d.k === c.dung ? ' ✓' : ''}`))),
+    vanBanCau(c.noiDung),
+    h('ul', { class: 'ds-dap-an' }, ...c.dapAn.map((d) => h('li', { class: d.k === c.dung ? 'dung' : '' }, `${d.k}. `, vanBanDapAn(d.text), d.k === c.dung ? ' ✓' : ''))),
     c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
     h('p', { class: 'phu nho' }, `${c.soLuot} lượt làm. Cùng thảo luận trong nhóm nhé.`),
     nutBaoSai(c.id));

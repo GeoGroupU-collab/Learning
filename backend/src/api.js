@@ -79,6 +79,7 @@ var HANH_DONG_ = {
   'admin.duyetCau': { vaiTro: CHU_, chay: hdDuyetCau_ },
   'admin.xuatChoDuyet': { vaiTro: CHU_, chay: hdXuatChoDuyet_ },
   'admin.donCauTuChoi': { vaiTro: CHU_, chay: hdDonCauTuChoi_ },
+  'admin.nhapCauMoi': { vaiTro: CHU_, chay: hdNhapCauMoi_ },
   'admin.xuatNganHang': { vaiTro: CHU_, chay: hdXuatNganHang_ },
   'admin.xemTruocNhap': { vaiTro: CHU_, chay: hdXemTruocNhap_ },
   'admin.nhapNganHang': { vaiTro: CHU_, chay: hdNhapNganHang_ },

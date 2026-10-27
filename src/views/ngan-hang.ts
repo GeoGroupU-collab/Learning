@@ -1,4 +1,5 @@
 import { goi, LoiApi } from '../api';
+import { vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { datHuyHieuDuyet, h, xoaHet, thongBao } from '../dom';
 import { docCsv, taiXuong, taoCsv } from '../csv';
 import { taoMarkdownChoDuyet } from '../xuat-cho-duyet';
@@ -8,6 +9,17 @@ interface HocKyTomTat { maHocKy: string; tenHocKy: string; trangThai: string }
 
 const NHAN_TT: Record<string, string> = { cho_duyet: 'Chờ duyệt', active: 'Đang dùng', tu_choi: 'Bị từ chối', suspended: 'Tạm loại', removed: 'Đã xóa' };
 const COT_XUAT = ['id', 'maHocKy', 'soTuan', 'maMon', 'maChuong', 'trangNguon', 'noiDung', 'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ghiChuDuyet', 'soBaoSai'];
+
+// Tệp thêm câu mới: một mảng câu hỏi, hoặc một đối tượng {maMon, maChuong, trangNguon, cauHoi: [...]} với giá trị chung.
+function docCauMoi(du: unknown): Record<string, unknown>[] {
+  if (Array.isArray(du)) return du as Record<string, unknown>[];
+  const o = du as { cauHoi?: unknown } & Record<string, unknown>;
+  if (o && Array.isArray(o.cauHoi)) {
+    const chung = { maMon: o.maMon, maChuong: o.maChuong, trangNguon: o.trangNguon };
+    return (o.cauHoi as Record<string, unknown>[]).map((c) => ({ ...chung, ...c }));
+  }
+  throw new Error('Tệp phải là một danh sách câu hỏi, hoặc có trường "cauHoi".');
+}
 
 function baoLoi(e: unknown): void {
   thongBao((e as LoiApi).message ?? 'Có lỗi xảy ra', 'loi');
@@ -167,8 +179,8 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       h('div', { class: 'hang' },
         h('span', { class: 'phu nho' }, `Tuần ${c.soTuan} · ${c.maMon}${c.maChuong ? ` · ${c.maChuong}` : ''}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
         h('span', { class: c.trangThai === 'active' ? 'nhan' : c.trangThai === 'cho_duyet' ? 'nhan nhan-vang' : 'nhan nhan-loi' }, NHAN_TT[c.trangThai] ?? c.trangThai)),
-      h('p', { class: 'noi-dung-cau' }, c.noiDung),
-      h('ul', { class: 'ds-dap-an' }, ...(['A', 'B', 'C', 'D'] as const).map((k) => h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. ${c[k]}`))),
+      vanBanCau(c.noiDung),
+      h('ul', { class: 'ds-dap-an' }, ...(['A', 'B', 'C', 'D'] as const).map((k) => h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. `, vanBanDapAn(c[k])))),
       c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
       c.ghiChuDuyet ? h('p', { class: 'phu nho' }, `Ghi chú duyệt: ${c.ghiChuDuyet}`) : null,
       c.daKiemTra ? h('p', { class: 'phu nho' }, 'Bạn đã kiểm tra câu này là đúng: báo sai không tự tạm loại nữa.') : null,
@@ -232,6 +244,32 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
           } }, `Áp dụng ${xem.thayDoi.length} thay đổi`)] : []));
       } catch (e) { baoLoi(e); }
     });
+    const tepMoi = h('input', { type: 'file', accept: '.json', class: 'o-nhap' }) as HTMLInputElement;
+    const vungMoi = h('div', {});
+    tepMoi.addEventListener('change', async () => {
+      xoaHet(vungMoi);
+      const f = tepMoi.files?.[0];
+      if (!f) return;
+      try {
+        const rows = docCauMoi(JSON.parse(await f.text()));
+        const xem = await goi<{ soHopLe: number; soTrung: number; soLoi: number; loi: string[] }>('admin.nhapCauMoi', { rows, chiXem: true });
+        vungMoi.append(
+          h('p', {}, `${rows.length} câu trong tệp: ${xem.soHopLe} câu mới, ${xem.soTrung} câu đã có trong ngân hàng (bỏ qua), ${xem.soLoi} câu lỗi.`),
+          ...xem.loi.map((l) => h('p', { class: 'loi nho' }, l)),
+          ...(xem.soLoi === 0 && xem.soHopLe > 0 ? [h('button', { class: 'nut', onclick: async () => {
+            try {
+              const kq = await goi<{ daThem: number }>('admin.nhapCauMoi', { rows });
+              thongBao(`Đã thêm ${kq.daThem} câu vào ngân hàng`);
+              xoaHet(vungMoi);
+              tepMoi.value = '';
+              await tai();
+            } catch (e) { baoLoi(e); }
+          } }, `Thêm ${xem.soHopLe} câu vào ngân hàng`)] : []));
+      } catch (e) { vungMoi.append(h('p', { class: 'loi' }, (e as Error).message)); }
+    });
+    noi.append(h('details', { class: 'card' }, h('summary', {}, 'Thêm câu mới từ tệp (.json)'),
+      h('p', { class: 'phu nho' }, 'Dùng khi có sẵn câu hỏi kèm đáp án (ví dụ đề thi cũ). Câu thêm vào ở trạng thái Đang dùng, không thuộc tuần nào và không có tác giả riêng nên ai cũng làm được. Có bước xem trước, chỉ thêm khi tất cả câu hợp lệ; câu trùng nội dung với câu đã có sẽ được bỏ qua.'),
+      h('label', { class: 'nhan-o' }, 'Chọn tệp câu hỏi', tepMoi), vungMoi));
     noi.append(h('details', { class: 'card' }, h('summary', {}, 'Xuất và nhập ngân hàng'),
       h('p', { class: 'phu nho' }, 'Xuất file (kèm trang nguồn) để đối chiếu với PDF bài giảng. Sửa xong chọn lại file, hệ thống khớp theo id, cho xem trước các thay đổi rồi mới áp dụng. Chỉ sửa được nội dung, đáp án, giải thích, trang nguồn, chương, trạng thái và ghi chú duyệt. Ở tệp rà soát, cột quyetDinh bằng duyet hoặc tu_choi sẽ duyệt hoặc từ chối câu đó.'),
       h('div', { class: 'hang-nut' },

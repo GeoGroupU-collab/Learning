@@ -559,3 +559,16 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 /* Web quản trị riêng: rộng hơn cho bảng và danh sách */
 .noi-dung-rong { max-width: 980px; }
 .hang-nut + .phu.nho { margin-top: var(--k3); }
+
+/* Câu hỏi có code */
+.doan-chu { white-space: pre-wrap; overflow-wrap: anywhere; }
+.noi-dung-cau, .noi-dung-tim { overflow-wrap: anywhere; }
+.noi-dung-tim { margin: var(--k2) 0; }
+.ma-cau {
+  margin: var(--k2) 0; padding: var(--k3); overflow-x: auto; white-space: pre; tab-size: 4;
+  font-family: var(--font-so); font-size: 0.86rem; font-weight: 400; line-height: 1.5;
+  background: var(--mat-2); border: 1px solid var(--vien); border-radius: var(--r2); color: var(--chu);
+}
+.ma-dong { font-family: var(--font-so); font-size: 0.86rem; font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dap-an-nut .doan-chu, .dap-an-nut .ma-dong { text-align: left; }
+.ds-dap-an li { overflow-wrap: anywhere; }

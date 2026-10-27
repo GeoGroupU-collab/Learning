@@ -1,4 +1,5 @@
 import { goi, goiNhanh, LoiApi } from '../api';
+import { vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { icon } from '../icon';
 import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
@@ -27,10 +28,10 @@ function veKetQua(goc: HTMLElement, kq: KetQuaTaoDe): void {
 export function theXemLai(c: CauXemLai, i: number): HTMLElement {
   return h('div', { class: c.laDung ? 'card cau-xem cau-dung' : 'card cau-xem cau-sai' },
     h('div', { class: 'phu nho' }, `Câu ${i + 1} · ${c.tenMon}${c.maChuong ? ` · ${c.maChuong}` : ''}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
-    h('p', { class: 'noi-dung-cau' }, c.noiDung),
+    vanBanCau(c.noiDung),
     h('ul', { class: 'ds-dap-an' }, ...c.dapAn.map((d) =>
       h('li', { class: `${d.k === c.dung ? 'dung' : ''} ${d.k === c.chon && d.k !== c.dung ? 'chon-sai' : ''}` },
-        `${d.k}. ${d.text}`, d.k === c.dung ? ' ✓' : '', d.k === c.chon ? ' (bạn chọn)' : ''))),
+        `${d.k}. `, vanBanDapAn(d.text), d.k === c.dung ? ' ✓' : '', d.k === c.chon ? ' (bạn chọn)' : ''))),
     c.chon === '' ? h('p', { class: 'loi nho' }, 'Bạn chưa trả lời câu này.') : null,
     c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
     nutBaoSai(c.id));
@@ -61,7 +62,7 @@ function lamDe(goc: HTMLElement, de: DeTaoDe): void {
     h('div', { class: 'thanh-thi' }, h('div', { class: 'hang' }, dem, nutNop)),
     ...de.cauHoi.map((c, i) => {
       const nuts = c.dapAn.map((d) => {
-        const b = h('button', { class: 'dap-an-nut', type: 'button', 'aria-pressed': false }, h('span', { class: 'chu-dap-an' }, d.k), h('span', {}, d.text));
+        const b = h('button', { class: 'dap-an-nut', type: 'button', 'aria-pressed': false }, h('span', { class: 'chu-dap-an' }, d.k), vanBanDapAn(d.text));
         b.addEventListener('click', () => {
           traLoi[c.id] = d.k;
           nuts.forEach((x, k) => x.setAttribute('aria-pressed', String(c.dapAn[k].k === d.k)));
@@ -69,7 +70,7 @@ function lamDe(goc: HTMLElement, de: DeTaoDe): void {
         });
         return b;
       });
-      return h('div', { class: 'card cau-thi' }, h('div', { class: 'phu nho' }, `Câu ${i + 1}/${de.cauHoi.length}`), h('p', { class: 'noi-dung-cau' }, c.noiDung), ...nuts);
+      return h('div', { class: 'card cau-thi' }, h('div', { class: 'phu nho' }, `Câu ${i + 1}/${de.cauHoi.length}`), vanBanCau(c.noiDung), ...nuts);
     }),
     h('div', { class: 'card' }, h('button', { class: 'nut', onclick: () => nutNop.click() }, 'Nộp bài')));
   capNhat();

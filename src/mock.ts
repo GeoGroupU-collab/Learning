@@ -81,9 +81,11 @@ const cauXemLaiGia = (n: number) => Array.from({ length: n }, (_, i) => ({
   chon: i % 3 === 0 ? 'B' : 'A', dung: i % 3 === 0 ? 'B' : 'C', laDung: i % 3 === 0,
   giaiThich: 'Đáp án đúng vì theo slide 12, khái niệm này được định nghĩa như vậy.',
 }));
+// Câu mẫu có khối code, để xem cách hiển thị khi chạy dev:mock.
+const MAU_CAU_CODE = ['Đoạn code sau in ra màn hình kết quả gì?', '```', 'name = "An"', 'score = 8.456', 'print(f"[{name:<5}][{score:.1f}]")', '```'].join('\n');
 const nganHangGia = Array.from({ length: 7 }, (_, i) => ({
   id: 'ch' + i, maHocKy: 'hk1-2026-2027', soTuan: 1, maMon: 'khoa-hoc-du-lieu', maChuong: 'c1', trangNguon: 'tr.' + i,
-  noiDung: `Nội dung câu hỏi trong ngân hàng số ${i + 1}`, A: 'a' + i, B: 'b' + i, C: 'c' + i, D: 'd' + i, dapAn: 'A', giaiThich: '',
+  noiDung: i === 0 ? MAU_CAU_CODE : `Nội dung câu hỏi trong ngân hàng số ${i + 1}`, A: i === 0 ? '`[   An][8.5]`' : 'a' + i, B: i === 0 ? '`[An   ][8.5]`' : 'b' + i, C: i === 0 ? '`[   An][8.4]`' : 'c' + i, D: i === 0 ? '`[An   ][8.4]`' : 'd' + i, dapAn: i === 0 ? 'B' : 'A', giaiThich: '',
   tacGia: `sv${i}@example.test`, tenTacGia: `Bạn ${i}`, trangThai: (i === 2 ? 'suspended' : i >= 5 ? 'cho_duyet' : 'active') as 'active' | 'suspended' | 'removed' | 'cho_duyet' | 'tu_choi', ngayNop: '2026-11-05T10:00:00Z', soBaoSai: i === 2 ? 2 : 0,
 }));
 

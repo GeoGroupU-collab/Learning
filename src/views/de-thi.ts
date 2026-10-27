@@ -1,4 +1,5 @@
 import { goi, LoiApi } from '../api';
+import { boDauCode, vanBanCau } from '../van-ban-cau';
 import { mauMon } from '../mau';
 import { h, khungCho, xoaHet, thongBao } from '../dom';
 import { taiXuong } from '../csv';
@@ -149,8 +150,8 @@ export async function veDeThi(noi: HTMLElement): Promise<void> {
     cau.forEach((c, i) => {
       vungCau.append(h('div', { class: 'card cau-xem' },
         h('div', { class: 'phu nho' }, `${i + 1}. ${c.tenMon}${c.maChuong ? ` · ${c.maChuong}` : ''} · tuần ${c.soTuan}${c.trangNguon ? ` · ${c.trangNguon}` : ''}`),
-        h('p', { class: 'noi-dung-cau' }, c.noiDung),
-        h('p', { class: 'phu nho' }, `Đáp án đúng: ${c.dapAn}. ${c[c.dapAn as 'A' | 'B' | 'C' | 'D']}`),
+        vanBanCau(c.noiDung),
+        h('p', { class: 'phu nho' }, `Đáp án đúng: ${c.dapAn}. ${boDauCode(c[c.dapAn as 'A' | 'B' | 'C' | 'D'])}`),
         h('div', { class: 'hang-nut' },
           h('button', { class: 'nut nut-phu nho', onclick: async () => {
             try {
@@ -191,7 +192,7 @@ export async function veDeThi(noi: HTMLElement): Promise<void> {
         const co = cau.some((x) => x.id === c.id);
         vungTim.append(h('div', { class: 'card cau-xem' },
           h('div', { class: 'phu nho' }, `${tenMon.get(c.maMon) ?? c.maMon}${c.maChuong ? ` · ${c.maChuong}` : ''} · tuần ${c.soTuan}`),
-          h('p', {}, c.noiDung),
+          vanBanCau(c.noiDung, 'noi-dung-tim'),
           h('button', { class: 'nut nut-phu nho', disabled: co, onclick: () => {
             cau.push({ ...c, tenMon: tenMon.get(c.maMon) ?? c.maMon });
             veCau();

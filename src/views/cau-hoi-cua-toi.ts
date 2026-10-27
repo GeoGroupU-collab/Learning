@@ -1,4 +1,5 @@
 import { goi } from '../api';
+import { chuTomTat, vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { h, xoaHet } from '../dom';
 import type { CauCuaToi } from '../types';
 
@@ -27,14 +28,14 @@ export async function veCauHoiCuaToi(goc: HTMLElement): Promise<void> {
     theoTuan.get(tuan)!.forEach((c) => {
       const nhan = NHAN_CUA_TOI[c.trangThai] ?? { chu: 'Đang dùng', loi: false };
       goc.append(h('details', { class: 'card' },
-        h('summary', {}, h('span', {}, c.noiDung.length > 70 ? `${c.noiDung.slice(0, 70)}...` : c.noiDung),
+        h('summary', {}, h('span', {}, chuTomTat(c.noiDung)),
           h('span', { class: nhan.loi ? 'nhan nhan-loi' : c.trangThai === 'cho_duyet' ? 'nhan nhan-vang' : 'nhan' }, nhan.chu)),
         h('p', { class: 'phu nho' }, `${c.tenMon}${c.maChuong ? ` · ${c.maChuong}` : ''}`),
         c.trangThai === 'cho_duyet' ? h('p', { class: 'phu nho' }, 'Câu này đang chờ chủ lớp hoặc trợ lý duyệt. Duyệt xong mới được rút vào đề.') : null,
         c.trangThai === 'tu_choi' ? h('p', { class: 'loi nho' }, c.ghiChuDuyet ? `Không được duyệt: ${c.ghiChuDuyet}` : 'Câu này không được duyệt.') : null,
-        h('p', {}, c.noiDung),
+        vanBanCau(c.noiDung, 'noi-dung-tim'),
         h('ul', { class: 'ds-dap-an' }, ...(['A', 'B', 'C', 'D'] as const).map((k) =>
-          h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. ${c[k]}${c.dapAn === k ? ' (đúng)' : ''}`))),
+          h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. `, vanBanDapAn(c[k]), c.dapAn === k ? ' (đúng)' : ''))),
         h('p', { class: 'phu nho' }, c.soBaoSai > 0 ? `${c.soBaoSai} người đã báo sai câu này` : 'Chưa có ai báo sai')));
     });
   });

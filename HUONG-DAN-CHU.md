@@ -648,3 +648,24 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 - **Bài học chạy trong khung cách ly:** mã trong file bài học (kể cả script tải từ trang ngoài) không còn đọc được phiên đăng nhập hay dữ liệu của web. Bài học vẫn lưu tiến độ như cũ, tiến độ đã học trước đây không mất. Link nội bộ trong bài (`#chuong-1`...) vẫn chạy.
 - **Chống lạm dụng báo sai:** câu bị tạm loại vì báo sai, nếu bạn xem thấy đúng và bấm **Khôi phục**, sẽ được đánh dấu "đã kiểm tra". Từ đó báo sai vẫn được ghi để bạn xem nhưng không tự tạm loại hay xóa câu nữa. Khung **Duyệt câu hỏi** báo số câu đang bị tạm loại và có nút **Xem câu bị tạm loại**. Lệnh `khoiTao` thêm cột `daKiemTra` vào tab `CauHoi`.
 - **Nút Làm mới** ở đầu web quản trị: lấy ngay số liệu mới nhất, không phải chờ 60 giây.
+
+---
+
+## Phụ lục 5. Thêm câu hỏi có sẵn vào ngân hàng (câu có code)
+
+**Làm gì (một lần):** dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**, **Triển khai**, **Phiên bản mới** (không cần chạy `khoiTao`). Push bản web, chờ Actions tick xanh, **Ctrl+F5**.
+
+**Nạp 45 câu đề GE1027 (mã đề C2A-05):**
+1. Vào web quản trị `/admin/`, tab **Câu hỏi**, mở mục **Thêm câu mới từ tệp (.json)**.
+2. Chọn tệp `ngan-hang-luu-tru/GE1027-C2A-05.json` trong thư mục dự án.
+3. Web báo "45 câu trong tệp: 45 câu mới, 0 câu đã có, 0 câu lỗi". Bấm **Thêm 45 câu vào ngân hàng**.
+
+**Làm đúng khi thấy:** tab Câu hỏi có thêm 45 câu thuộc môn Khoa học dữ liệu, chương "Chương 2", trạng thái Đang dùng. Câu có khối code hiện trong khung chữ đơn cách, đáp án giữ đúng khoảng trắng.
+
+**Lưu ý:**
+- Câu thêm bằng cách này **không có tác giả riêng và không thuộc tuần nào**, nên ai cũng làm được và được dùng ngay trong đề **Tự tạo đề luyện tập** (không phải chờ duyệt).
+- Tên chương đang ghi "Chương 2". Nếu danh sách chương của môn bạn đặt tên khác (tab **Chương**), sửa lại bằng cách đổi chương của câu ở tab Câu hỏi, để lọc theo chương khớp.
+- Bấm thêm lần nữa không tạo trùng: câu có nội dung giống câu đã có sẽ được bỏ qua.
+- Muốn bỏ "tạm thời": ở tab Câu hỏi lọc theo tác giả `ngan-hang-chung` rồi xóa hoặc tạm loại.
+- Tệp nằm trong `ngan-hang-luu-tru/`, thư mục **không bao giờ lên GitHub** vì có đáp án.
+- Viết câu có code: đặt code giữa hai dòng ```` ``` ````. Đáp án là code thì bọc trong dấu ` (ví dụ `` `[An   ][8.5]` ``).

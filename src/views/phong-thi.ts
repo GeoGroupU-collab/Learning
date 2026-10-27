@@ -1,4 +1,5 @@
 import { goi, LoiApi } from '../api';
+import { vanBanCau, vanBanDapAn } from '../van-ban-cau';
 import { icon } from '../icon';
 import { mauMon } from '../mau';
 import { h, xoaHet, thongBao } from '../dom';
@@ -176,7 +177,7 @@ function chayBaiThi(goc: HTMLElement, du: DuLieuThi, mon: MonNop[]): void {
 
   du.cauHoi.forEach((c, i) => {
     const nutCac = c.dapAn.map((d) => {
-      const b = h('button', { class: 'dap-an-nut', type: 'button', 'aria-pressed': traLoi[c.id] === d.k }, h('span', { class: 'chu-dap-an' }, d.k), h('span', {}, d.text));
+      const b = h('button', { class: 'dap-an-nut', type: 'button', 'aria-pressed': traLoi[c.id] === d.k }, h('span', { class: 'chu-dap-an' }, d.k), vanBanDapAn(d.text));
       b.addEventListener('click', () => {
         traLoi[c.id] = d.k;
         canLuu = true;
@@ -187,7 +188,7 @@ function chayBaiThi(goc: HTMLElement, du: DuLieuThi, mon: MonNop[]): void {
     });
     const the = h('div', { class: 'card cau-thi', id: `cau-${i}` },
       h('div', { class: 'phu nho' }, `Câu ${i + 1}/${tong} · ${tenMon.get(c.maMon) ?? c.maMon}`),
-      h('p', { class: 'noi-dung-cau' }, c.noiDung), ...nutCac, h('div', { class: 'phai' }, nutBaoSai(c.id)));
+      vanBanCau(c.noiDung), ...nutCac, h('div', { class: 'phai' }, nutBaoSai(c.id)));
     theCau.push(the);
     danhSach.append(the);
     const so = h('button', { class: 'o-so', type: 'button', 'aria-label': `Câu ${i + 1}` }, String(i + 1));
