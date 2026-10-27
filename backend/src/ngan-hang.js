@@ -29,7 +29,9 @@ function hdBaoSai_(email, tv, body) {
     var nguoi = {};
     baoSai.forEach(function (b) { if (b.idCauHoi === id) nguoi[chuanHoaEmail(b.email)] = true; });
     nguoi[email] = true;
-    var moi = trangThaiTheoBaoSai(Object.keys(nguoi).length, nguongTam, nguongXoa, c.trangThai);
+    var daKiemTra = c.daKiemTra === true || String(c.daKiemTra).toLowerCase() === 'true';
+    // Câu chủ đã kiểm tra là đúng: vẫn ghi báo sai để chủ xem, nhưng không tự tạm loại hay xóa, nên vài người thông đồng không loại được câu.
+    var moi = daKiemTra ? c.trangThai : trangThaiTheoBaoSai(Object.keys(nguoi).length, nguongTam, nguongXoa, c.trangThai);
     if (moi !== c.trangThai) {
       suaDong_('CauHoi', c._dong, { trangThai: moi });
       ghiNhatKy_('he_thong', 'doiTrangThaiCau', id, { tu: c.trangThai, den: moi, soNguoiBao: Object.keys(nguoi).length });
@@ -109,7 +111,8 @@ function hangCauHoiQuanTri_(c, soBaoSai, tenTacGia) {
   return {
     id: c.id, maHocKy: c.maHocKy, soTuan: Number(c.soTuan), maMon: c.maMon, maChuong: c.maChuong, trangNguon: c.trangNguon,
     noiDung: c.noiDung, A: c.A, B: c.B, C: c.C, D: c.D, dapAn: c.dapAn, giaiThich: c.giaiThich,
-    tacGia: chuanHoaEmail(c.tacGia), tenTacGia: tenTacGia || '', trangThai: c.trangThai, ghiChuDuyet: c.ghiChuDuyet || '', ngayNop: c.ngayNop ? new Date(msCua_(c.ngayNop)).toISOString() : '',
+    tacGia: chuanHoaEmail(c.tacGia), tenTacGia: tenTacGia || '', trangThai: c.trangThai, ghiChuDuyet: c.ghiChuDuyet || '',
+    daKiemTra: c.daKiemTra === true || String(c.daKiemTra).toLowerCase() === 'true', ngayNop: c.ngayNop ? new Date(msCua_(c.ngayNop)).toISOString() : '',
     soBaoSai: soBaoSai || 0,
   };
 }
@@ -154,8 +157,10 @@ function hdNganHang_(email, tv, body) {
   });
   var coKichThuoc = 50;
   var trang = Math.max(1, Number(body.trang) || 1);
-  var soChoDuyet = docBang_('CauHoi').filter(function (c) { return (!maHk || c.maHocKy === maHk) && c.trangThai === 'cho_duyet'; }).length;
-  return { soChoDuyet: soChoDuyet, tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
+  var trongKy = docBang_('CauHoi').filter(function (c) { return !maHk || c.maHocKy === maHk; });
+  var soChoDuyet = trongKy.filter(function (c) { return c.trangThai === 'cho_duyet'; }).length;
+  var soTamLoai = trongKy.filter(function (c) { return c.trangThai === 'suspended'; }).length;
+  return { soChoDuyet: soChoDuyet, soTamLoai: soTamLoai, tong: ds.length, trang: trang, coTrang: coKichThuoc, cauHoi: ds.slice((trang - 1) * coKichThuoc, trang * coKichThuoc) };
 }
 
 function hdSuaCauHoi_(email, tv, body) {
@@ -186,7 +191,11 @@ function hdDoiTrangThaiCau_(email, tv, body) {
     var c = docBang_('CauHoi').filter(function (x) { return x.id === id; })[0];
     if (!c) throw loi_('khong_thay', 'Không tìm thấy câu hỏi.');
     if (tv.vaiTro !== 'owner' && c.trangThai === 'removed') throw loi_('cam', 'Chỉ chủ mới khôi phục câu đã xóa.');
-    suaDong_('CauHoi', c._dong, { trangThai: moi });
+    var khoiPhuc = moi === 'active' && (c.trangThai === 'suspended' || c.trangThai === 'removed');
+    var thayDoi = { trangThai: moi };
+    if (khoiPhuc) thayDoi.daKiemTra = true; // chủ đã xem và thấy câu đúng
+    if (moi === 'suspended' || moi === 'removed') thayDoi.daKiemTra = false; // chủ tự loại thì bỏ dấu đã kiểm tra
+    suaDong_('CauHoi', c._dong, thayDoi);
     if (moi === 'active') xoaDongNeu_('BaoSai', function (b) { return b.idCauHoi === id; }); // khôi phục thì xóa các báo sai cũ
     ghiNhatKy_(email, 'doiTrangThaiCau', id, { tu: c.trangThai, den: moi });
     return { id: id, trangThai: moi };

@@ -336,6 +336,23 @@ describe('báo sai', () => {
     expect(trangThaiCau(cauCuaNguoi0Gap)).toBe('suspended');
   });
 
+  it('chủ khôi phục câu bị tạm loại thì câu được đánh dấu đã kiểm tra, báo sai sau đó không tự loại nữa', () => {
+    goiAs(NGUOI[1], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
+    goiAs(NGUOI[2], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
+    expect(trangThaiCau(cauCuaNguoi0Gap)).toBe('suspended');
+    expect(goiAs(CHU, 'admin.doiTrangThaiCau', { id: cauCuaNguoi0Gap, trangThai: 'active' }).ok).toBe(true);
+    expect(mt.docTab('CauHoi').find((c) => c.id === cauCuaNguoi0Gap).daKiemTra).toBe(true);
+    goiAs(NGUOI[1], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
+    goiAs(NGUOI[2], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
+    goiAs(NGUOI[3], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
+    expect(trangThaiCau(cauCuaNguoi0Gap)).toBe('active');
+    expect(mt.docTab('BaoSai').filter((b) => b.idCauHoi === cauCuaNguoi0Gap)).toHaveLength(3); // vẫn ghi để chủ xem
+    // chủ tự tạm loại thì bỏ dấu đã kiểm tra
+    goiAs(CHU, 'admin.doiTrangThaiCau', { id: cauCuaNguoi0Gap, trangThai: 'suspended' });
+    expect(mt.docTab('CauHoi').find((c) => c.id === cauCuaNguoi0Gap).daKiemTra).toBe(false);
+    expect(goiAs(CHU, 'admin.nganHang', {}).data.soTamLoai).toBe(1);
+  });
+
   it('cùng một người báo hai lần không tính hai', () => {
     goiAs(NGUOI[1], 'baoSai', { idCauHoi: cauCuaNguoi0Gap });
     expect(goiAs(NGUOI[1], 'baoSai', { idCauHoi: cauCuaNguoi0Gap })).toMatchObject({ ok: false, error: 'da_bao' });

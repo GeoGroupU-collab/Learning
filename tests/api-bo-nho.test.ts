@@ -74,3 +74,14 @@ describe('bộ nhớ tạm web quản trị', () => {
     vi.useRealTimers();
   });
 });
+
+describe('nút Làm mới', () => {
+  it('xóa bộ nhớ nên lần đọc sau gọi lại máy chủ', async () => {
+    const { goi, batBoNhoAdmin, xoaBoNhoAdmin } = await taiApi();
+    batBoNhoAdmin();
+    await goi('admin.dsThanhVien');
+    xoaBoNhoAdmin();
+    await goi('admin.dsThanhVien');
+    expect(soLan['admin.dsThanhVien']).toBe(2);
+  });
+});

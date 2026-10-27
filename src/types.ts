@@ -333,12 +333,14 @@ export interface CauNganHang {
   tenTacGia: string;
   trangThai: 'active' | 'suspended' | 'removed' | 'cho_duyet' | 'tu_choi';
   ghiChuDuyet?: string;
+  daKiemTra?: boolean;
   ngayNop: string;
   soBaoSai: number;
 }
 
 export interface KetQuaNganHang {
   soChoDuyet: number;
+  soTamLoai?: number;
   tong: number;
   trang: number;
   coTrang: number;

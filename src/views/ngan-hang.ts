@@ -49,7 +49,7 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       const kq = await goi<KetQuaNganHang>('admin.nganHang', loc);
       xoaHet(danhSach);
       xoaHet(phanTrang);
-      veVungDuyet(kq.soChoDuyet);
+      veVungDuyet(kq.soChoDuyet, kq.soTamLoai ?? 0);
       if (!loc.maHocKy) datHuyHieuDuyet(kq.soChoDuyet); // số trên nút Quản trị chỉ tính học kỳ đang mở
       danhSach.append(h('p', { class: 'phu' }, `${kq.tong} câu hỏi`));
       kq.cauHoi.forEach((c) => danhSach.append(theCau(c)));
@@ -90,7 +90,7 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
     } catch (e) { baoLoi(e); }
   };
 
-  const veVungDuyet = (soCho: number): void => {
+  const veVungDuyet = (soCho: number, soTamLoai: number): void => {
     xoaHet(vungDuyet);
     const kemThamKhao = h('input', { type: 'checkbox', id: 'kem-tham-khao', checked: true }) as HTMLInputElement;
     const nut: HTMLElement[] = [];
@@ -107,6 +107,8 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       h('span', { class: 'nhan-muc' }, 'Duyệt câu hỏi'),
       h('p', {}, soCho > 0 ? `Có ${soCho} câu đang chờ duyệt. Câu chờ duyệt chưa vào đề nào.` : 'Không có câu nào đang chờ duyệt.'),
       nut.length ? h('div', { class: 'hang-nut' }, ...nut) : null,
+      soTamLoai > 0 ? h('div', { class: 'hang-nut' }, h('p', { class: 'phu nho' }, `${soTamLoai} câu đang bị tạm loại vì bị báo sai. Xem lại: đúng thì bấm Khôi phục (sau đó báo sai không tự loại câu đó nữa), sai thì Sửa hoặc Xóa.`),
+        h('button', { class: 'nut nut-phu nho', onclick: () => { trangThai.value = 'suspended'; loc.trangThai = 'suspended'; loc.trang = 1; void tai(); } }, 'Xem câu bị tạm loại')) : null,
     ];
     if (laChu) {
       khung.push(
@@ -118,8 +120,8 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
             h('button', { class: 'nut nut-nguy nho', onclick: async () => {
               if (!confirm('Xóa hẳn mọi câu đang ở trạng thái "Bị từ chối" khỏi Sheet? Hãy chắc là đã lưu tệp rà soát. Câu đã duyệt và câu chờ duyệt không bị đụng tới.')) return;
               try {
-                const r = await goi<{ soCau: number }>('admin.donCauTuChoi', { xacNhan: true });
-                thongBao(`Đã xóa ${r.soCau} câu bị từ chối`);
+                const r = await goi<{ soCau: number; giuLai?: number }>('admin.donCauTuChoi', { xacNhan: true });
+                thongBao(r.giuLai ? `Đã xóa ${r.soCau} câu. Giữ lại ${r.giuLai} câu của tuần chưa đóng để người nộp không mất quyền thi.` : `Đã xóa ${r.soCau} câu bị từ chối`);
                 await tai();
               } catch (e) { baoLoi(e); }
             } }, 'Dọn câu bị từ chối'))));
@@ -169,6 +171,7 @@ export async function veNganHang(noi: HTMLElement, laChu: boolean): Promise<void
       h('ul', { class: 'ds-dap-an' }, ...(['A', 'B', 'C', 'D'] as const).map((k) => h('li', { class: c.dapAn === k ? 'dung' : '' }, `${k}. ${c[k]}`))),
       c.giaiThich ? h('p', { class: 'phu nho' }, `Giải thích: ${c.giaiThich}`) : null,
       c.ghiChuDuyet ? h('p', { class: 'phu nho' }, `Ghi chú duyệt: ${c.ghiChuDuyet}`) : null,
+      c.daKiemTra ? h('p', { class: 'phu nho' }, 'Bạn đã kiểm tra câu này là đúng: báo sai không tự tạm loại nữa.') : null,
       h('p', { class: 'phu nho' }, `Tác giả: ${c.tenTacGia || c.tacGia} (${c.tacGia}) · ${c.soBaoSai} lượt báo sai`),
       h('div', { class: 'hang-nut' }, ...nut), vungSua);
   };

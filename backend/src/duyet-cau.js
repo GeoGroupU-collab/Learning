@@ -111,9 +111,17 @@ function hdXuatChoDuyet_(email, tv, body) {
 function hdDonCauTuChoi_(email, tv, body) {
   if (!body.xacNhan) throw loi_('can_xac_nhan', 'Cần xác nhận xóa các câu bị từ chối.');
   return voiKhoa_(function () {
-    var dong = docBang_('CauHoi').filter(function (c) { return c.trangThai === 'tu_choi'; }).map(function (c) { return c._dong; });
+    var bayGio = Date.now();
+    var dongCua = {};
+    docBang_('Tuan').forEach(function (t) { dongCua[t.maHocKy + '/' + Number(t.soTuan)] = msCua_(t.dongCua); });
+    var tuChoi = docBang_('CauHoi').filter(function (c) { return c.trangThai === 'tu_choi'; });
+    var xoaDuoc = tuChoi.filter(function (c) {
+      var d = dongCua[c.maHocKy + '/' + Number(c.soTuan)];
+      return !d || bayGio > d;
+    });
+    var dong = xoaDuoc.map(function (c) { return c._dong; });
     xoaNhieuDong_('CauHoi', dong);
-    ghiNhatKy_(email, 'donCauTuChoi', '', { soCau: dong.length });
-    return { soCau: dong.length };
+    ghiNhatKy_(email, 'donCauTuChoi', '', { soCau: dong.length, giuLai: tuChoi.length - dong.length });
+    return { soCau: dong.length, giuLai: tuChoi.length - dong.length };
   });
 }

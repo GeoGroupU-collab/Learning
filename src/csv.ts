@@ -1,7 +1,9 @@
 // CSV đọc ghi đơn giản, đủ cho ngân hàng câu hỏi: có dấu ngoặc kép, dấu phẩy và xuống dòng trong ô.
 
+// Ô chữ bắt đầu bằng = + - @ (hoặc tab, xuống dòng) sẽ bị Excel chạy như công thức. Thêm dấu ' phía trước; docCsv bỏ lại dấu này.
 function thoatO(v: unknown): string {
-  const s = v === null || v === undefined ? '' : String(v);
+  let s = v === null || v === undefined ? '' : String(v);
+  if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
@@ -37,7 +39,8 @@ export function docCsv(chuoi: string): Record<string, string>[] {
   if (dong.some((x) => x !== '')) hang.push(dong);
   if (!hang.length) return [];
   const tieuDe = hang[0].map((x) => x.trim());
-  return hang.slice(1).map((r) => Object.fromEntries(tieuDe.map((t, i) => [t, r[i] ?? ''])));
+  const boNhay = (x: string): string => (/^'[=+\-@\t\r]/.test(x) ? x.slice(1) : x);
+  return hang.slice(1).map((r) => Object.fromEntries(tieuDe.map((t, i) => [t, boNhay(r[i] ?? '')])));
 }
 
 export function taiXuong(tenFile: string, noiDung: string, loai: string): void {

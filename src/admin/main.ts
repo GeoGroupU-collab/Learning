@@ -9,7 +9,7 @@ import '@fontsource/ibm-plex-mono/vietnamese-500.css';
 import '../style.css';
 import { icon, dauHieu } from '../icon';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from '../config';
-import { batBoNhoAdmin, goi, LoiApi, xoaCache } from '../api';
+import { batBoNhoAdmin, goi, LoiApi, xoaBoNhoAdmin, xoaCache } from '../api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from '../auth';
 import { datHuyHieuDuyet, h, xoaHet } from '../dom';
 import { veQuanTri } from '../views/quan-tri';
@@ -97,10 +97,26 @@ function veKhung(): void {
     h('header', { class: 'dau-trang' },
       h('span', { class: 'logo' }, dauHieu(30) as unknown as HTMLElement, h('span', {}, `${CONFIG.TEN_WEB} · Quản trị`)),
       h('div', { class: 'dau-phai' },
+        nutLamMoi(),
         h('a', { class: 'nut-dau', href: '../' }, icon('nha', 16) as unknown as HTMLElement, h('span', {}, 'Về web lớp')),
         h('button', { class: 'nut-dau', type: 'button', onclick: () => void thoat() }, 'Đăng xuất'))),
     vungNoiDung
   );
+}
+
+// Lấy lại số liệu mới nhất ngay, không chờ hết 60 giây bộ nhớ tạm (ví dụ vừa có bạn nộp câu hỏi).
+function nutLamMoi(): HTMLElement {
+  const nut = h('button', { class: 'nut-dau', type: 'button', title: 'Tải lại số liệu mới nhất từ máy chủ' }, 'Làm mới') as HTMLButtonElement;
+  nut.addEventListener('click', async () => {
+    nut.disabled = true;
+    nut.textContent = 'Đang tải...';
+    xoaBoNhoAdmin();
+    void goi<{ choDuyet: number }>('admin.tongQuan').then((t) => datHuyHieuDuyet(t.choDuyet)).catch(() => undefined);
+    await dinhTuyen();
+    nut.disabled = false;
+    nut.textContent = 'Làm mới';
+  });
+  return nut;
 }
 
 async function dinhTuyen(): Promise<void> {

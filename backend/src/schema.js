@@ -20,7 +20,7 @@ var TABS = [
     name: 'CauHoi',
     headers: [
       'id', 'maHocKy', 'soTuan', 'maMon', 'maChuong', 'trangNguon', 'noiDung',
-      'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop', 'ghiChuDuyet',
+      'A', 'B', 'C', 'D', 'dapAn', 'giaiThich', 'tacGia', 'trangThai', 'ngayNop', 'ghiChuDuyet', 'daKiemTra',
     ],
   },
   { name: 'ThongBao', headers: ['id', 'ngay', 'tieuDe', 'noiDung', 'loai', 'maHocKy', 'maNhom', 'dsEmail', 'nguoiTao'] },
@@ -71,6 +71,7 @@ var CAU_HINH_MAC_DINH = [
   ['giaiTienBo', false, 'Bật giải nhóm tiến bộ nhất'],
   ['xoaGpaSauChiaNhom', false, 'Tự nhắc xóa cột GPA sau khi chia nhóm'],
   ['duyetCauHoiTruoc', true, 'Câu hỏi mới nộp phải được chủ hoặc trợ lý duyệt trước khi vào đề (FALSE là vào ngân hàng ngay)'],
+  ['anCauTuanChuaDong', true, 'Đề tự luyện không dùng câu của tuần chưa đóng phòng thi, để không ai xem trước đáp án đề sự kiện (FALSE là cho dùng)'],
   ['soCauDeTuTao', 30, 'Số câu mỗi đề thành viên tự tạo (chọn môn và chương, lấy từ ngân hàng)'],
   ['soCauToiThieuDeTuTao', 10, 'Số câu tối thiểu trong ngân hàng (theo môn và chương đã chọn) để tạo được đề'],
   ['diemMoiDeTuTao', 20, 'Điểm cá nhân cộng cho mỗi đề tự tạo làm xong (hợp lệ)'],

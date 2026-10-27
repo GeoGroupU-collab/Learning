@@ -631,3 +631,20 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 - **Sự kiện:** khối đếm ngược lớn và ba chặng của tuần (Nộp câu hỏi, Phòng thi, Kết quả) cho biết đang ở chặng nào.
 
 **Làm đúng khi thấy:** mở trang admin bằng tài khoản chủ thấy các tab Thành viên, Chia nhóm, Tuần, **Thông báo**...; mở bằng tài khoản thành viên thấy "Trang này chỉ dành cho lớp trưởng". Gửi một thông báo thử cho riêng một tài khoản, đăng nhập tài khoản đó thấy chấm đỏ ở **Sự kiện**.
+
+---
+
+## Phụ lục 4. Bản vá sau đợt rà soát an toàn (27/10/2026)
+
+**Làm gì:** dán `backend/dist/Code.gs` mới, **Ctrl+S**, chạy `khoiTao` một lần (thêm dòng cấu hình `anCauTuanChuaDong`), **Triển khai**, **Phiên bản mới**. Rồi push bản web.
+
+**Đã sửa:**
+- **Chèn công thức vào Sheet:** trước đây ai đó đặt tên hoặc viết câu hỏi bắt đầu bằng `=` (ví dụ `=IMPORTXML(...)`) thì Sheet chạy như công thức, có thể gửi dữ liệu trong Sheet ra ngoài khi bạn mở. Giờ mọi chữ bắt đầu bằng `= + - @` được lưu nguyên dạng chữ.
+- **Chèn công thức vào file CSV** (bảng điểm gửi thầy, ngân hàng câu hỏi): ô chữ nguy hiểm được thêm dấu `'` để Excel không chạy. Nhập lại file vẫn đúng chữ gốc.
+- **Đề tự luyện lộ câu của tuần đang thi:** đề sự kiện ưu tiên câu nộp trong tuần đó, mà trước đây đề tự luyện dùng luôn các câu này (kèm đáp án sau khi nộp). Giờ đề tự luyện chỉ dùng câu của các tuần đã đóng phòng thi. Muốn tắt: tab `CauHinh`, `anCauTuanChuaDong` = `FALSE`.
+- **Dọn câu bị từ chối làm mất quyền thi:** quyền vào thi tính theo số câu đã nộp, nên xóa câu bị từ chối giữa tuần làm người đó tụt dưới 15 câu. Giờ nút **Dọn câu bị từ chối** chỉ xóa câu của tuần đã đóng, câu tuần đang diễn ra được giữ lại tới khi tuần đóng.
+- **Đề cố định của tuần** không còn dùng câu đã bị tạm loại (2 người báo sai) hay chờ duyệt.
+- **Trang chủ** hỏi máy chủ dải Vinh danh nhiều nhất 5 phút một lần, đỡ tốn lượt gọi Apps Script.
+- **Bài học chạy trong khung cách ly:** mã trong file bài học (kể cả script tải từ trang ngoài) không còn đọc được phiên đăng nhập hay dữ liệu của web. Bài học vẫn lưu tiến độ như cũ, tiến độ đã học trước đây không mất. Link nội bộ trong bài (`#chuong-1`...) vẫn chạy.
+- **Chống lạm dụng báo sai:** câu bị tạm loại vì báo sai, nếu bạn xem thấy đúng và bấm **Khôi phục**, sẽ được đánh dấu "đã kiểm tra". Từ đó báo sai vẫn được ghi để bạn xem nhưng không tự tạm loại hay xóa câu nữa. Khung **Duyệt câu hỏi** báo số câu đang bị tạm loại và có nút **Xem câu bị tạm loại**. Lệnh `khoiTao` thêm cột `daKiemTra` vào tab `CauHoi`.
+- **Nút Làm mới** ở đầu web quản trị: lấy ngay số liệu mới nhất, không phải chờ 60 giây.

@@ -180,14 +180,18 @@ describe('nhập kết quả rà soát', () => {
 });
 
 describe('dọn câu bị từ chối', () => {
-  it('chỉ chủ, cần xác nhận, chỉ xóa câu bị từ chối', () => {
+  it('chỉ chủ, cần xác nhận, chỉ xóa câu bị từ chối của tuần đã đóng', () => {
     NGUOI.slice(0, 2).forEach((e) => goiAs(e, 'nopCauHoi', { cauHoi: taoBoCau(e) }));
     goiAs(CHU, 'admin.duyetCau', { quyetDinh: 'duyet', loc: { tacGia: NGUOI[0] } });
     goiAs(CHU, 'admin.duyetCau', { quyetDinh: 'tu_choi', loc: { maMon: MON[0], tacGia: NGUOI[1] }, lyDo: 'Dở' });
     expect(trangThaiDem()).toEqual({ active: 15, tu_choi: 5, cho_duyet: 10 });
     expect(goiAs(TRO_LY, 'admin.donCauTuChoi', { xacNhan: true })).toMatchObject({ ok: false, error: 'cam' });
     expect(goiAs(CHU, 'admin.donCauTuChoi', {})).toMatchObject({ ok: false, error: 'can_xac_nhan' });
-    expect(goiAs(CHU, 'admin.donCauTuChoi', { xacNhan: true }).data.soCau).toBe(5);
+    // tuần 1 chưa đóng: giữ lại câu bị từ chối để người nộp vẫn đủ 15 câu, không mất quyền thi
+    expect(goiAs(CHU, 'admin.donCauTuChoi', { xacNhan: true }).data).toEqual({ soCau: 0, giuLai: 5 });
+    expect(goiAs(NGUOI[1], 'tuanHienTai').data.moKhoa).toBe(true);
+    vi.setSystemTime(gio('2026-11-09T08:00:00')); // sau khi phòng thi tuần 1 đóng
+    expect(goiAs(CHU, 'admin.donCauTuChoi', { xacNhan: true }).data).toEqual({ soCau: 5, giuLai: 0 });
     expect(trangThaiDem()).toEqual({ active: 15, cho_duyet: 10 });
     // các câu còn lại vẫn đọc được bình thường
     expect(goiAs(CHU, 'admin.nganHang', {}).data.soChoDuyet).toBe(10);

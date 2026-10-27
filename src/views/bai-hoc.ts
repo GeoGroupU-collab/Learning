@@ -2,6 +2,7 @@ import { h, xoaHet } from '../dom';
 import { icon } from '../icon';
 import { mauMon } from '../mau';
 import { khiRoiTrang } from '../gio';
+import { QUYEN_KHUNG, apDungTinNhan, chenLopCachLy, docDuLieuBaiHoc } from '../bai-hoc-cach-ly';
 import type { Manifest, MonHoc } from '../types';
 
 let boNho: Manifest | null = null;
@@ -73,14 +74,37 @@ export async function veDanhSachBai(goc: HTMLElement, maHocKy: string, maMon: st
 }
 
 // Mở bài trong cùng tab ở chế độ toàn màn hình: ẩn thanh trên và thanh dưới của web, chỉ còn một thanh nhỏ có nút quay lại.
-// Bài học tự dùng localStorage với khóa riêng nên chạy trong iframe cùng nguồn.
+// Bài học chạy trong khung cách ly (xem bai-hoc-cach-ly.ts): không đọc được phiên đăng nhập, vẫn lưu được tiến độ.
 export function veBaiHoc(goc: HTMLElement, maHocKy: string, maMon: string, file: string): void {
   xoaHet(goc);
   document.body.classList.add('dang-doc');
-  khiRoiTrang(() => document.body.classList.remove('dang-doc'));
   const duongDan = `bai-hoc/${encodeURIComponent(maHocKy)}/${encodeURIComponent(maMon)}/${encodeURIComponent(file)}`;
+  const urlBai = new URL(duongDan, document.baseURI).href;
+  const khung = h('iframe', { class: 'khung-bai', title: 'Bài học', sandbox: QUYEN_KHUNG }) as HTMLIFrameElement;
+  const nghe = (e: MessageEvent): void => {
+    if (e.source !== khung.contentWindow) return; // chỉ nhận tin từ đúng khung bài học này
+    try { apDungTinNhan(localStorage, e.data); } catch { /* bộ nhớ đầy hoặc bị chặn */ }
+  };
+  window.addEventListener('message', nghe);
+  khiRoiTrang(() => {
+    document.body.classList.remove('dang-doc');
+    window.removeEventListener('message', nghe);
+  });
+  const thongBaoLoi = h('p', { class: 'loi', hidden: true }, 'Không tải được bài học. Kiểm tra mạng rồi thử lại.');
   goc.append(
     h('div', { class: 'thanh-doc' }, h('a', { class: 'quay-lai', href: `#/bai-hoc/${maHocKy}/${maMon}` }, icon('trai', 16) as unknown as HTMLElement, 'Quay lại')),
-    h('iframe', { class: 'khung-bai', src: new URL(duongDan, document.baseURI).href, title: 'Bài học' })
+    thongBaoLoi,
+    khung
   );
+  void (async () => {
+    try {
+      const res = await fetch(urlBai, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(String(res.status));
+      let duLieu: Record<string, string> = {};
+      try { duLieu = docDuLieuBaiHoc(localStorage); } catch { /* không đọc được bộ nhớ thì bài học bắt đầu trống */ }
+      khung.srcdoc = chenLopCachLy(await res.text(), duLieu, urlBai);
+    } catch {
+      thongBaoLoi.hidden = false;
+    }
+  })();
 }

@@ -23,7 +23,7 @@ function themDiemNhieu_(cacMuc) {
       thoiGian: bayGio, email: m.email, loai: m.loai, soDiem: m.soDiem, maHocKy: m.maHocKy || '', soTuan: m.soTuan || '',
       tuanKey: m.tuanKey || '', khoa: m.khoa || '', ghiChu: m.ghiChu || '',
     };
-    return tieuDe.map(function (h) { return o[h] === undefined ? '' : o[h]; });
+    return hangAnToan_(tieuDe.map(function (h) { return o[h] === undefined ? '' : o[h]; }));
   });
   sheet.getRange(sheet.getLastRow() + 1, 1, hang.length, tieuDe.length).setValues(hang);
   lamMoiBang_('Diem');
@@ -95,8 +95,13 @@ function luotTaoDeDangMo_(email) {
 
 // Các câu có thể dùng để tạo đề cho một người: đang dùng, không phải câu của chính họ.
 function cauDungDuocChoDe_(maHocKy, email) {
+  var bayGio = Date.now();
+  var tuanChuaDong = {};
+  if (String(layCauHinh_().anCauTuanChuaDong).toLowerCase() !== 'false') {
+    docTuan_(maHocKy).forEach(function (t) { if (bayGio <= t.dongCua) tuanChuaDong[t.soTuan] = true; });
+  }
   return docBang_('CauHoi').filter(function (c) {
-    return c.maHocKy === maHocKy && c.trangThai === 'active' && chuanHoaEmail(c.tacGia) !== email;
+    return c.maHocKy === maHocKy && c.trangThai === 'active' && chuanHoaEmail(c.tacGia) !== email && !tuanChuaDong[Number(c.soTuan)];
   });
 }
 
@@ -312,7 +317,7 @@ function hdTaoDeNop_(email, tv, body) {
 function hdDsMon_() {
   var hk = hocKyDangMo_();
   if (!hk) return { mon: [] };
-  var tatCa = docBang_('CauHoi').filter(function (c) { return c.maHocKy === hk.maHocKy && c.trangThai !== 'removed'; });
+  var tatCa = docBang_('CauHoi').filter(function (c) { return c.maHocKy === hk.maHocKy && c.trangThai !== 'removed' && c.trangThai !== 'tu_choi'; });
   return {
     mon: monCuaHocKy_(hk.maHocKy).map(function (m) {
       var cauMon = tatCa.filter(function (c) { return c.maMon === m.ma; });

@@ -40,6 +40,7 @@ const goc = document.getElementById('app') as HTMLElement;
 let me: Me | null = null;
 let duLieuTrangChu: TrangChuData | null = null;
 let thoiDiemTaiTrangChu = 0;
+let lanHoiVinhDanh = 0;
 
 function laTrinhDuyetTrongUngDung(): boolean {
   return /(Zalo|FBAN|FBAV|FB_IAB|Messenger|Instagram)/i.test(navigator.userAgent);
@@ -309,14 +310,24 @@ function veTrangChu(noi: HTMLElement): void {
   let nhomVd: string[] = [];
   let nguoiVd: string[] = [];
   const ve = (): void => { if (vungChay.isConnected) dungDaiVinhDanh(vungChay, nhomVd, nguoiVd); };
-  void goiNhanh<KetQuaXepHang>('xepHang', {}, (kq) => {
+  const nhom = (kq: KetQuaXepHang): void => {
     nhomVd = kq.vinhDanh ? kq.vinhDanh.nhom.map((n) => `${n.tenNhom} dẫn đầu tuần ${kq.vinhDanh!.soTuan} với ${n.diem.toFixed(1)} điểm`) : [];
     ve();
-  }).catch(() => undefined);
-  void goiNhanh<KetQuaXepHangCaNhan>('xepHangCaNhan', {}, (kq) => {
+  };
+  const nguoi = (kq: KetQuaXepHangCaNhan): void => {
     nguoiVd = kq.vinhDanh ? kq.vinhDanh.nguoi.map((n) => `${n.hoTen} nhận danh hiệu ${n.danhHieu} (${n.diem.toFixed(1)} điểm)`) : [];
     ve();
-  }).catch(() => undefined);
+  };
+  // Vinh danh chỉ đổi khi chốt tuần, nên mỗi tab hỏi máy chủ nhiều nhất 5 phút một lần; còn lại dùng bản đã lưu.
+  const cuNhom = docCache<KetQuaXepHang>('xepHang');
+  const cuNguoi = docCache<KetQuaXepHangCaNhan>('xepHangCaNhan');
+  if (cuNhom) nhom(cuNhom);
+  if (cuNguoi) nguoi(cuNguoi);
+  if (Date.now() - lanHoiVinhDanh > 300000 || !cuNhom || !cuNguoi) {
+    lanHoiVinhDanh = Date.now();
+    void goiNhanh<KetQuaXepHang>('xepHang', {}, nhom).catch(() => undefined);
+    void goiNhanh<KetQuaXepHangCaNhan>('xepHangCaNhan', {}, nguoi).catch(() => undefined);
+  }
 
   const vungMon = h('div', {});
   noi.append(vungMon);

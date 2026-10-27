@@ -19,7 +19,7 @@ class TrangTinh {
   getLastRow() { return this.dong.length; }
   getLastColumn() { return this.dong.reduce((m, r) => Math.max(m, r.length), 0); }
   setFrozenRows() {}
-  appendRow(arr) { this.dong.push(arr.slice()); }
+  appendRow(arr) { this.dong.push(arr.map(boDauNhay)); }
   deleteRow(r) { this.dong.splice(r - 1, 1); }
   deleteRows(r, n) { this.dong.splice(r - 1, n); }
   getRange(r, c, nr = 1, nc = 1) {
@@ -38,13 +38,21 @@ class TrangTinh {
         vals.forEach((rowVals, i) => {
           while (sheet.dong.length < r + i) sheet.dong.push([]);
           const row = sheet.dong[r - 1 + i];
-          rowVals.forEach((v, j) => { row[c - 1 + j] = v; });
+          rowVals.forEach((v, j) => { row[c - 1 + j] = boDauNhay(v); });
         });
       },
       setValue(v) { this.setValues([[v]]); },
       setFontWeight() { return this; },
     };
   }
+}
+
+// Ghi lại giá trị mà Sheets thật hiểu là công thức, để bài kiểm tra bắt được chỗ ghi quên lọc.
+export const congThucDaGhi = [];
+function boDauNhay(v) {
+  if (typeof v === 'string' && v.startsWith("'")) return v.slice(1);
+  if (typeof v === 'string' && v.startsWith('=')) congThucDaGhi.push(v);
+  return v;
 }
 
 export function taoMoiTruong() {
@@ -153,6 +161,7 @@ export function taoMoiTruong() {
     khoiTao() {
       xuat.khoiTao();
       this.datCauHinh('duyetCauHoiTruoc', false);
+      this.datCauHinh('anCauTuanChuaDong', false);
     },
     datCauHinh(khoa, giaTri) {
       const dong = ss.getSheetByName('CauHinh').dong.find((r) => r[0] === khoa);

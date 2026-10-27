@@ -89,10 +89,20 @@ function tieuDeTab_(sheet) {
   return tieuDe.slice();
 }
 
+// Chữ do người dùng nhập mà bắt đầu bằng = + - @ sẽ bị Sheets hiểu là công thức (ví dụ =IMPORTXML có thể gửi dữ liệu ra ngoài).
+// Thêm dấu ' phía trước để Sheets lưu nguyên dạng chữ; khi đọc lại Sheets trả đúng chữ gốc, không có dấu '.
+function oAnToan_(v) {
+  return typeof v === 'string' && /^[=+\-@]/.test(v) ? "'" + v : v;
+}
+
+function hangAnToan_(hang) {
+  return hang.map(oAnToan_);
+}
+
 function themDong_(ten, obj) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ten);
   var tieuDe = tieuDeTab_(sheet);
-  sheet.appendRow(tieuDe.map(function (h) { return obj[h] === undefined ? '' : obj[h]; }));
+  sheet.appendRow(hangAnToan_(tieuDe.map(function (h) { return obj[h] === undefined ? '' : obj[h]; })));
   lamMoiBang_(ten);
 }
 
@@ -102,7 +112,7 @@ function suaDong_(ten, soDong, thayDoi) {
   var tieuDe = tieuDeTab_(sheet);
   var hienCo = sheet.getRange(soDong, 1, 1, tieuDe.length).getValues()[0];
   var moi = tieuDe.map(function (h, i) { return thayDoi[h] !== undefined ? thayDoi[h] : hienCo[i]; });
-  sheet.getRange(soDong, 1, 1, tieuDe.length).setValues([moi]);
+  sheet.getRange(soDong, 1, 1, tieuDe.length).setValues([hangAnToan_(moi)]);
   lamMoiBang_(ten);
 }
 
@@ -175,7 +185,7 @@ function datCotNhieuDong_(ten, tenCot, giaTriTheoDong) {
   var vung = sheet.getRange(2, cot + 1, lastRow - 1, 1);
   var gt = vung.getValues();
   dong.forEach(function (d) { if (d >= 2 && d <= lastRow) gt[d - 2][0] = giaTriTheoDong[d]; });
-  vung.setValues(gt);
+  vung.setValues(gt.map(hangAnToan_));
   lamMoiBang_(ten);
 }
 

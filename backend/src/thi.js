@@ -139,7 +139,7 @@ function hdBatDauThi_(email, tv, body) {
     var deCD = docBang_('DeThi').filter(function (d) { return d.idDe === t.idDe; })[0];
     if (!deCD) throw loi_('khong_du_cau', 'Đề cố định của tuần này không tồn tại. Báo lớp trưởng.');
     var cauCD = cauHoiTheoId_(hk.maHocKy);
-    var idHopLe = jsonAnToan_(deCD.dsIdCau, []).filter(function (id) { return cauCD[id] && cauCD[id].trangThai !== 'removed'; });
+    var idHopLe = jsonAnToan_(deCD.dsIdCau, []).filter(function (id) { return cauCD[id] && cauCD[id].trangThai === 'active'; });
     if (!idHopLe.length) throw loi_('khong_du_cau', 'Đề cố định không còn câu hợp lệ. Báo lớp trưởng.');
     de = dungDeCoDinh(idHopLe);
     var monDe = {};

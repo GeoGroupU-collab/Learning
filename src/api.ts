@@ -22,6 +22,11 @@ export function batBoNhoAdmin(): void {
   dungBoNhoAdmin = true;
 }
 
+// Bỏ hết dữ liệu đã nhớ để lần đọc sau lấy mới từ máy chủ (nút Làm mới).
+export function xoaBoNhoAdmin(): void {
+  boNhoAdmin.clear();
+}
+
 export async function goi<T>(action: string, payload: Record<string, unknown> = {}, thuLai = true): Promise<T> {
   if (dungBoNhoAdmin && thuLai) {
     if (LENH_DOC_NHO.has(action)) {
