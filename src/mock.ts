@@ -99,6 +99,13 @@ let thongBaoGia = [
   { id: 'tb-1', ngay: Date.now() - 30 * 3600000, tieuDe: 'Nhóm 1 được cộng điểm', noiDung: 'Chúc mừng nhóm 1 đứng đầu tuần trước, +50 điểm cấp bậc.', nguoiNhan: 'Nhóm: Nhóm 1' },
 ];
 
+// ?ngu=1 trong địa chỉ: giả lập đang trong khung nhắc ngủ để xem lời nhắc.
+let nhacNguCauHinh = { bat: false, emails: [] as string[], loiNhan: 'Khuya rồi đó, ngủ đi cục cưng!' };
+const nhacNguGia = () => {
+  const ngu = new URLSearchParams(location.search).has('ngu');
+  return { canHoi: ngu, hien: ngu, loiNhan: nhacNguCauHinh.loiNhan, now: Date.now() };
+};
+
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 export async function mockGoi(action: string, payload: Record<string, unknown>): Promise<unknown> {
@@ -200,7 +207,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       };
     }
     case 'trangChu':
-      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), tbMoiNhat: thongBaoGia.length ? Math.max(...thongBaoGia.map((t) => t.ngay)) : 0 };
+      return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), nhacNgu: nhacNguGia(), tbMoiNhat: thongBaoGia.length ? Math.max(...thongBaoGia.map((t) => t.ngay)) : 0 };
     case 'taoDe.thongTin':
       return {
         cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
@@ -312,6 +319,13 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
           dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Phương án ${k}` })), dung: 'C', giaiThich: 'Vì quá trình này xảy ra ở điều kiện áp suất cao.', soLuot: 12 - i, tyLeSai: 80 - i * 10,
         })),
       };
+    case 'nhacNgu':
+      return nhacNguGia();
+    case 'admin.nhacNguLay':
+      return nhacNguCauHinh;
+    case 'admin.nhacNguLuu':
+      nhacNguCauHinh = { bat: payload.bat === true, emails: (payload.emails as string[]) ?? [], loiNhan: String(payload.loiNhan || nhacNguCauHinh.loiNhan) };
+      return nhacNguCauHinh;
     case 'thongBao':
       return thongBaoGia.map((t) => ({ id: t.id, ngay: t.ngay, tieuDe: t.tieuDe, noiDung: t.noiDung, rieng: t.nguoiNhan !== 'Cả lớp' }));
     case 'admin.tongQuan':

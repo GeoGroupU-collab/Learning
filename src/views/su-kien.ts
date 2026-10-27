@@ -35,12 +35,16 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   datGioMayChu(tt.now);
   xoaHet(goc);
   goc.append(h('h1', {}, 'Sự kiện'), thanhTabSuKien('tuan'));
+  const chinh = h('div', { class: 'cot-chinh' });
+  const phu = h('div', { class: 'cot-phu' });
+  goc.append(h('div', { class: 'bo-cuc-2' }, chinh, phu));
   const t = tt.tuan;
   if (!t) {
-    goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chưa có lịch sự kiện. Lớp trưởng sẽ tạo lịch trong trang Quản trị.')));
+    chinh.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chưa có lịch sự kiện. Lớp trưởng sẽ tạo lịch trong trang Quản trị.')));
     return;
   }
   const lamMoi = (): Promise<void> => veSuKien(goc);
+  phu.append(theLuatTuan(tt));
 
   // Ba chặng của một tuần: chặng đang diễn ra sáng lên, chặng đã qua có dấu tick.
   const chang = t.trangThai === 'nop_cau_hoi' ? 0 : t.trangThai === 'dong' ? 2 : 1;
@@ -49,7 +53,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
     ['2', 'Phòng thi', `${dinhDangNgay(t.moCua)} đến ${dinhDangNgay(t.dongCua)}`],
     ['3', 'Kết quả', 'Xem điểm, hạng và đáp án'],
   ];
-  goc.append(
+  chinh.append(
     h('div', { class: 'hero hero-su-kien' },
       h('div', { class: 'hang' },
         h('span', { class: 'hero-nhan' }, `Tuần ${t.soTuan}`),
@@ -62,7 +66,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
         h('div', { class: 'phu nho' }, mo))))
   );
 
-  goc.append(h('a', { class: 'card', href: '#/su-kien/xem-lai' },
+  phu.append(h('a', { class: 'card', href: '#/su-kien/xem-lai' },
     h('div', { class: 'mon-ten' }, 'Xem lại bài và câu khó nhất'),
     h('div', { class: 'phu nho' }, 'Đáp án, giải thích và 5 câu cả lớp sai nhiều nhất, mở sau khi mỗi tuần đóng cửa.')));
   const yc = tt.yeuCau!;
@@ -70,7 +74,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
 
   if (t.trangThai === 'nop_cau_hoi') {
     if (tt.mien) {
-      goc.append(h('div', { class: 'card' },
+      chinh.append(h('div', { class: 'card' },
         h('h3', {}, 'Bạn đã xin miễn tuần này'),
         h('p', { class: 'phu' }, 'Bạn không phải nộp câu hỏi và không thi tuần này. Điểm nhóm sẽ không tính bạn vào mẫu số.'),
         h('button', { class: 'nut nut-phu', onclick: async () => {
@@ -79,7 +83,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
       return;
     }
     const xong = (tt.soCauDaNop ?? 0) >= canNop;
-    goc.append(h('div', { class: 'card' },
+    chinh.append(h('div', { class: 'card' },
       h('h3', {}, '1. Nộp câu hỏi'),
       h('p', {}, `Chọn ${yc.soMon} môn, mỗi môn nộp đúng ${yc.soCauMoiMon} câu trắc nghiệm (tổng ${canNop} câu). Nộp đủ mới được vào phòng thi.`),
       h('div', { class: xong ? 'tien-do tien-do-xong' : 'tien-do' }, xong ? `Đã nộp đủ ${canNop} câu. Bạn được vào phòng thi.` : `Đã nộp ${tt.soCauDaNop ?? 0}/${canNop} câu`),
@@ -87,7 +91,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
       h('p', { class: 'phu nho' }, 'Bạn được sửa câu đã nộp đến hết hạn.')));
     const conLuot = (tt.soMienToiDa ?? 0) - (tt.soMienDaDung ?? 0);
     if (!xong && conLuot > 0) {
-      goc.append(h('div', { class: 'card' },
+      chinh.append(h('div', { class: 'card' },
         h('h3', {}, '2. Xin miễn tuần này'),
         h('p', { class: 'phu' }, `Bạn còn ${conLuot} lượt xin miễn trong học kỳ. Được miễn thì không nộp câu hỏi, không thi và không bị tính vào điểm nhóm tuần này.`),
         h('button', { class: 'nut nut-nguy', onclick: async () => {
@@ -99,7 +103,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   }
 
   if (tt.mien) {
-    goc.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Bạn được miễn tuần này.')));
+    chinh.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Bạn được miễn tuần này.')));
     return;
   }
   const luot = tt.luotThi ?? null;
@@ -122,7 +126,21 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   } else {
     noiDung = 'Phòng thi đã đóng.';
   }
-  goc.append(h('div', { class: 'card' }, h('h3', {}, 'Phòng thi'), h('p', { class: tt.moKhoa || luot ? '' : 'loi' }, noiDung), ...hanhDong.filter((x): x is HTMLElement => x !== null)));
+  chinh.append(h('div', { class: 'card' }, h('h3', {}, 'Phòng thi'), h('p', { class: tt.moKhoa || luot ? '' : 'loi' }, noiDung), ...hanhDong.filter((x): x is HTMLElement => x !== null)));
+}
+
+
+// Thẻ tóm tắt luật của tuần, đặt ở cột phụ để màn rộng không bị trống.
+function theLuatTuan(tt: TuanHienTai): HTMLElement {
+  const yc = tt.yeuCau ?? { soMon: 3, soCauMoiMon: 5 };
+  const cfg = tt.thi ?? { soMonThi: 2, soCauMoiMonThi: 20, thoiGianPhut: 40 };
+  const dong = (bieuTuong: string, tieuDe: string, mo: string): HTMLElement =>
+    h('div', { class: 'luat-dong' }, icon(bieuTuong, 20) as unknown as HTMLElement, h('div', {}, h('div', { class: 'mon-ten' }, tieuDe), h('div', { class: 'phu nho' }, mo)));
+  return h('div', { class: 'card the-luat' },
+    h('span', { class: 'nhan-muc' }, 'Luật của tuần'),
+    dong('but', `Nộp ${yc.soMon * yc.soCauMoiMon} câu hỏi`, `${yc.soMon} môn, mỗi môn ${yc.soCauMoiMon} câu. Nộp đủ mới được vào phòng thi.`),
+    dong('dongHo', `Thi ${cfg.soMonThi * cfg.soCauMoiMonThi} câu trong ${cfg.thoiGianPhut} phút`, `Tự chọn ${cfg.soMonThi} môn lúc vào thi, mỗi người thi một lần.`),
+    dong('cup', 'Điểm nhóm và cấp bậc', 'Điểm nhóm là trung bình của cả nhóm. Nhóm đứng đầu tuần được cộng điểm thưởng.'));
 }
 
 // ---------- Form nộp câu hỏi ----------

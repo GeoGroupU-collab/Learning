@@ -671,3 +671,21 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 - Viết câu có code: đặt code giữa hai dòng ```` ``` ````. Đáp án là code thì bọc trong dấu ` (ví dụ `` `[An   ][8.5]` ``).
 
 **Ngân hàng lớn không làm lag (cập nhật):** tab Câu hỏi giờ chia **20 câu mỗi trang**, mỗi câu chỉ hiện **một dòng tóm tắt**, bấm vào mới mở nội dung đầy đủ (nội dung chỉ được dựng lúc mở). Có thêm bộ lọc **Chương** (danh sách chương lấy từ ngân hàng theo môn đang chọn, kèm số câu) cùng các bộ lọc cũ: học kỳ, tuần, môn, trạng thái, tác giả, từ khóa, câu bị báo sai. Dùng bộ lọc để chỉ hiện đúng nhóm câu cần xem. Cần dán `Code.gs` mới và push web.
+
+---
+
+## Phụ lục 6. Nhắc ngủ tự động và trang chủ mới
+
+**Làm gì:** dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**, **Triển khai**, **Phiên bản mới** (không cần chạy `khoiTao`, các dòng cấu hình tự thêm khi bạn bấm Lưu). Rồi push web, chờ Actions tick xanh, **Ctrl+F5**.
+
+**Nhắc ngủ:**
+1. Vào web quản trị `/admin/`, tab **Thông báo**, thẻ **Nhắc ngủ tự động**.
+2. Tick **Bật nhắc ngủ**, sửa lời nhắc nếu muốn, tick người cần nhắc, bấm **Lưu**. Bấm **Xem thử** để xem lời nhắc hiện thế nào (không ghi gì).
+3. Từ 23:30 đến 7:00 sáng hôm sau (giờ Việt Nam), người được chọn **đang mở web** sẽ thấy hộp nhắc có ảnh chú chó và lời nhắc. Web hỏi lại máy chủ mỗi 10 phút khi họ còn mở web.
+4. Họ bấm **Dạ, em đi ngủ đây** thì cả đêm đó không nhắc nữa. Bấm **Nhắc em sau 10 phút** thì 10 phút sau nhắc lại.
+
+**Giới hạn cần biết:** web miễn phí không đẩy được thông báo khi người đó **đã đóng web** (không có Zalo hay tin nhắn điện thoại). Nó chỉ hiện khi họ đang mở web. Máy chủ chỉ trả lời "có nhắc" cho đúng người được chọn và đúng giờ, không ghi lại ai online lúc nào.
+
+**Trang chủ mới:** lời chào đổi theo giờ (buổi sáng, trưa, chiều, tối, khuya) kèm ngày, vòng tròn **tiến độ nộp câu hỏi** của tuần, và thẻ **Mẹo học hôm nay** đổi mỗi ngày.
+
+Ảnh chú chó nằm ở `public/anh/cun.jpg`. Muốn đổi ảnh thì thay file này (giữ tên) rồi push.

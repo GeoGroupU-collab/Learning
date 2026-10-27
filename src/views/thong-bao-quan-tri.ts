@@ -1,6 +1,7 @@
 import { goi, LoiApi } from '../api';
 import { h, xoaHet, thongBao } from '../dom';
 import { dinhDangNgay } from '../gio';
+import { hienNhacNgu } from '../nhac-ngu';
 import type { NhomHienTai, ThanhVienDs, ThongBaoQuanTri } from '../types';
 
 function baoLoi(e: unknown): void {
@@ -13,9 +14,11 @@ export async function veThongBaoQuanTri(noi: HTMLElement): Promise<void> {
   let thanhVien: ThanhVienDs[] = [];
   let nhoms: { maNhom: string; tenNhom: string }[] = [];
   let daGui: ThongBaoQuanTri[] = [];
+  let nhacNgu = { bat: false, emails: [] as string[], loiNhan: '' };
   try {
     const dsNhom = goi<NhomHienTai>('admin.nhomHienTai').catch(() => null); // chưa chia nhóm thì chỉ gửi được cho cả lớp hoặc từng người
     [thanhVien, daGui] = await Promise.all([goi<ThanhVienDs[]>('admin.dsThanhVien'), goi<ThongBaoQuanTri[]>('admin.dsThongBao')]);
+    nhacNgu = await goi<typeof nhacNgu>('admin.nhacNguLay');
     const nh = await dsNhom;
     nhoms = nh ? nh.nhoms.map((n) => ({ maNhom: n.maNhom as string, tenNhom: n.tenNhom })) : [];
   } catch (e) {
@@ -84,6 +87,7 @@ export async function veThongBaoQuanTri(noi: HTMLElement): Promise<void> {
       h('label', { class: 'nhan-o' }, 'Nội dung', noiDung),
       h('div', { class: 'hang-nut' }, nutGui),
       h('p', { class: 'phu nho' }, 'Thành viên thấy ở trang Sự kiện, mục Thông báo, kèm chấm báo có tin mới. Người nhận chỉ thấy thông báo của mình, không thấy ai khác nhận.')),
+    theNhacNgu(hoatDong, nhacNgu, () => { xoaHet(noi); void veThongBaoQuanTri(noi); }),
     h('h2', {}, 'Đã gửi'),
     ...(daGui.length ? daGui.map((t) => h('div', { class: 'card' },
       h('div', { class: 'hang' }, h('div', { class: 'mon-ten' }, t.tieuDe), h('span', { class: 'nhan nhan-xam' }, t.nguoiNhan)),
@@ -93,4 +97,46 @@ export async function veThongBaoQuanTri(noi: HTMLElement): Promise<void> {
           if (!confirm('Xóa thông báo này? Mọi người sẽ không còn thấy.')) return;
           try { await goi('admin.xoaThongBao', { id: t.id }); xoaHet(noi); await veThongBaoQuanTri(noi); } catch (e) { baoLoi(e); }
         } }, 'Xóa')))) : [h('p', { class: 'phu' }, 'Chưa gửi thông báo nào.')]));
+}
+
+// Nhắc ngủ tự động: người được chọn mà đang dùng web trong 23:30 đến 7:00 sáng hôm sau sẽ thấy lời nhắc kèm ảnh chú chó.
+function theNhacNgu(hoatDong: ThanhVienDs[], hienTai: { bat: boolean; emails: string[]; loiNhan: string }, lamMoi: () => void): HTMLElement {
+  const chon = new Set(hienTai.emails);
+  const bat = h('input', { type: 'checkbox', id: 'nhac-ngu-bat', checked: hienTai.bat }) as HTMLInputElement;
+  const loi = h('input', { class: 'o-nhap', type: 'text', maxlength: 200, value: hienTai.loiNhan }) as HTMLInputElement;
+  const tim = h('input', { class: 'o-nhap', type: 'search', placeholder: 'Tìm người cần nhắc' }) as HTMLInputElement;
+  const ds = h('div', { class: 'ds-chon-nguoi' });
+  const dem = h('p', { class: 'phu nho' });
+  const ve = (): void => {
+    xoaHet(ds);
+    const q = tim.value.trim().toLowerCase();
+    hoatDong.filter((t) => !q || t.hoTen.toLowerCase().includes(q) || t.email.includes(q)).forEach((t) => {
+      const o = h('input', { type: 'checkbox', checked: chon.has(t.email) }) as HTMLInputElement;
+      o.addEventListener('change', () => { if (o.checked) chon.add(t.email); else chon.delete(t.email); dem.textContent = `Đã chọn ${chon.size} người`; });
+      ds.append(h('label', { class: 'dong-chon' }, o, h('span', {}, t.hoTen || t.email)));
+    });
+    dem.textContent = `Đã chọn ${chon.size} người`;
+  };
+  tim.addEventListener('input', ve);
+  ve();
+  const luu = h('button', { class: 'nut', type: 'button' }, 'Lưu') as HTMLButtonElement;
+  luu.addEventListener('click', async () => {
+    luu.disabled = true;
+    try {
+      await goi('admin.nhacNguLuu', { bat: bat.checked, emails: [...chon], loiNhan: loi.value });
+      thongBao(bat.checked ? 'Đã bật nhắc ngủ' : 'Đã lưu, nhắc ngủ đang tắt');
+      lamMoi();
+    } catch (e) {
+      baoLoi(e);
+      luu.disabled = false;
+    }
+  });
+  return h('div', { class: 'card' },
+    h('span', { class: 'nhan-muc' }, 'Nhắc ngủ tự động'),
+    h('p', { class: 'phu nho' }, 'Từ 23:30 đến 7:00 sáng hôm sau (giờ Việt Nam), nếu người được chọn đang mở web thì web hiện lời nhắc kèm ảnh chú chó. Web kiểm tra lại mỗi 10 phút khi họ còn mở web. Họ bấm "Dạ, em đi ngủ đây" thì đêm đó không nhắc nữa. Web không theo dõi ai khác và không gửi gì khi họ không mở web.'),
+    h('label', { class: 'dong-chon', for: 'nhac-ngu-bat' }, bat, h('span', {}, 'Bật nhắc ngủ')),
+    h('label', { class: 'nhan-o' }, 'Lời nhắc', loi),
+    h('label', { class: 'nhan-o' }, 'Người được nhắc', tim), ds, dem,
+    h('div', { class: 'hang-nut' }, luu,
+      h('button', { class: 'nut nut-phu', type: 'button', onclick: () => hienNhacNgu(loi.value.trim() || 'Khuya rồi đó, ngủ đi cục cưng!', Date.now(), true) }, 'Xem thử')));
 }

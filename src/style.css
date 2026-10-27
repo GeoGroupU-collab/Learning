@@ -202,7 +202,7 @@ ul, ol { margin: 0; padding: 0; }
 .thanh-duoi a.dang::before { content: ''; position: absolute; top: -1px; left: 22%; right: 22%; height: 2px; background: var(--nhan); }
 
 @media (min-width: 900px) {
-  .dau-trang { padding: 0 max(var(--k5), calc((100vw - 1040px) / 2)); }
+  .dau-trang { padding: 0 max(var(--k5), calc((100vw - 1008px) / 2)); }
   .thanh-duoi {
     position: static; z-index: auto; height: var(--cao-dau); padding: 0; border: 0; background: transparent;
     margin: 0 auto 0 var(--k6); gap: var(--k1);
@@ -585,3 +585,56 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 @media (max-width: 600px) { .cau-gon-meta { display: none; } }
 
 .luoi-loc { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0 var(--k3); }
+
+/* ---------- Bố cục hai cột cho Trang chủ và Sự kiện trên màn rộng ---------- */
+.bo-cuc-2 { display: grid; grid-template-columns: 1fr; gap: var(--k3); align-items: start; }
+.cot-chinh, .cot-phu { display: grid; gap: var(--k3); align-content: start; min-width: 0; }
+.cot-chinh > *, .cot-phu > * { margin: 0; }
+@media (min-width: 900px) {
+  .noi-dung.noi-dung-2cot { max-width: 1040px; }
+  .noi-dung-2cot .bo-cuc-2 { grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: var(--k4); }
+  .noi-dung-2cot .hero { padding: var(--k6); }
+  .noi-dung-2cot .hero-tieu-de { font-size: 2.5rem; }
+  .noi-dung-2cot .hero-phu { max-width: 46ch; font-size: 1.05rem; }
+  .noi-dung-2cot .luoi { grid-template-columns: 1fr 1fr; }
+}
+.the-luat { display: grid; gap: var(--k3); }
+.luat-dong { display: flex; align-items: flex-start; gap: var(--k3); }
+.luat-dong svg { flex: none; color: var(--nhan); margin-top: 2px; }
+
+/* Dải chạy: mép mờ dần hai đầu để chữ không bị cắt cụt, mỗi mục có ngôi sao phân cách ở cuối */
+.chay-khung { -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent); }
+.chay-muc::before { content: none; }
+.chay-muc::after { content: '\2605'; margin-left: 28px; opacity: 0.7; }
+
+/* Trang chủ: trên điện thoại thứ tự là sự kiện, cấp bậc và nhóm, rồi các môn; trên màn rộng các môn nằm dưới sự kiện, cột phải chạy suốt chiều cao */
+@media (min-width: 900px) {
+  .bo-cuc-trang-chu { grid-template-areas: 'chinh phu' 'mon phu'; grid-template-rows: auto 1fr; }
+  .bo-cuc-trang-chu > .cot-chinh { grid-area: chinh; }
+  .bo-cuc-trang-chu > .cot-phu { grid-area: phu; }
+  .bo-cuc-trang-chu > .khu-mon { grid-area: mon; }
+}
+.khu-mon:empty { display: none; }
+
+/* ---------- Nhắc ngủ ---------- */
+.nhac-ngu { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: var(--k4); background: rgba(8, 16, 14, 0.72); animation: hien-dan 220ms ease-out; }
+.nhac-ngu-the { width: min(360px, 100%); max-height: calc(100dvh - 32px); overflow: auto; text-align: center; padding: var(--k4); border-radius: 18px; background: var(--mat); border: 1px solid var(--vien); }
+.nhac-ngu-anh { display: block; width: 100%; max-height: 300px; object-fit: cover; object-position: 50% 30%; border-radius: 12px; margin-bottom: var(--k3); background: var(--mat-2); }
+.nhac-ngu-the h2 { margin: 0 0 var(--k2); }
+.nhac-ngu-loi { margin: 0 0 var(--k4); font-size: 1.05rem; overflow-wrap: anywhere; }
+.nhac-ngu-nut { justify-content: center; }
+@keyframes hien-dan { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Thẻ phụ ở trang chủ: tiến độ nộp câu và mẹo học ---------- */
+.the-tien-do-tuan { display: flex; align-items: center; gap: var(--k4); }
+.vong-tien-do { flex: none; transform: rotate(-90deg); }
+.vong-tien-do text { transform: rotate(90deg); transform-origin: 32px 32px; }
+.vong-nen, .vong-dung { fill: none; stroke-width: 7; }
+.vong-nen { stroke: var(--vien); }
+.vong-dung { stroke: var(--nhan); stroke-linecap: round; }
+.vong-so { font-family: var(--font-so); font-size: 13px; fill: var(--chu); font-weight: 500; }
+.the-meo { display: flex; align-items: flex-start; gap: var(--k3); background: var(--vang-nen); border-color: var(--vang-vien); }
+.the-meo svg { flex: none; color: var(--vang); margin-top: 2px; }
+.the-meo .nhan-muc { color: var(--vang); }
+.the-meo-chu { margin: var(--k1) 0 0; }
+@media (prefers-reduced-motion: reduce) { .nhac-ngu { animation: none; } }

@@ -218,7 +218,15 @@ export interface TrangChuData {
   me: Me;
   tuan: TuanHienTai;
   cap: ThongTinCap;
+  nhacNgu?: NhacNgu;
   tbMoiNhat?: number; // thời điểm thông báo mới nhất dành cho mình (0 nếu chưa có)
+}
+
+export interface NhacNgu {
+  canHoi: boolean; // có trong danh sách nhắc ngủ của chủ
+  hien: boolean; // đang trong khung 23:30 đến 7:00 giờ Việt Nam
+  loiNhan: string;
+  now: number;
 }
 
 export interface ThongBaoCuaToi {

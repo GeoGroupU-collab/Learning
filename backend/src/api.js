@@ -37,6 +37,9 @@ var HANH_DONG_ = {
   capNhatHoTen: { chay: hdCapNhatHoTen_ },
   trangChu: { chay: hdTrangChu_ },
   thongBao: { chay: hdThongBaoCuaToi_ },
+  nhacNgu: { chay: hdNhacNgu_ },
+  'admin.nhacNguLay': { vaiTro: CHU_, chay: hdNhacNguLay_ },
+  'admin.nhacNguLuu': { vaiTro: CHU_, chay: hdNhacNguLuu_ },
   'admin.guiThongBao': { vaiTro: CHU_, chay: hdGuiThongBao_ },
   'admin.dsThongBao': { vaiTro: CHU_, chay: hdDsThongBao_ },
   'admin.xoaThongBao': { vaiTro: CHU_, chay: hdXoaThongBao_ },
@@ -151,6 +154,7 @@ function hdCapNhatHoTen_(email, tv, body) {
 // Gom mọi thứ trang chủ cần vào một yêu cầu để mở web nhanh hơn: thông tin cá nhân, tuần hiện tại, cấp bậc.
 function hdTrangChu_(email, tv) {
   var kq = { me: hdMe_(email, tv), tuan: hdTuanHienTai_(email), cap: thongTinCapCuaToi_(email, layCauHinh_()) };
+  kq.nhacNgu = hdNhacNgu_(email);
   kq.tbMoiNhat = thongBaoMoiNhat_(email); // thời điểm thông báo mới nhất dành cho người này, để hiện chấm báo chưa đọc
   if (tv.vaiTro === 'owner') {
     var hk = hocKyDangMo_();
