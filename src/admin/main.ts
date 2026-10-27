@@ -9,12 +9,13 @@ import '@fontsource/ibm-plex-mono/vietnamese-500.css';
 import '../style.css';
 import { icon, dauHieu } from '../icon';
 import { CONFIG, DEV_MOCK, chuaCauHinh } from '../config';
-import { goi, LoiApi, xoaCache } from '../api';
+import { batBoNhoAdmin, goi, LoiApi, xoaCache } from '../api';
 import { daDangNhap, dangXuat, layPhien, luuPhien, veNutDangNhap } from '../auth';
 import { datHuyHieuDuyet, h, xoaHet } from '../dom';
 import { veQuanTri } from '../views/quan-tri';
 import type { Me } from '../types';
 
+batBoNhoAdmin();
 const goc = document.getElementById('app') as HTMLElement;
 let me: Me | null = null;
 let vungNoiDung: HTMLElement;
@@ -64,8 +65,17 @@ function manHinhLoi(thongDiep: string): void {
   );
 }
 
+// Gọi sẵn các danh sách hay mở ngay lúc vào web, song song với việc kiểm tra quyền, để bấm sang tab nào cũng hiện liền.
+// Người không phải chủ chỉ nhận lỗi, bỏ qua.
+function goiSan(): void {
+  const dsTrong = { maHocKy: '', soTuan: '', maMon: '', trangThai: '', tacGia: '', tuKhoa: '', chiBaoSai: false, trang: 1 };
+  const lenh: [string, Record<string, unknown>][] = [['admin.dsThanhVien', {}], ['admin.dsThongBao', {}], ['admin.nhomHienTai', {}], ['admin.dsTuan', {}], ['admin.dsHocKy', {}], ['admin.dsMon', {}], ['admin.nganHang', dsTrong]];
+  lenh.forEach(([a, p]) => { void goi(a, p).catch(() => undefined); });
+}
+
 async function khoiDong(): Promise<void> {
   manHinhDon(h('p', { class: 'phu' }, 'Đang kiểm tra quyền...'));
+  goiSan();
   try {
     me = await goi<Me>('me');
   } catch (e) {

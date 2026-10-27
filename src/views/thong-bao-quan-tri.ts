@@ -14,12 +14,10 @@ export async function veThongBaoQuanTri(noi: HTMLElement): Promise<void> {
   let nhoms: { maNhom: string; tenNhom: string }[] = [];
   let daGui: ThongBaoQuanTri[] = [];
   try {
+    const dsNhom = goi<NhomHienTai>('admin.nhomHienTai').catch(() => null); // chưa chia nhóm thì chỉ gửi được cho cả lớp hoặc từng người
     [thanhVien, daGui] = await Promise.all([goi<ThanhVienDs[]>('admin.dsThanhVien'), goi<ThongBaoQuanTri[]>('admin.dsThongBao')]);
-    try {
-      nhoms = (await goi<NhomHienTai>('admin.nhomHienTai')).nhoms.map((n) => ({ maNhom: n.maNhom as string, tenNhom: n.tenNhom }));
-    } catch {
-      /* chưa chia nhóm thì chỉ gửi được cho cả lớp hoặc từng người */
-    }
+    const nh = await dsNhom;
+    nhoms = nh ? nh.nhoms.map((n) => ({ maNhom: n.maNhom as string, tenNhom: n.tenNhom })) : [];
   } catch (e) {
     xoaHet(noi);
     noi.append(h('p', { class: 'loi' }, (e as Error).message));

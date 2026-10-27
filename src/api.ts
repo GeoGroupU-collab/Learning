@@ -9,7 +9,40 @@ export class LoiApi extends Error {
 
 // Gọi máy chủ bằng POST text/plain để tránh preflight CORS.
 // Gặp token_expired thì xin token mới và gửi lại đúng một lần.
+// ---------- Bộ nhớ tạm cho web quản trị ----------
+// Chỉ bật ở web quản trị (chủ dùng một mình). Các lệnh đọc được nhớ 60 giây trong bộ nhớ của trang, và được gọi sẵn ngay khi mở
+// web, nên chuyển tab là hiện liền. Mọi lệnh ghi đều xóa bộ nhớ này để không bao giờ hiện số liệu cũ sau khi vừa sửa.
+const GIAY_NHO_ADMIN = 60000;
+const LENH_DOC_NHO = new Set(['tuanHienTai', 'admin.dsThanhVien', 'admin.dsThongBao', 'admin.nhomHienTai', 'admin.dsTuan', 'admin.dsHocKy', 'admin.dsMon', 'admin.dsDeThi', 'admin.dsSaoLuu', 'admin.tongQuan', 'admin.nganHang', 'admin.bangDiem', 'admin.nhatKy', 'admin.tongKet']);
+const LENH_KHONG_GHI = /^admin\.(xemTruoc|xuat|layDeThi)/;
+const boNhoAdmin = new Map<string, { luc: number; p: Promise<unknown> }>();
+let dungBoNhoAdmin = false;
+
+export function batBoNhoAdmin(): void {
+  dungBoNhoAdmin = true;
+}
+
 export async function goi<T>(action: string, payload: Record<string, unknown> = {}, thuLai = true): Promise<T> {
+  if (dungBoNhoAdmin && thuLai) {
+    if (LENH_DOC_NHO.has(action)) {
+      const khoa = action + ':' + JSON.stringify(payload);
+      const co = boNhoAdmin.get(khoa);
+      if (co && Date.now() - co.luc < GIAY_NHO_ADMIN) return structuredClone(await co.p) as T;
+      const p = goiThat<T>(action, payload, thuLai);
+      boNhoAdmin.set(khoa, { luc: Date.now(), p });
+      p.catch(() => boNhoAdmin.delete(khoa));
+      return structuredClone(await p) as T;
+    }
+    if (action.startsWith('admin.') && !LENH_KHONG_GHI.test(action)) {
+      const kq = await goiThat<T>(action, payload, thuLai);
+      boNhoAdmin.clear();
+      return kq;
+    }
+  }
+  return goiThat<T>(action, payload, thuLai);
+}
+
+async function goiThat<T>(action: string, payload: Record<string, unknown> = {}, thuLai = true): Promise<T> {
   if (DEV_MOCK) {
     const { mockGoi } = await import('./mock');
     return (await mockGoi(action, payload)) as T;
