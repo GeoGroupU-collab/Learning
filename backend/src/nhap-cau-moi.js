@@ -7,12 +7,24 @@ function laChuoiTho_(v) {
   return String(v == null ? '' : v).trim();
 }
 
+// Khớp tên chương người nhập ("Chương 2") với chương chuẩn của môn ("Chương 2 Python cơ bản") để tạo đề lọc theo chương được.
+// Khớp đúng toàn bộ, hoặc là phần đầu của đúng một chương chuẩn (sau phần đầu phải là dấu cách hay dấu câu, nên "Chương 1" không khớp "Chương 10").
+function khopChuongChuan_(gia, dsChuan) {
+  var g = laChuoiTho_(gia).toLowerCase().replace(/\s+/g, ' ');
+  if (!g || !dsChuan || !dsChuan.length) return laChuoiTho_(gia);
+  var khop = dsChuan.filter(function (c) {
+    var x = String(c).toLowerCase().replace(/\s+/g, ' ').trim();
+    return x === g || (x.indexOf(g) === 0 && !/[\p{L}\p{N}]/u.test(x.charAt(g.length)));
+  });
+  return khop.length === 1 ? String(khop[0]).trim() : laChuoiTho_(gia);
+}
+
 // Kiểm tra từng dòng. Ở đây bốn đáp án chỉ cần khác nhau theo chữ thô (khác khoảng trắng hay dấu câu vẫn là khác),
 // vì câu về code có đáp án như "[ An][8.5]" và "[An ][8.5]".
-function kiemTraCauNhapMoi_(r, nhan, monHopLe) {
+function kiemTraCauNhapMoi_(r, nhan, monHopLe, chuongCuaMon) {
   var loi = [];
   var c = {
-    maMon: laChuoiTho_(r.maMon), maChuong: laChuoiTho_(r.maChuong), trangNguon: laChuoiTho_(r.trangNguon),
+    maMon: laChuoiTho_(r.maMon), maChuong: khopChuongChuan_(r.maChuong, chuongCuaMon[laChuoiTho_(r.maMon)]), trangNguon: laChuoiTho_(r.trangNguon),
     noiDung: laChuoiTho_(r.noiDung), A: laChuoiTho_(r.A), B: laChuoiTho_(r.B), C: laChuoiTho_(r.C), D: laChuoiTho_(r.D),
     dapAn: laChuoiTho_(r.dapAn).toUpperCase(), giaiThich: laChuoiTho_(r.giaiThich),
   };
@@ -37,7 +49,8 @@ function hdNhapCauMoi_(email, tv, body) {
   var rows = body.rows;
   if (!Array.isArray(rows) || !rows.length || rows.length > 500) throw loi_('du_lieu_sai', 'Cần từ 1 đến 500 câu hỏi.');
   var monHopLe = {};
-  monCuaHocKy_(hk.maHocKy).forEach(function (m) { monHopLe[m.ma] = true; });
+  var chuongCuaMon = {};
+  monCuaHocKy_(hk.maHocKy).forEach(function (m) { monHopLe[m.ma] = true; chuongCuaMon[m.ma] = m.chuong; });
   var daCo = {};
   docBang_('CauHoi').forEach(function (c) {
     if (c.maHocKy === hk.maHocKy && c.trangThai !== 'removed' && c.trangThai !== 'tu_choi') daCo[c.maMon + '|' + chuanHoaChu(c.noiDung)] = true;
@@ -46,7 +59,7 @@ function hdNhapCauMoi_(email, tv, body) {
   var hopLe = [];
   var soTrung = 0;
   rows.forEach(function (r, i) {
-    var kq = kiemTraCauNhapMoi_(r || {}, 'Câu ' + (i + 1) + ': ', monHopLe);
+    var kq = kiemTraCauNhapMoi_(r || {}, 'Câu ' + (i + 1) + ': ', monHopLe, chuongCuaMon);
     if (kq.loi.length) { loi = loi.concat(kq.loi); return; }
     var khoa = kq.c.maMon + '|' + chuanHoaChu(kq.c.noiDung);
     if (daCo[khoa]) { soTrung++; return; }

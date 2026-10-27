@@ -664,7 +664,7 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 
 **Lưu ý:**
 - Câu thêm bằng cách này **không có tác giả riêng và không thuộc tuần nào**, nên ai cũng làm được và được dùng ngay trong đề **Tự tạo đề luyện tập** (không phải chờ duyệt).
-- Tên chương đang ghi "Chương 2". Nếu danh sách chương của môn bạn đặt tên khác (tab **Chương**), sửa lại bằng cách đổi chương của câu ở tab Câu hỏi, để lọc theo chương khớp.
+- **Tên chương:** nếu môn đã có danh sách chương chuẩn (tab **Chương**), web tự đổi "Chương 2" trong tệp thành tên chuẩn như "Chương 2 Python cơ bản" khi nhập (khớp phần đầu, "Chương 1" không nhầm với "Chương 10"). Câu đã nhập trước đó với tên ngắn thì chuyển một lần: **Quản trị**, **Chương**, mục **Câu hỏi chưa thuộc chương chuẩn**, chọn chương chuẩn rồi bấm **Chuyển**. Làm xong, màn **Tự tạo đề** của thành viên mới đếm đúng số câu mỗi chương.
 - Bấm thêm lần nữa không tạo trùng: câu có nội dung giống câu đã có sẽ được bỏ qua.
 - Muốn bỏ "tạm thời": ở tab Câu hỏi lọc theo tác giả `ngan-hang-chung` rồi xóa hoặc tạm loại.
 - Tệp nằm trong `ngan-hang-luu-tru/`, thư mục **không bao giờ lên GitHub** vì có đáp án.

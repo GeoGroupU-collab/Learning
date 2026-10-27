@@ -93,3 +93,29 @@ describe('lọc ngân hàng theo chương, trang nhỏ', () => {
     expect(goiAs(CHU, 'admin.nganHang', { maMon: 'mon-khac' }).data.chuong).toEqual([]);
   });
 });
+
+describe('khớp tên chương với chương chuẩn của môn', () => {
+  const datChuong = (ds) => {
+    const sheet = mt.ss.getSheetByName('Mon');
+    const tieuDe = sheet.dong[0];
+    const dong = sheet.dong.find((r, k) => k > 0 && r[tieuDe.indexOf('maMon')] === MON);
+    dong[tieuDe.indexOf('danhSachChuong')] = JSON.stringify(ds);
+    mt.boNho.clear();
+  };
+  const chuongDaLuu = () => mt.docTab('CauHoi').map((c) => c.maChuong);
+
+  it('"Chương 2" được ghi thành "Chương 2 Python cơ bản", không nhầm "Chương 1" với "Chương 10"', () => {
+    datChuong(['Chương 1 Data', 'Chương 2 Python cơ bản', 'Chương 10 Mở rộng']);
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(1, { maChuong: 'Chương 2' }), cau(2, { maChuong: 'chương 1' }), cau(3, { maChuong: 'Chương 10' }), cau(4, { maChuong: 'Chương 2 Python cơ bản' })] });
+    expect(chuongDaLuu()).toEqual(['Chương 2 Python cơ bản', 'Chương 1 Data', 'Chương 10 Mở rộng', 'Chương 2 Python cơ bản']);
+  });
+
+  it('không khớp hoặc mơ hồ thì giữ nguyên chữ người nhập; môn chưa có danh sách chương thì giữ nguyên', () => {
+    datChuong(['Chương 2 A', 'Chương 2 B']);
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(1, { maChuong: 'Chương 2' }), cau(2, { maChuong: 'Chương 9' })] });
+    expect(chuongDaLuu()).toEqual(['Chương 2', 'Chương 9']);
+    datChuong([]);
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(3, { maChuong: 'Chương 4' })] });
+    expect(chuongDaLuu()[2]).toBe('Chương 4');
+  });
+});
