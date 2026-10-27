@@ -162,6 +162,7 @@ export function taoMoiTruong() {
       xuat.khoiTao();
       this.datCauHinh('duyetCauHoiTruoc', false);
       this.datCauHinh('anCauTuanChuaDong', false);
+      this.datCauHinh('khoaTaoDeKhiChuaNop', false);
     },
     datCauHinh(khoa, giaTri) {
       const dong = ss.getSheetByName('CauHinh').dong.find((r) => r[0] === khoa);

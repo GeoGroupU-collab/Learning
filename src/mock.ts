@@ -58,7 +58,7 @@ function tuanGia() {
     mon: MON_GIA,
     yeuCau: { soMon: 3, soCauMoiMon: 5 },
     soMienToiDa: 1,
-    soCauDaNop: cauDaNop.length,
+    soCauDaNop: cauDaNop.length, khoaTaoDe: khoaGia(),
     soCauCanNop: 15,
     moKhoa: cauDaNop.length >= 15,
     mien: mienGia,
@@ -105,6 +105,9 @@ const nhacNguGia = () => {
   const ngu = new URLSearchParams(location.search).has('ngu');
   return { canHoi: ngu, hien: ngu, loiNhan: nhacNguCauHinh.loiNhan, now: Date.now() };
 };
+
+// ?khoa trong địa chỉ: giả lập chưa nộp đủ câu hỏi nên Tự tạo đề bị khóa.
+const khoaGia = () => new URLSearchParams(location.search).has('khoa');
 
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
@@ -210,6 +213,7 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
       return { me: await mockGoi('me', {}), tuan: tuanGia(), cap: capGia(), nhacNgu: nhacNguGia(), tbMoiNhat: thongBaoGia.length ? Math.max(...thongBaoGia.map((t) => t.ngay)) : 0 };
     case 'taoDe.thongTin':
       return {
+        khoa: khoaGia() ? { bi: true, daNop: 4, can: 15, soTuan: 1 } : undefined,
         cap: capGia(), diemTuanNay: diemLuyenTapTuan, diemToiDaTuan: 120, diemMoiDe: 20, soCauMoiDe: 30, soCauToiThieu: 10, dangMo: false,
         dePhatHanh: [{ idDe: 'de-2', tenDe: 'Đề ôn Triết chương 1', soCau: 20, daLam: null }, { idDe: 'de-9', tenDe: 'Đề ôn giữa kỳ', soCau: 25, daLam: { diem: 68, soDung: 17, soCau: 25 } }],
         mon: MON_GIA.map((m, i) => ({

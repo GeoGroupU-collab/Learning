@@ -81,6 +81,7 @@ function hdTuanHienTai_(email) {
     yeuCau: { soMon: soMon, soCauMoiMon: soCauMoiMon },
     soMienToiDa: Number(cauHinh.soTuanMienToiDa) || 0,
     duyetTruoc: duyetTruoc_(cauHinh),
+    khoaTaoDe: khoaTaoDe_(email, timThanhVien_(email), hk).bi, // trang Bài học dùng để hiện thẻ Tự tạo đề đang khóa
   };
   if (!t) return res;
   var mien = mienCuaEmail_(hk.maHocKy, email);

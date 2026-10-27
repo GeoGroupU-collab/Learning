@@ -93,6 +93,7 @@ export interface TuanHienTai {
   yeuCau?: { soMon: number; soCauMoiMon: number };
   soMienToiDa?: number;
   duyetTruoc?: boolean;
+  khoaTaoDe?: boolean;
   soCauDaNop?: number;
   soCauCanNop?: number;
   moKhoa?: boolean;
@@ -212,6 +213,7 @@ export interface ThongTinTaoDe {
   mon: { ma: string; ten: string; mau: string; soCau: number; chuong: { ma: string; ten: string; soCau: number }[] }[];
   dePhatHanh: { idDe: string; tenDe: string; soCau: number; daLam: null | { diem: number; soDung: number; soCau: number } }[];
   dangMo: boolean;
+  khoa?: { bi: boolean; daNop: number; can: number; soTuan: number; mien?: boolean }; // khóa khi chưa nộp đủ câu hỏi của tuần
 }
 
 export interface TrangChuData {

@@ -689,3 +689,18 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 **Trang chủ mới:** lời chào đổi theo giờ (buổi sáng, trưa, chiều, tối, khuya) kèm ngày, vòng tròn **tiến độ nộp câu hỏi** của tuần, và thẻ **Mẹo học hôm nay** đổi mỗi ngày.
 
 Ảnh chú chó nằm ở `public/anh/cun.jpg`. Muốn đổi ảnh thì thay file này (giữ tên) rồi push.
+
+---
+
+## Phụ lục 7. Khóa tự tạo đề khi chưa nộp đủ câu hỏi
+
+**Làm gì:** dán `backend/dist/Code.gs` mới vào Apps Script, **Ctrl+S**, **Triển khai**, **Phiên bản mới** (không cần chạy `khoiTao`, dòng cấu hình mới tự thêm). Rồi push web, chờ Actions tick xanh, **Ctrl+F5**.
+
+**Luật mới:** thành viên phải nộp đủ **15 câu hỏi của tuần hiện tại** mới được **Tự tạo đề luyện tập** (kể cả đề do lớp trưởng phát hành trong mục đó). Chưa đủ thì:
+- Ở trang **Bài học**, thẻ Tự tạo đề có nhãn **Đang khóa** và ghi đã nộp bao nhiêu trên 15; bấm vào sẽ sang trang nộp câu hỏi.
+- Ở trang Tự tạo đề hiện thẻ **Đang khóa** với số câu đã nộp và nút **Nộp câu hỏi ngay**.
+- Máy chủ cũng chặn, không thể lách bằng cách gọi thẳng.
+
+**Ngoại lệ:** bạn (chủ), người **được miễn tuần**, và người đang có **một đề làm dở** (vẫn làm tiếp được). Câu nộp rồi mà còn chờ duyệt vẫn được tính là đã nộp. Sang tuần mới thì phải nộp lại 15 câu của tuần mới.
+
+**Tắt luật này:** tab `CauHinh`, đặt `khoaTaoDeKhiChuaNop` thành `FALSE`.

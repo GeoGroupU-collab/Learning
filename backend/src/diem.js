@@ -127,7 +127,21 @@ function chuongCuaMon_(mon, cauCuaMon) {
   return kq.sort(function (a, b) { return a.ten < b.ten ? -1 : 1; });
 }
 
-function hdTaoDeThongTin_(email) {
+// Khóa tự tạo đề: chưa nộp đủ câu hỏi của tuần hiện tại thì chưa được tạo đề. Chủ, người được miễn tuần, tuần chưa có lịch thì không khóa.
+function khoaTaoDe_(email, tv, hk) {
+  var khong = { bi: false, daNop: 0, can: 0, soTuan: 0 };
+  if (!hk || (tv && tv.vaiTro === 'owner')) return khong;
+  var cauHinh = layCauHinh_();
+  if (String(cauHinh.khoaTaoDeKhiChuaNop).toLowerCase() === 'false') return khong;
+  var t = chonTuanHienTai(docTuan_(hk.maHocKy), Date.now());
+  if (!t) return khong;
+  if (mienCuaEmail_(hk.maHocKy, email).some(function (m) { return Number(m.soTuan) === t.soTuan; })) return { bi: false, daNop: 0, can: 0, soTuan: t.soTuan, mien: true };
+  var can = (Number(cauHinh.soMonNopCauHoi) || 3) * (Number(cauHinh.soCauNopMoiMon) || 5);
+  var daNop = demCauNopTheoTuan_(hk.maHocKy, t.soTuan)[email] || 0;
+  return { bi: daNop < can, daNop: daNop, can: can, soTuan: t.soTuan };
+}
+
+function hdTaoDeThongTin_(email, tv) {
   var hk = hocKyDangMo_();
   var cauHinh = layCauHinh_();
   var tranTuan = Number(cauHinh.diemToiDaDeTuTaoTuan) || 120;
@@ -151,6 +165,7 @@ function hdTaoDeThongTin_(email) {
     mon: mon,
     dePhatHanh: dePhatHanhChoToi_(email, hk),
     dangMo: !!luotTaoDeDangMo_(email),
+    khoa: khoaTaoDe_(email, tv, hk),
   };
 }
 
@@ -192,7 +207,9 @@ function hdTaoDeBat_(email, tv, body) {
   var hk = hocKyDangMo_();
   if (!hk) throw loi_('khong_co_hoc_ky', 'Chưa có học kỳ đang mở.');
   var cu = luotTaoDeDangMo_(email);
-  if (cu) return guiLuotTaoDe_(cu, hk.maHocKy);
+  if (cu) return guiLuotTaoDe_(cu, hk.maHocKy); // đề đang làm dở vẫn được làm tiếp
+  var khoa = khoaTaoDe_(email, tv, hk);
+  if (khoa.bi) throw loi_('khoa_tao_de', 'Hãy nộp đủ ' + khoa.can + ' câu hỏi của tuần này (mới có ' + khoa.daNop + ') để mở khóa đề luyện tập.');
   if (body.idDe) return batDeDaPhatHanh_(email, hk, String(body.idDe));
 
   var cauHinh = layCauHinh_();

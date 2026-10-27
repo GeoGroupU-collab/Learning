@@ -638,3 +638,12 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 .the-meo .nhan-muc { color: var(--vang); }
 .the-meo-chu { margin: var(--k1) 0 0; }
 @media (prefers-reduced-motion: reduce) { .nhac-ngu { animation: none; } }
+
+/* Khóa tự tạo đề */
+.the-khoa { border-color: var(--vang-vien); background: var(--vang-nen); }
+.the-khoa-dau { display: flex; align-items: flex-start; gap: var(--k3); margin-bottom: var(--k3); }
+.the-khoa-dau svg { flex: none; color: var(--vang); margin-top: 4px; }
+.the-khoa-dau h2 { margin: 0 0 var(--k1); }
+.the-khoa-nho { border-color: var(--vang-vien); background: var(--vang-nen); }
+.the-khoa-nho svg { color: var(--vang); }
+.hang-the { display: flex; align-items: center; gap: var(--k2); flex-wrap: wrap; }

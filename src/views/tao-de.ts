@@ -101,6 +101,16 @@ function veChon(goc: HTMLElement, tt: ThongTinTaoDe): void {
     return;
   }
 
+  if (tt.khoa?.bi) {
+    const k = tt.khoa;
+    goc.append(h('div', { class: 'card the-khoa' },
+      h('div', { class: 'the-khoa-dau' }, icon('khoa', 28) as unknown as HTMLElement, h('div', {}, h('h2', {}, 'Đang khóa'), h('p', { class: 'phu' }, `Nộp đủ ${k.can} câu hỏi của tuần ${k.soTuan} để mở khóa tự tạo đề luyện tập.`))),
+      h('div', { class: 'tien-do' }, `Đã nộp ${k.daNop}/${k.can} câu`),
+      h('p', { class: 'phu nho' }, 'Câu hỏi bạn nộp cũng chính là đề cho các bạn khác ôn. Nộp đủ là đề luyện tập mở ngay, kể cả khi câu còn đang chờ duyệt. Được miễn tuần thì không bị khóa.'),
+      h('a', { class: 'nut', href: '#/su-kien/nop' }, 'Nộp câu hỏi ngay')));
+    return;
+  }
+
   if (tt.dePhatHanh.length) {
     goc.append(h('h2', {}, 'Đề do lớp trưởng phát hành'),
       h('p', { class: 'phu nho' }, 'Mỗi đề chỉ được cộng điểm ở lần làm đầu tiên.'),

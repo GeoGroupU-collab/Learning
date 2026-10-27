@@ -1,9 +1,10 @@
+import { goiNhanh } from '../api';
 import { h, xoaHet } from '../dom';
 import { icon } from '../icon';
 import { mauMon } from '../mau';
 import { khiRoiTrang } from '../gio';
 import { QUYEN_KHUNG, apDungTinNhan, chenLopCachLy, docDuLieuBaiHoc } from '../bai-hoc-cach-ly';
-import type { Manifest, MonHoc } from '../types';
+import type { Manifest, MonHoc, TuanHienTai } from '../types';
 
 let boNho: Manifest | null = null;
 
@@ -33,12 +34,31 @@ function theMon(hocKy: string, m: MonHoc): HTMLElement {
   );
 }
 
+// Thẻ Tự tạo đề: hiện khóa khi chưa nộp đủ câu hỏi của tuần (lấy từ tuần hiện tại, hiện ngay từ bản đã lưu rồi cập nhật).
+function theTuTaoDe(): HTMLElement {
+  const the = h('a', { class: 'card the-lien-ket', href: '#/tao-de' });
+  const ve = (tt: TuanHienTai | null): void => {
+    xoaHet(the);
+    const can = tt?.soCauCanNop ?? 0;
+    const da = tt?.soCauDaNop ?? 0;
+    const khoa = !!tt && !!tt.khoaTaoDe;
+    the.setAttribute('href', khoa ? '#/su-kien/nop' : '#/tao-de');
+    the.classList.toggle('the-khoa-nho', khoa);
+    the.append(icon(khoa ? 'khoa' : 'but', 22) as unknown as HTMLElement,
+      h('div', {},
+        h('div', { class: 'hang-the' }, h('div', { class: 'mon-ten' }, 'Tự tạo đề luyện tập'), khoa ? h('span', { class: 'nhan nhan-vang' }, 'Đang khóa') : null),
+        h('div', { class: 'phu nho' }, khoa
+          ? `Nộp đủ ${can} câu hỏi của tuần này (đã nộp ${da}/${can}) để mở khóa. Bấm để nộp câu hỏi.`
+          : 'Chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.')));
+  };
+  ve(null);
+  void goiNhanh<TuanHienTai>('tuanHienTai', {}, (tt) => ve(tt)).catch(() => undefined);
+  return the;
+}
+
 export async function veDanhSachMon(goc: HTMLElement, maHocKyDangMo: string | null): Promise<void> {
   xoaHet(goc);
-  goc.append(h('h1', {}, 'Bài học'),
-    h('a', { class: 'card the-lien-ket', href: '#/tao-de' }, icon('but', 22) as unknown as HTMLElement,
-      h('div', {}, h('div', { class: 'mon-ten' }, 'Tự tạo đề luyện tập'),
-        h('div', { class: 'phu nho' }, 'Chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Mỗi đề làm xong +20 điểm, tối đa 120 điểm mỗi tuần.'))));
+  goc.append(h('h1', {}, 'Bài học'), theTuTaoDe());
   const mf = await layManifest();
   const hk = mf.hocKy.find((x) => x.ma === maHocKyDangMo) ?? mf.hocKy[0];
   if (!hk || hk.mon.length === 0) {
