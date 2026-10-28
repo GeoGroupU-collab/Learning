@@ -109,6 +109,8 @@ const nhacNguGia = () => {
 // ?khoa trong địa chỉ: giả lập chưa nộp đủ câu hỏi nên Tự tạo đề bị khóa.
 const khoaGia = () => new URLSearchParams(location.search).has('khoa');
 
+let moKhoaGia = { cheDo: 'khoa' as 'khoa' | 'het_tuan' | 'tat', den: 0, emails: [] as string[], conHieuLuc: false };
+
 const tre = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
 export async function mockGoi(action: string, payload: Record<string, unknown>): Promise<unknown> {
@@ -323,6 +325,11 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
           dapAn: ['A', 'B', 'C', 'D'].map((k) => ({ k, text: `Phương án ${k}` })), dung: 'C', giaiThich: 'Vì quá trình này xảy ra ở điều kiện áp suất cao.', soLuot: 12 - i, tyLeSai: 80 - i * 10,
         })),
       };
+    case 'admin.moKhoaLay':
+      return moKhoaGia;
+    case 'admin.moKhoaLuu':
+      moKhoaGia = { cheDo: payload.cheDo as 'khoa' | 'het_tuan' | 'tat', den: payload.cheDo === 'het_tuan' ? Date.now() + 3 * 86400000 : 0, emails: (payload.emails as string[]) ?? [], conHieuLuc: payload.cheDo !== 'khoa' };
+      return moKhoaGia;
     case 'nhacNgu':
       return nhacNguGia();
     case 'admin.nhacNguLay':

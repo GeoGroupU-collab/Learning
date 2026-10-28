@@ -9,6 +9,7 @@ import { veHocKy } from './hoc-ky';
 import { veBangDiem } from './bang-diem';
 import { veNhatKy, veSaoLuu } from './he-thong';
 import { veThongBaoQuanTri } from './thong-bao-quan-tri';
+import { veMoKhoa } from './mo-khoa';
 import type { Me, ThanhVienDs, KetQuaXemTruoc, NhomHienTai, NhomXemTruoc, TuanQuanTri } from '../types';
 
 const NHAN_VAI_TRO: Record<string, string> = { owner: 'Chủ', member: 'Thành viên' };
@@ -238,6 +239,9 @@ async function veTuan(noi: HTMLElement): Promise<void> {
     return;
   }
   xoaHet(noi);
+  const vungMoKhoa = h('div', {});
+  noi.append(vungMoKhoa);
+  void veMoKhoa(vungMoKhoa);
   const lamMoi = async (): Promise<void> => { xoaHet(noi); await veTuan(noi); };
 
   const ngay = h('input', { class: 'o-nhap', type: 'date', value: '2026-11-07' }) as HTMLInputElement;

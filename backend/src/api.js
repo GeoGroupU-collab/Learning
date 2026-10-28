@@ -38,6 +38,8 @@ var HANH_DONG_ = {
   trangChu: { chay: hdTrangChu_ },
   thongBao: { chay: hdThongBaoCuaToi_ },
   nhacNgu: { chay: hdNhacNgu_ },
+  'admin.moKhoaLay': { vaiTro: CHU_, chay: hdMoKhoaLay_ },
+  'admin.moKhoaLuu': { vaiTro: CHU_, chay: hdMoKhoaLuu_ },
   'admin.nhacNguLay': { vaiTro: CHU_, chay: hdNhacNguLay_ },
   'admin.nhacNguLuu': { vaiTro: CHU_, chay: hdNhacNguLuu_ },
   'admin.guiThongBao': { vaiTro: CHU_, chay: hdGuiThongBao_ },

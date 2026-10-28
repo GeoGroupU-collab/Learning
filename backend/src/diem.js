@@ -133,6 +133,8 @@ function khoaTaoDe_(email, tv, hk) {
   if (!hk || (tv && tv.vaiTro === 'owner')) return khong;
   var cauHinh = layCauHinh_();
   if (String(cauHinh.khoaTaoDeKhiChuaNop).toLowerCase() === 'false') return khong;
+  var moBoi = daMoKhoaTaoDe_(email, cauHinh, Date.now()); // chủ mở khóa cho cả lớp hoặc riêng người này
+  if (moBoi) return { bi: false, daNop: 0, can: 0, soTuan: 0, moBoi: moBoi };
   var t = chonTuanHienTai(docTuan_(hk.maHocKy), Date.now());
   if (!t) return khong;
   if (mienCuaEmail_(hk.maHocKy, email).some(function (m) { return Number(m.soTuan) === t.soTuan; })) return { bi: false, daNop: 0, can: 0, soTuan: t.soTuan, mien: true };

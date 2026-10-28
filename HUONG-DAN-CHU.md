@@ -704,3 +704,11 @@ Sinh viên chuyển lớp hoặc thêm người: **Quản trị**, **Thành viê
 **Ngoại lệ:** bạn (chủ), người **được miễn tuần**, và người đang có **một đề làm dở** (vẫn làm tiếp được). Câu nộp rồi mà còn chờ duyệt vẫn được tính là đã nộp. Sang tuần mới thì phải nộp lại 15 câu của tuần mới.
 
 **Tắt luật này:** tab `CauHinh`, đặt `khoaTaoDeKhiChuaNop` thành `FALSE`.
+
+**Mở khóa tự tạo đề (cập nhật):** vào web quản trị `/admin/`, tab **Tuần**, thẻ **Khóa tự tạo đề luyện tập** ở đầu trang:
+- **Khóa như thường lệ:** phải nộp đủ 15 câu của tuần mới tạo đề được.
+- **Mở cho cả lớp đến hết tuần này:** cho mọi người trải nghiệm trước. Hết **Chủ nhật 23:59** (giờ Việt Nam) tự khóa lại, bạn không phải nhớ tắt.
+- **Mở cho cả lớp, đến khi tôi khóa lại:** không giới hạn thời gian.
+- **Mở khóa riêng cho từng người:** tick tên người được mở, họ luôn tạo đề được dù cả lớp đang bị khóa. Bỏ tick là khóa lại.
+
+Chọn xong bấm **Lưu**. Việc **nộp câu hỏi** không bị ảnh hưởng ở mọi chế độ, mọi người vẫn nộp bình thường. Cần dán `Code.gs` mới (không cần chạy `khoiTao`) và push web.
