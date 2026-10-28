@@ -184,9 +184,9 @@ describe('tạo đề tự luyện', () => {
     expect(goiAs(NGUOI[0], 'taoDe.bat', { maMon: 'khong-co' }).error).toBe('mon_sai');
   });
 
-  it('đủ 500 điểm thì lên Võ Sư (level 6)', () => {
+  it('đủ 500 điểm thì lên Sắt (level 6)', () => {
     mt.themDong('Diem', { thoiGian: new Date(), email: NGUOI[5], loai: 'thuong_nhom_nhat', soDiem: 500, khoa: 'x1' });
-    expect(goiAs(NGUOI[5], 'taoDe.thongTin').data.cap).toMatchObject({ level: 6, tenCapLon: 'Võ Sư' });
+    expect(goiAs(NGUOI[5], 'taoDe.thongTin').data.cap).toMatchObject({ level: 6, tenCapLon: 'Sắt' });
   });
 });
 

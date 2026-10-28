@@ -1,6 +1,7 @@
 // Thành phần giao diện dùng chung: thẻ cấp bậc cá nhân và nút báo sai.
 import { goi, LoiApi } from './api';
 import { h, thongBao } from './dom';
+import { anhCap } from './anh-cap';
 import type { ThongTinCap } from './types';
 
 export function theCap(cap: ThongTinCap, nhan = 'Cấp của tôi'): HTMLElement {
@@ -8,9 +9,10 @@ export function theCap(cap: ThongTinCap, nhan = 'Cấp của tôi'): HTMLElement
   const conLai = cap.diemMoiLevel - cap.diemTrongLevel;
   return h('div', { class: 'card the-cap' },
     h('span', { class: 'nhan-muc' }, nhan),
-    h('div', { class: 'hang' },
-      h('div', { class: 'ten-cap' }, cap.tenCapLon),
-      h('div', { class: 'level-cap' }, `Lv ${cap.level}`)),
+    h('div', { class: 'cap-dau' }, anhCap(cap.tenCapLon, 64),
+      h('div', { class: 'cap-ten-khung' },
+        h('div', { class: 'ten-cap' }, cap.tenCapLon),
+        h('div', { class: 'level-cap' }, `Level ${cap.level}`))),
     h('div', { class: 'thanh-tien-do', role: 'progressbar', 'aria-valuenow': phanTram, 'aria-valuemin': 0, 'aria-valuemax': 100 },
       h('div', { class: 'thanh-tien-do-day', style: `width:${phanTram}%` })),
     h('div', { class: 'phu nho' },

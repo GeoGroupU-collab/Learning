@@ -39,7 +39,7 @@ describe('hiệu năng: số lần đọc Sheet', () => {
     expect(r.data.me).toMatchObject({ email: NGUOI[0], vaiTro: 'member' });
     expect(r.data.me.nhom.tenNhom).toBe('A');
     expect(r.data.tuan.tuan.soTuan).toBe(1);
-    expect(r.data.cap).toMatchObject({ level: 1, tenCapLon: 'Võ Sĩ' });
+    expect(r.data.cap).toMatchObject({ level: 1, tenCapLon: 'Gỗ' });
   });
 
   it('mỗi tab chỉ đọc nhiều nhất một lần trong một yêu cầu trang chủ', () => {

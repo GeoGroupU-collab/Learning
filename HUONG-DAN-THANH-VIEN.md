@@ -30,7 +30,7 @@ Trong **Nộp câu hỏi** bấm **Dùng AI soạn câu hỏi**:
 ## Điểm cá nhân, cấp bậc, danh hiệu
 - **Tự tạo đề luyện tập:** chọn môn, chọn chương, làm đề 30 câu từ ngân hàng. Làm xong **+20 điểm**, tối đa **120 điểm mỗi tuần** (Thứ Hai đến Chủ nhật). Cần trả lời ít nhất một nửa số câu. Xem được đáp án và giải thích sau khi nộp. Đề do lớp trưởng phát hành chỉ được cộng điểm ở lần đầu.
 - **Thưởng nhóm cuối tuần** (cho người đã thi): nhóm hạng 1 **+50**, hạng 2 **+30**, các nhóm còn lại **+10**.
-- Cứ **100 điểm** lên 1 level. Level tăng thì đổi cấp: Võ Sĩ, Võ Sư, Đại Võ Sư, Tông Sư, Đại Tông Sư, Võ Vương, Võ Hoàng, Võ Đế, Võ Thánh, Võ Thần, Thiên Tôn, Đạo Tổ.
+- Cứ **100 điểm** lên 1 level. Level tăng thì đổi cấp, mỗi cấp có huy hiệu riêng: Gỗ, Sắt, Đồng, Bạc, Vàng, Bạch Kim, Lục Bảo, Kim Cương, Cao Thủ, Đại Cao Thủ, Thách Đấu.
 - Người có điểm thi cao nhất tuần nhận danh hiệu **Thiên Kiêu Tuần N** trên bảng xếp hạng cá nhân.
 - Nhóm có huy hiệu **Đủ quân** (cả nhóm cùng thi) và **Hạng nhất liên tiếp**.
 

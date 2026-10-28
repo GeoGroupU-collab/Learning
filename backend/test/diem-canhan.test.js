@@ -5,25 +5,27 @@ const L = createRequire(import.meta.url)('../src/logic.js');
 
 describe('cấp và level', () => {
   it('mỗi 100 điểm là 1 level, bắt đầu từ level 1', () => {
-    expect(L.capTuDiem(0, 100)).toMatchObject({ level: 1, diemTrongLevel: 0, tenCapLon: 'Võ Sĩ' });
+    expect(L.capTuDiem(0, 100)).toMatchObject({ level: 1, diemTrongLevel: 0, tenCapLon: 'Gỗ' });
     expect(L.capTuDiem(99, 100).level).toBe(1);
     expect(L.capTuDiem(100, 100).level).toBe(2);
     expect(L.capTuDiem(250, 100)).toMatchObject({ level: 3, diemTrongLevel: 50 });
   });
   it('đổi cấp lớn đúng ở biên', () => {
-    expect(L.capTuDiem(400, 100).tenCapLon).toBe('Võ Sĩ'); // level 5
-    expect(L.capTuDiem(500, 100).tenCapLon).toBe('Võ Sư'); // level 6
-    expect(L.capTuDiem(1000, 100).tenCapLon).toBe('Đại Võ Sư'); // level 11
-    expect(L.capTuDiem(2500, 100).tenCapLon).toBe('Võ Vương'); // level 26
+    expect(L.capTuDiem(400, 100).tenCapLon).toBe('Gỗ'); // level 5
+    expect(L.capTuDiem(500, 100).tenCapLon).toBe('Sắt'); // level 6
+    expect(L.capTuDiem(1000, 100).tenCapLon).toBe('Đồng'); // level 11
+    expect(L.capTuDiem(2500, 100).tenCapLon).toBe('Bạch Kim'); // level 26
+    expect(L.capTuDiem(8900, 100).tenCapLon).toBe('Đại Cao Thủ'); // level 90
+    expect(L.capTuDiem(9000, 100).tenCapLon).toBe('Thách Đấu'); // level 91
   });
   it('cho biết còn bao nhiêu level đến cấp kế', () => {
-    const c = L.capTuDiem(300, 100); // level 4, Võ Sĩ (1-5)
-    expect(c.capKe).toBe('Võ Sư');
+    const c = L.capTuDiem(300, 100); // level 4, Gỗ (1-5)
+    expect(c.capKe).toBe('Sắt');
     expect(c.levelConLaiDenCapKe).toBe(2);
   });
   it('cấp cuối không có giới hạn', () => {
     const c = L.capTuDiem(999999, 100);
-    expect(c.tenCapLon).toBe('Đạo Tổ');
+    expect(c.tenCapLon).toBe('Thách Đấu');
     expect(c.capKe).toBeNull();
   });
   it('các cấp lớn liền nhau, không hở không chồng', () => {

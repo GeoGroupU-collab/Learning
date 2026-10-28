@@ -1,4 +1,5 @@
 import { goiNhanh } from '../api';
+import { anhCap } from '../anh-cap';
 import { h, khungCho, xoaHet } from '../dom';
 import { chayDinhKy, dungDongHo } from '../gio';
 import { theCap } from '../cap';
@@ -72,7 +73,7 @@ function veCaNhan(vung: HTMLElement, kq: KetQuaXepHangCaNhan): void {
     tb.append(h('tr', { class: x.laToi ? 'hang-toi' : '' },
       h('td', {}, String(x.hang)),
       h('td', {}, x.hoTen, x.soDanhHieu ? h('span', { class: 'nhan nhan-vang' }, `${x.soDanhHieu} danh hiệu`) : null),
-      h('td', {}, `${x.tenCapLon} · Lv ${x.level}`),
+      h('td', {}, h('span', { class: 'o-cap' }, anhCap(x.tenCapLon, 28), `${x.tenCapLon} · Lv ${x.level}`)),
       h('td', {}, String(x.tong)))));
   t.append(tb);
   vung.append(h('div', { class: 'card' }, h('h3', {}, 'Bảng xếp hạng cá nhân'), h('div', { class: 'cuon-ngang' }, t),

@@ -316,7 +316,7 @@ describe('bảng điểm', () => {
     expect(ng[NGUOI[2]].diemTuan[1]).toBeNull();
     expect(ng[NGUOI[2]].diemTB).toBeNull();
     expect(ng[NGUOI[4]].diemTuan[1]).toBe(75);
-    expect(ng[NGUOI[4]]).toMatchObject({ tongCapBac: 50, tenCapLon: 'Võ Sĩ', level: 1 });
+    expect(ng[NGUOI[4]]).toMatchObject({ tongCapBac: 50, tenCapLon: 'Gỗ', level: 1 });
     expect(r.nguoi.some((x) => x.email === TRO_LY)).toBe(true); // vẫn là một thành viên của lớp
     expect(r.nhom.map((n) => [n.nhom, n.hang])).toEqual(expect.arrayContaining([['Nhóm B', 1], ['Nhóm A', 2]]));
   });

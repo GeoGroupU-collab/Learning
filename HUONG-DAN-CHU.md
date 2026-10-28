@@ -316,7 +316,7 @@ Bản này thêm 3 tab mới trong Sheet (`Diem`, `DeTuTao`, `DanhHieu`) và nhi
 3. **Triển khai**, **Quản lý triển khai**, cây bút, **Phiên bản mới**, **Triển khai**.
 4. GitHub Desktop: Summary `Thêm điểm cấp bậc, xem lại, ngân hàng`, **Commit to main**, **Push origin**, chờ Actions tick xanh, rồi **Ctrl+F5**.
 
-Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Võ Sĩ, Lv 1) và thẻ **Tự tạo đề luyện tập**.
+Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Gỗ, Lv 1) và thẻ **Tự tạo đề luyện tập**.
 
 ### Cách tính điểm cá nhân
 
@@ -327,18 +327,19 @@ Làm đúng khi thấy: trang chủ có thẻ **Cấp của tôi** (Võ Sĩ, Lv 
 
 | Cấp lớn | Level |
 |---|---|
-| Võ Sĩ | 1 đến 5 |
-| Võ Sư | 6 đến 10 |
-| Đại Võ Sư | 11 đến 15 |
-| Tông Sư | 16 đến 20 |
-| Đại Tông Sư | 21 đến 25 |
-| Võ Vương | 26 đến 35 |
-| Võ Hoàng | 36 đến 45 |
-| Võ Đế | 46 đến 55 |
-| Võ Thánh | 56 đến 70 |
-| Võ Thần | 71 đến 90 |
-| Thiên Tôn | 91 đến 120 |
-| Đạo Tổ | từ 121 |
+| Gỗ | 1 đến 5 |
+| Sắt | 6 đến 10 |
+| Đồng | 11 đến 15 |
+| Bạc | 16 đến 20 |
+| Vàng | 21 đến 25 |
+| Bạch Kim | 26 đến 35 |
+| Lục Bảo | 36 đến 45 |
+| Kim Cương | 46 đến 55 |
+| Cao Thủ | 56 đến 70 |
+| Đại Cao Thủ | 71 đến 90 |
+| Thách Đấu | từ 91 |
+
+Mỗi cấp có một **huy hiệu riêng** (khiên Gỗ, Sắt, Đồng... lên tới Thách Đấu có cánh, mũ và đá quý), hiện ở thẻ **Cấp của tôi** và ở bảng xếp hạng cá nhân. Tệp ảnh SVG của 11 huy hiệu nằm trong `public/anh/cap/` để bạn dùng làm slide hay poster; chạy `npx vite-node scripts/tao-anh-cap.ts` để vẽ lại.
 
 Muốn đổi các con số (điểm mỗi lượt, trần tuần, điểm mỗi level, điểm thưởng nhóm) hãy sửa trong tab `CauHinh`: `diemMoiDeTuTao`, `diemToiDaDeTuTaoTuan`, `diemMoiLevel`, `diemThuongNhom` (dạng `50,30,10`), `soCauDeTuTao`, `soCauToiThieuDeTuTao`. Muốn đổi tên cấp lớn hoặc khoảng level, nhờ mình sửa (nằm trong `backend/src/logic.js`).
 

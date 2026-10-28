@@ -289,21 +289,20 @@ function diemLuyKe(diemCacTuan) {
 
 // ---------- Điểm cá nhân, cấp, danh hiệu ----------
 
-// Các cấp lớn (cảnh giới). Mỗi cấp lớn gồm nhiều level; level = floor(tổng điểm / diemMoiCap) + 1.
+// Các cấp lớn (Gỗ đến Thách Đấu, huy hiệu vẽ trong src/anh-cap.ts, thứ tự phải khớp). Mỗi cấp lớn gồm nhiều level; level = floor(tổng điểm / diemMoiCap) + 1.
 // 5 cấp đầu mỗi cấp 5 level, các cấp sau dài hơn. Chủ có thể đổi tên và khoảng level ở đây.
 var CAP_LON = [
-  { ten: 'Võ Sĩ', tu: 1, den: 5 },
-  { ten: 'Võ Sư', tu: 6, den: 10 },
-  { ten: 'Đại Võ Sư', tu: 11, den: 15 },
-  { ten: 'Tông Sư', tu: 16, den: 20 },
-  { ten: 'Đại Tông Sư', tu: 21, den: 25 },
-  { ten: 'Võ Vương', tu: 26, den: 35 },
-  { ten: 'Võ Hoàng', tu: 36, den: 45 },
-  { ten: 'Võ Đế', tu: 46, den: 55 },
-  { ten: 'Võ Thánh', tu: 56, den: 70 },
-  { ten: 'Võ Thần', tu: 71, den: 90 },
-  { ten: 'Thiên Tôn', tu: 91, den: 120 },
-  { ten: 'Đạo Tổ', tu: 121, den: null },
+  { ten: 'Gỗ', tu: 1, den: 5 },
+  { ten: 'Sắt', tu: 6, den: 10 },
+  { ten: 'Đồng', tu: 11, den: 15 },
+  { ten: 'Bạc', tu: 16, den: 20 },
+  { ten: 'Vàng', tu: 21, den: 25 },
+  { ten: 'Bạch Kim', tu: 26, den: 35 },
+  { ten: 'Lục Bảo', tu: 36, den: 45 },
+  { ten: 'Kim Cương', tu: 46, den: 55 },
+  { ten: 'Cao Thủ', tu: 56, den: 70 },
+  { ten: 'Đại Cao Thủ', tu: 71, den: 90 },
+  { ten: 'Thách Đấu', tu: 91, den: null },
 ];
 
 // Từ tổng điểm tính ra level, cấp lớn và tiến độ.

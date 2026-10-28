@@ -72,7 +72,7 @@ let tongDiemGia = 230;
 let diemLuyenTapTuan = 40;
 const capGia = () => {
   const level = Math.floor(tongDiemGia / 100) + 1;
-  return { tong: tongDiemGia, level, diemTrongLevel: tongDiemGia % 100, diemMoiLevel: 100, tenCapLon: level <= 5 ? 'Võ Sĩ' : 'Võ Sư', levelDauCap: 1, levelCuoiCap: 5, capKe: 'Võ Sư', levelConLaiDenCapKe: Math.max(0, 6 - level) };
+  return { tong: tongDiemGia, level, diemTrongLevel: tongDiemGia % 100, diemMoiLevel: 100, tenCapLon: level <= 5 ? 'Gỗ' : 'Sắt', levelDauCap: 1, levelCuoiCap: 5, capKe: 'Sắt', levelConLaiDenCapKe: Math.max(0, 6 - level) };
 };
 const cauXemLaiGia = (n: number) => Array.from({ length: n }, (_, i) => ({
   id: 'q' + i, tenMon: 'Khoa học dữ liệu', maChuong: 'c1', trangNguon: 'tr.' + (i + 3),
@@ -306,9 +306,9 @@ export async function mockGoi(action: string, payload: Record<string, unknown>):
     case 'xepHangCaNhan':
       return {
         bang: [
-          { hang: 1, hoTen: 'Nguyễn Văn A', tong: 520, level: 6, tenCapLon: 'Võ Sư', soDanhHieu: 2, laToi: false },
+          { hang: 1, hoTen: 'Nguyễn Văn A', tong: 520, level: 6, tenCapLon: 'Vàng', soDanhHieu: 2, laToi: false },
           { hang: 2, hoTen: 'Lớp trưởng (thử)', tong: tongDiemGia, level: capGia().level, tenCapLon: capGia().tenCapLon, soDanhHieu: 1, laToi: true },
-          { hang: 3, hoTen: 'Trần Thị B', tong: 90, level: 1, tenCapLon: 'Võ Sĩ', soDanhHieu: 0, laToi: false },
+          { hang: 3, hoTen: 'Trần Thị B', tong: 90, level: 1, tenCapLon: 'Gỗ', soDanhHieu: 0, laToi: false },
         ],
         vinhDanh: { soTuan: 1, nguoi: [{ hoTen: 'Nguyễn Văn A', diem: 97.5, danhHieu: 'Thiên Kiêu Tuần 1' }] },
         toi: { hang: 2, cap: capGia(), danhHieu: [{ soTuan: 1, danhHieu: 'Thiên Kiêu Tuần 1', diem: 92.5 }] },

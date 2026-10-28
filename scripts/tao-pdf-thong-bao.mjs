@@ -117,7 +117,7 @@ const html = `<!doctype html>
 
 <div class="diem">
   <div class="lon">+50<small>điểm cho nhóm nhất tuần</small></div>
-  <div>Nhóm có điểm cao nhất tuần được <b>+50 điểm</b> và <b>vinh danh ở trang chủ</b> (nhóm nhì +30, các nhóm còn lại +10). Mỗi bạn còn có <b>cấp bậc riêng</b> kiểu tu tiên: làm đề luyện tập được thêm điểm để lên cấp, bạn điểm cao nhất tuần nhận danh hiệu.</div>
+  <div>Nhóm có điểm cao nhất tuần được <b>+50 điểm</b> và <b>vinh danh ở trang chủ</b> (nhóm nhì +30, các nhóm còn lại +10). Mỗi bạn còn có <b>rank riêng</b> với huy hiệu từ <b>Gỗ lên Thách Đấu</b>: làm đề luyện tập được thêm điểm để lên cấp, bạn điểm cao nhất tuần nhận danh hiệu.</div>
 </div>
 
 <div class="thuong">

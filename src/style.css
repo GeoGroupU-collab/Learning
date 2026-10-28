@@ -647,3 +647,9 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 .the-khoa-nho { border-color: var(--vang-vien); background: var(--vang-nen); }
 .the-khoa-nho svg { color: var(--vang); }
 .hang-the { display: flex; align-items: center; gap: var(--k2); flex-wrap: wrap; }
+
+/* Huy hiệu cấp bậc */
+.cap-dau { display: flex; align-items: center; gap: var(--k3); margin: var(--k1) 0 var(--k2); }
+.cap-ten-khung { flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: var(--k2); flex-wrap: wrap; }
+.anh-cap { flex: none; display: block; }
+.o-cap { display: inline-flex; align-items: center; gap: var(--k2); }
