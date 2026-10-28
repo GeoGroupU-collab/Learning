@@ -37,7 +37,7 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   goc.append(h('h1', {}, 'Sự kiện'), thanhTabSuKien('tuan'));
   const chinh = h('div', { class: 'cot-chinh' });
   const phu = h('div', { class: 'cot-phu' });
-  goc.append(h('div', { class: 'bo-cuc-2' }, chinh, phu));
+  goc.append(h('div', { class: 'bo-cuc-2' }, chinh, phu), sapRaMat());
   const t = tt.tuan;
   if (!t) {
     chinh.append(h('div', { class: 'card' }, h('p', { class: 'phu' }, 'Chưa có lịch sự kiện. Lớp trưởng sẽ tạo lịch trong trang Quản trị.')));
@@ -129,6 +129,21 @@ function dungSuKien(goc: HTMLElement, tt: TuanHienTai): void {
   chinh.append(h('div', { class: 'card' }, h('h3', {}, 'Phòng thi'), h('p', { class: tt.moKhoa || luot ? '' : 'loi' }, noiDung), ...hanhDong.filter((x): x is HTMLElement => x !== null)));
 }
 
+
+// Hai hoạt động sắp ra mắt, chỉ để trang trí và báo trước. Sửa nội dung ở đây khi có thông tin chính thức.
+function sapRaMat(): HTMLElement {
+  const the = (bieuTuong: string, ten: string, mo: string, lop: string): HTMLElement =>
+    h('div', { class: `card the-sap-ra ${lop}` },
+      h('span', { class: 'sap-ra-dai' }, 'Coming soon'),
+      h('div', { class: 'sap-ra-bieu' }, icon(bieuTuong, 30) as unknown as HTMLElement),
+      h('h3', {}, ten),
+      h('p', { class: 'phu' }, mo));
+  return h('section', { class: 'sap-ra-mat' },
+    h('h2', {}, 'Coming soon'),
+    h('div', { class: 'sap-ra-luoi' },
+      the('binhThiNghiem', 'GeoLab', 'Ứng dụng mô phỏng môn Cơ học đất, giúp bạn nhìn thấy kiến thức vận hành thay vì chỉ đọc công thức. Sắp ra mắt, đón chờ nhé.', 'sap-ra-xanh'),
+      the('laBan', 'Orientation & English Study Tips', 'Định hướng cho tương lai và mẹo học tiếng Anh, sắp ra mắt.', 'sap-ra-vang')));
+}
 
 // Thẻ tóm tắt luật của tuần, đặt ở cột phụ để màn rộng không bị trống.
 function theLuatTuan(tt: TuanHienTai): HTMLElement {

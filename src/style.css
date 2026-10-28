@@ -653,3 +653,27 @@ body.dang-doc .khung-bai { position: fixed; top: 44px; left: 0; right: 0; bottom
 .cap-ten-khung { flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: var(--k2); flex-wrap: wrap; }
 .anh-cap { flex: none; display: block; }
 .o-cap { display: inline-flex; align-items: center; gap: var(--k2); }
+
+/* ---------- Sắp ra mắt (Sự kiện) ---------- */
+.sap-ra-mat { margin-top: var(--k5); }
+.sap-ra-luoi { display: grid; grid-template-columns: 1fr; gap: var(--k3); }
+@media (min-width: 700px) { .sap-ra-luoi { grid-template-columns: 1fr 1fr; gap: var(--k4); } }
+.the-sap-ra { position: relative; overflow: hidden; margin: 0; padding: var(--k5) var(--k5) var(--k4); border-style: dashed; border-width: 2px; min-height: 170px; }
+.the-sap-ra h3 { margin: var(--k3) 0 var(--k1); font-size: 1.25rem; }
+.the-sap-ra p { margin: 0; max-width: 40ch; }
+.sap-ra-bieu { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; }
+.sap-ra-dai {
+  position: absolute; top: 20px; right: -42px; width: 170px; text-align: center; transform: rotate(35deg);
+  padding: 3px 0; font-family: var(--font-so); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+}
+.sap-ra-xanh { border-color: var(--nhan); background: var(--nhan-nen); }
+.sap-ra-xanh .sap-ra-bieu { background: var(--nhan); color: var(--tren-nhan); }
+.sap-ra-xanh .sap-ra-dai { background: var(--nhan); color: var(--tren-nhan); }
+.sap-ra-vang { border-color: var(--vang-vien); background: var(--vang-nen); }
+.sap-ra-vang .sap-ra-bieu { background: var(--vang); color: var(--vang-nen); }
+.sap-ra-vang .sap-ra-dai { background: var(--vang); color: var(--vang-nen); }
+.the-sap-ra::after { content: ''; position: absolute; right: -30px; bottom: -30px; width: 120px; height: 120px; border-radius: 50%; border: 18px solid currentColor; opacity: 0.06; pointer-events: none; }
+.sap-ra-xanh { color: var(--nhan); }
+.sap-ra-vang { color: var(--vang); }
+.the-sap-ra h3, .the-sap-ra p { color: var(--chu); }
+.the-sap-ra p.phu { color: var(--chu-2); }
