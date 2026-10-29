@@ -2,7 +2,7 @@
 // tác giả là "ngan-hang-chung" nên ai cũng làm được, không ai bị loại vì là tác giả. Tuần = 0 nên không dính tuần nào.
 
 var TAC_GIA_CHUNG_ = 'ngan-hang-chung';
-var GIAI_THICH_NHAP_TOI_DA_ = 1500; // chủ nhập nên cho giải thích dài hơn giới hạn 500 của câu thành viên nộp
+var GIAI_THICH_NHAP_TOI_DA_ = 3000; // chủ nhập nên cho giải thích dài hơn giới hạn 500 của câu thành viên nộp
 
 function laChuoiTho_(v) {
   return String(v == null ? '' : v).trim();
