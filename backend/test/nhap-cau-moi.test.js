@@ -97,6 +97,7 @@ describe('lọc ngân hàng theo chương, trang nhỏ', () => {
 });
 
 describe('khớp tên chương với chương chuẩn của môn', () => {
+  // Chương chuẩn lưu dạng {ten, ma} như tab Chương của web quản trị.
   const datChuong = (ds) => {
     const sheet = mt.ss.getSheetByName('Mon');
     const tieuDe = sheet.dong[0];
@@ -105,15 +106,28 @@ describe('khớp tên chương với chương chuẩn của môn', () => {
     mt.boNho.clear();
   };
   const chuongDaLuu = () => mt.docTab('CauHoi').map((c) => c.maChuong);
+  const CHUAN = [{ ten: 'Chương 1 Data', ma: 'c1' }, { ten: 'Chương 2 Python cơ bản', ma: 'c2' }, { ten: 'Chương 3 Thư viện python', ma: 'c3' }, { ten: 'Chương 10 Mở rộng', ma: 'c10' }];
 
-  it('"Chương 2" được ghi thành "Chương 2 Python cơ bản", không nhầm "Chương 1" với "Chương 10"', () => {
-    datChuong(['Chương 1 Data', 'Chương 2 Python cơ bản', 'Chương 10 Mở rộng']);
-    goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(1, { maChuong: 'Chương 2' }), cau(2, { maChuong: 'chương 1' }), cau(3, { maChuong: 'Chương 10' }), cau(4, { maChuong: 'Chương 2 Python cơ bản' })] });
-    expect(chuongDaLuu()).toEqual(['Chương 2 Python cơ bản', 'Chương 1 Data', 'Chương 10 Mở rộng', 'Chương 2 Python cơ bản']);
+  it('tên đầy đủ, phần đầu của tên hoặc mã đều được ghi thành MÃ chương; "Chương 1" không nhầm "Chương 10"', () => {
+    datChuong(CHUAN);
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: [
+      cau(1, { maChuong: 'Chương 2 Python cơ bản' }), cau(2, { maChuong: 'chương 1' }), cau(3, { maChuong: 'Chương 10' }),
+      cau(4, { maChuong: 'c3' }), cau(5, { maChuong: 'Chương 3 Thư viện python' }),
+    ] });
+    expect(chuongDaLuu()).toEqual(['c2', 'c1', 'c10', 'c3', 'c3']);
+  });
+
+  it('nhập xong thì số câu hiện đúng dưới từng chương trong màn Tự tạo đề của thành viên', () => {
+    datChuong(CHUAN);
+    goiAs(CHU, 'admin.nhapCauMoi', { rows: Array.from({ length: 12 }, (_, i) => cau(i * 7, { maChuong: 'Chương 3 Thư viện python', noiDung: `Câu thư viện số ${i} ${'z'.repeat(i)}` })) });
+    mt.themDong('ThanhVien', { email: 'tv@x.vn', hoTen: 'TV', vaiTro: 'member', trangThai: 'active' });
+    const mon = mt.goi({ action: 'taoDe.thongTin', idToken: mt.datToken('tv@x.vn') }).data.mon.find((m) => m.ma === MON);
+    expect(mon.chuong.find((c) => c.ma === 'c3').soCau).toBe(12);
+    expect(mon.chuong.find((c) => c.ma === 'c2').soCau).toBe(0);
   });
 
   it('không khớp hoặc mơ hồ thì giữ nguyên chữ người nhập; môn chưa có danh sách chương thì giữ nguyên', () => {
-    datChuong(['Chương 2 A', 'Chương 2 B']);
+    datChuong([{ ten: 'Chương 2 A', ma: 'c2' }, { ten: 'Chương 2 B', ma: 'c9' }]);
     goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(1, { maChuong: 'Chương 2' }), cau(2, { maChuong: 'Chương 9' })] });
     expect(chuongDaLuu()).toEqual(['Chương 2', 'Chương 9']);
     datChuong([]);

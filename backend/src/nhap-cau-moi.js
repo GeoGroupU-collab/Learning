@@ -8,16 +8,25 @@ function laChuoiTho_(v) {
   return String(v == null ? '' : v).trim();
 }
 
-// Khớp tên chương người nhập ("Chương 2") với chương chuẩn của môn ("Chương 2 Python cơ bản") để tạo đề lọc theo chương được.
-// Khớp đúng toàn bộ, hoặc là phần đầu của đúng một chương chuẩn (sau phần đầu phải là dấu cách hay dấu câu, nên "Chương 1" không khớp "Chương 10").
+// Khớp chương người nhập với chương chuẩn của môn và trả MÃ chương (ví dụ "c2"), vì ngân hàng đếm và lọc theo mã.
+// Chương chuẩn là {ma, ten}. Chấp nhận người nhập ghi mã ("c2"), tên đầy đủ ("Chương 2 Python cơ bản") hoặc phần đầu của tên ("Chương 2");
+// phần đầu phải kết thúc ở dấu cách hay dấu câu, nên "Chương 1" không khớp "Chương 10". Mơ hồ hoặc không khớp thì giữ nguyên chữ người nhập.
 function khopChuongChuan_(gia, dsChuan) {
   var g = laChuoiTho_(gia).toLowerCase().replace(/\s+/g, ' ');
   if (!g || !dsChuan || !dsChuan.length) return laChuoiTho_(gia);
-  var khop = dsChuan.filter(function (c) {
-    var x = String(c).toLowerCase().replace(/\s+/g, ' ').trim();
-    return x === g || (x.indexOf(g) === 0 && !/[\p{L}\p{N}]/u.test(x.charAt(g.length)));
+  var chuan = dsChuan.map(function (c) {
+    return typeof c === 'string' ? { ma: c, ten: c } : { ma: String(c.ma == null ? '' : c.ma), ten: String(c.ten == null ? '' : c.ten) };
   });
-  return khop.length === 1 ? String(khop[0]).trim() : laChuoiTho_(gia);
+  var gon = function (x) { return String(x).toLowerCase().replace(/\s+/g, ' ').trim(); };
+  var khop = chuan.filter(function (c) { return c.ma !== '' && gon(c.ma) === g; });
+  if (!khop.length) khop = chuan.filter(function (c) { return gon(c.ten) === g; });
+  if (!khop.length) {
+    khop = chuan.filter(function (c) {
+      var x = gon(c.ten);
+      return x.indexOf(g) === 0 && !/[\p{L}\p{N}]/u.test(x.charAt(g.length));
+    });
+  }
+  return khop.length === 1 ? (khop[0].ma || khop[0].ten).trim() : laChuoiTho_(gia);
 }
 
 // Kiểm tra từng dòng. Ở đây bốn đáp án chỉ cần khác nhau theo chữ thô (khác khoảng trắng hay dấu câu vẫn là khác),
