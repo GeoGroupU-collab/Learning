@@ -2,6 +2,7 @@
 // tác giả là "ngan-hang-chung" nên ai cũng làm được, không ai bị loại vì là tác giả. Tuần = 0 nên không dính tuần nào.
 
 var TAC_GIA_CHUNG_ = 'ngan-hang-chung';
+var GIAI_THICH_NHAP_TOI_DA_ = 1500; // chủ nhập nên cho giải thích dài hơn giới hạn 500 của câu thành viên nộp
 
 function laChuoiTho_(v) {
   return String(v == null ? '' : v).trim();
@@ -33,7 +34,7 @@ function kiemTraCauNhapMoi_(r, nhan, monHopLe, chuongCuaMon) {
   if (['A', 'B', 'C', 'D'].indexOf(c.dapAn) === -1) loi.push(nhan + 'đáp án đúng phải là A, B, C hoặc D.');
   if (c.noiDung.length > GIOI_HAN_CHU_.noiDung) loi.push(nhan + 'nội dung quá dài (tối đa ' + GIOI_HAN_CHU_.noiDung + ' ký tự).');
   ['A', 'B', 'C', 'D'].forEach(function (k) { if (c[k].length > GIOI_HAN_CHU_.dapAn) loi.push(nhan + 'đáp án ' + k + ' quá dài.'); });
-  if (c.giaiThich.length > GIOI_HAN_CHU_.giaiThich) loi.push(nhan + 'giải thích quá dài (tối đa ' + GIOI_HAN_CHU_.giaiThich + ' ký tự).');
+  if (c.giaiThich.length > GIAI_THICH_NHAP_TOI_DA_) loi.push(nhan + 'giải thích quá dài (' + c.giaiThich.length + ' ký tự, tối đa ' + GIAI_THICH_NHAP_TOI_DA_ + ').');
   if (c.trangNguon.length > GIOI_HAN_CHU_.trangNguon) loi.push(nhan + 'trang nguồn quá dài.');
   if (c.maChuong.length > GIOI_HAN_CHU_.maChuong) loi.push(nhan + 'tên chương quá dài.');
   var khacNhau = {};

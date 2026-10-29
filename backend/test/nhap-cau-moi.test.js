@@ -56,6 +56,8 @@ describe('chủ thêm câu mới vào ngân hàng', () => {
 
   it('giới hạn độ dài và số lượng', () => {
     expect(goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(1, { noiDung: 'x'.repeat(601) })] }).ok).toBe(false);
+    expect(goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(2, { giaiThich: 'g'.repeat(1501) })] }).message).toContain('1501 ký tự');
+    expect(goiAs(CHU, 'admin.nhapCauMoi', { rows: [cau(3, { giaiThich: 'g'.repeat(1200) })] }).ok).toBe(true); // giải thích dài vẫn nhập được
     expect(goiAs(CHU, 'admin.nhapCauMoi', { rows: [] })).toMatchObject({ ok: false, error: 'du_lieu_sai' });
     expect(goiAs(CHU, 'admin.nhapCauMoi', { rows: Array.from({ length: 501 }, (_, i) => cau(i)) })).toMatchObject({ ok: false, error: 'du_lieu_sai' });
   });
